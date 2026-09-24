@@ -177,6 +177,7 @@
     d.settings.animation = Object.assign(M.defaultAnimation(), d.settings.animation || {});
     d.settings.transition = Object.assign({ effect: 'fade', speed: 1100 }, d.settings.transition || {});
     d.settings.fonts = Object.assign(M.defaultFonts(), d.settings.fonts || {});
+    d.settings.header = Object.assign(M.defaultHeader(), d.settings.header && !Array.isArray(d.settings.header) ? d.settings.header : {});
     delete d.settings.headingFont;
     d.ticker = d.ticker || [];
     d.dishes = d.dishes || [];
@@ -694,6 +695,12 @@
       field('Подзаголовок (надстрочник)', input(s, 'subtitle')),
       field('Заголовок', h('div', { class: 'd-flex align-items-center gap-3' }, checkbox(s, 'showTitle', 'Показывать', { defaultOn: true, rerender: true }),
         select(s, 'titleAlign', M.TITLE_ALIGNS, { sm: true }))),
+      field('Фон слайда', (function () {
+        var holder = { v: s.bgGradient == null ? '' : (s.bgGradient ? 'on' : 'off') };
+        var el = select(holder, 'v', { on: 'Анимированный градиент', off: 'Без градиента' }, { empty: 'Как в общих настройках (' + (data.settings.bgGradient !== false ? 'градиент' : 'без градиента') + ')' });
+        el.addEventListener('change', function () { s.bgGradient = holder.v === '' ? null : holder.v === 'on'; changed(); });
+        return el;
+      })()),
       field('Длительность, с', input(s, 'duration', { type: 'number', min: 3, max: 120, nullable: true, placeholder: 'по умолчанию ' + data.settings.slideDuration })),
       field('Акцентный цвет', h('div', { class: 'd-flex gap-2' }, accent, btn('Общий', function () { s.accent = null; changed(true); }, 'btn-outline-secondary btn-sm')))
     ));
@@ -894,16 +901,29 @@
         field('Эффект перехода', select(st.transition, 'effect', Object.keys(M.TRANSITIONS).reduce(function (o, k) { o[k] = M.TRANSITIONS[k].label; return o; }, {}))),
         field('Длительность перехода', range(st.transition, 'speed', 300, 3000, 100, function (v) { return v + ' мс'; })),
         field('Показ слайда по умолчанию, с', input(st, 'slideDuration', { type: 'number', min: 3, max: 120 }))),
+        h('div', { class: 'mt-3' }, checkbox(st, 'progressEnabled', 'Показывать полосу оставшегося времени слайда', { defaultOn: true })),
         h('div', { class: 'form-text mt-2', text: 'Чтобы увидеть переходы, выберите «Вся программа» в предпросмотре.' }))),
       card('Появление информации на слайде (по умолчанию)', animationEditor(st.animation, false)),
       fontsCard(st),
       card('Оформление', row(
         field('Тема', select(st, 'theme', M.THEMES)),
+        field('Фон слайдов', checkbox(st, 'bgGradient', 'Лёгкий анимированный градиент', { defaultOn: true }), 'Общее значение; у слайда можно переопределить'),
         field('Акцентный цвет', accent),
         field('Валюта после цены', input(st, 'currency', { placeholder: 'пусто — как в печатном меню' })),
         field('Название заведения', input(data.cafe, 'name')),
         field('Подпись под названием', input(data.cafe, 'tagline')))),
-      card('Бегущая строка', h('div', null, field('Строки (каждая с новой строки)', ticker),
+      card('Шапка экрана', h('div', null,
+        checkbox(st.header, 'enabled', 'Показывать шапку', { defaultOn: true, rerender: true }),
+        st.header.enabled !== false ? h('div', { class: 'd-flex flex-wrap gap-4 mt-3 ps-1' },
+          checkbox(st.header, 'logo', 'Логотип', { defaultOn: true }),
+          checkbox(st.header, 'name', 'Название', { defaultOn: true }),
+          checkbox(st.header, 'tagline', 'Подпись', { defaultOn: true }),
+          checkbox(st.header, 'clock', 'Часы', { defaultOn: true }),
+          checkbox(st.header, 'date', 'Дата', { defaultOn: true })) : null,
+        h('div', { class: 'form-text mt-2', text: 'Без шапки слайды занимают освободившуюся высоту экрана.' }))),
+      card('Бегущая строка', h('div', null,
+        h('div', { class: 'mb-3' }, checkbox(st, 'tickerEnabled', 'Показывать бегущую строку внизу экрана', { defaultOn: true, rerender: true })),
+        field('Строки (каждая с новой строки)', ticker),
         h('div', { class: 'row g-3 mt-1' }, h('div', { class: 'col-md-4' }, field('Скорость, пикс/с', input(st, 'tickerSpeed', { type: 'number', min: 20, max: 300 })))))),
       card('Работа экрана', row(
         field('Проверять обновления, с', input(st, 'refreshInterval', { type: 'number', min: 10, max: 3600 })),

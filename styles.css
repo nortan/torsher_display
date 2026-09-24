@@ -109,6 +109,21 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   transform-origin: 50% 0;
 }
 
+/* Лёгкий анимированный градиент на фоне слайда (двигает GSAP) */
+.slide-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.slide-bg__blob {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  opacity: .16;
+  background: radial-gradient(circle, var(--accent-local) 0, transparent 62%);
+  will-change: transform;
+}
+.slide-bg__blob--1 { top: -260px; left: -300px; }
+.slide-bg__blob--2 { right: -320px; bottom: -280px; opacity: .1; background: radial-gradient(circle, #e0873a 0, transparent 62%); }
+.theme-light .slide-bg__blob { opacity: .22; }
+
 /* Основной блок растягивается на свободную высоту, строки распределяются равномерно */
 .grow { flex: 1 1 auto; justify-content: space-evenly; }
 .info-grid.grow { align-content: space-evenly; }

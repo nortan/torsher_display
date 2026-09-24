@@ -100,6 +100,10 @@
   function defaultElement() { return { visible: true, effect: '', duration: null, delay: null, x: 0, y: 0 }; }
 
   function defaultPhotoPos() { return { x: 0, y: 0, scale: 1, rotate: 0, flip: false }; }
+  /* Шапка экрана: целиком и по частям (название, подпись, логотип, часы, дата). */
+  function defaultHeader() {
+    return { enabled: true, name: true, tagline: true, logo: true, clock: true, date: true };
+  }
   function defaultFonts() {
     return { heading: 'Nunito', dish: 'Montserrat', text: 'Calibri', headingScale: 1, dishScale: 1, textScale: 1 };
   }
@@ -123,6 +127,10 @@
   function defaultSettings() {
     return {
       theme: 'dark',
+      header: defaultHeader(),
+      tickerEnabled: true,
+      progressEnabled: true,
+      bgGradient: true,
       fonts: defaultFonts(),
       accent: '#d4df3f',
       slideDuration: 12,
@@ -146,7 +154,7 @@
 
   function newSlide(type) {
     var base = {
-      id: uid('slide'), type: type, name: '', enabled: true, showTitle: true, titleAlign: 'left', duration: null, accent: null,
+      id: uid('slide'), type: type, name: '', enabled: true, showTitle: true, titleAlign: 'left', bgGradient: null, duration: null, accent: null,
       schedule: { days: [], from: '', to: '', dateFrom: '', dateTo: '' },
       nearest: { enabled: false, count: 2 },
       sizes: { title: null, dish: null, text: null },
@@ -329,7 +337,7 @@
   var api = {
     LAYOUTS: LAYOUTS, TITLE_ALIGNS: TITLE_ALIGNS, ANIMATION_PRESETS: ANIMATION_PRESETS, TITLE_EFFECTS: TITLE_EFFECTS,
     PHOTO_EFFECTS: PHOTO_EFFECTS, PRICE_EFFECTS: PRICE_EFFECTS, ORDERS: ORDERS,
-    TRANSITIONS: TRANSITIONS, THEMES: THEMES, FONTS: FONTS, defaultFonts: defaultFonts, defaultPhotoPos: defaultPhotoPos, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
+    TRANSITIONS: TRANSITIONS, THEMES: THEMES, FONTS: FONTS, defaultFonts: defaultFonts, defaultHeader: defaultHeader, defaultPhotoPos: defaultPhotoPos, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
     uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
     newDish: newDish, newEvent: newEvent, newSlide: newSlide, generateSlides: generateSlides,
     dateKey: dateKey, parseDate: parseDate, addDays: addDays, minutes: minutes,

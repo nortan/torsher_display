@@ -33,7 +33,17 @@
     "currency": "",
     "refreshInterval": 60,
     "tickerSpeed": 80,
-    "dailyReloadAt": "04:00"
+    "dailyReloadAt": "04:00",
+    "header": {
+      "enabled": true,
+      "name": true,
+      "tagline": true,
+      "logo": true,
+      "clock": true,
+      "date": true
+    },
+    "tickerEnabled": true,
+    "progressEnabled": true
   },
   "ticker": [
     "Завтраки подаём весь день",
