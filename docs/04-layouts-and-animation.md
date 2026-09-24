@@ -322,6 +322,7 @@
   },
   "currency": "",
   "refreshInterval": 60,
+  "autoRefreshMinutes": 30,
   "tickerSpeed": 80,
   "dailyReloadAt": "04:00"
 }

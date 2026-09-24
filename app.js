@@ -817,7 +817,9 @@
     if (text === state.dataText) return;
     state.data = JSON.parse(text);
     state.dataText = text;
-    if (save) { try { localStorage.setItem(CACHE_KEY, text); } catch (e) { /* нет хранилища */ } }
+    var saved = false;
+    if (save) { try { localStorage.setItem(CACHE_KEY, text); saved = localStorage.getItem(CACHE_KEY) === text; } catch (e) { /* нет хранилища */ } }
+    if (syncAutoRefresh(saved)) return;
     applyBrand();
     refreshSlides(true);
     buildTicker(true);
@@ -866,6 +868,30 @@
       if (state.build && v && v !== state.build) location.reload();
       state.build = v;
     }).catch(function () { /* нет build.json — пропускаем */ });
+  }
+
+  /* Страховочная перезагрузка <meta http-equiv="refresh">: её ставит скрипт в <head> index.html
+     по данным из localStorage. Если настройка изменилась, вставляем тег (его не было) или
+     перезагружаем страницу, чтобы <head> прочитал новое значение (уже сохранённое в localStorage).
+     Возвращает true, если страница уходит на перезагрузку. */
+  function syncAutoRefresh(saved) {
+    if (PREVIEW) return false;
+    var v = settings().autoRefreshMinutes;
+    var sec = v === undefined || v === null || v === '' || isNaN(v) ? 1800 : Math.max(0, Math.round(+v * 60));
+    var meta = document.getElementById('autoRefresh');
+    var cur = meta ? +meta.getAttribute('content') : 0;
+    if (sec === cur) return false;
+    if (!meta && sec > 0) {
+      meta = document.createElement('meta');
+      meta.id = 'autoRefresh';
+      meta.httpEquiv = 'refresh';
+      meta.content = String(sec);
+      document.head.appendChild(meta);
+      return false;
+    }
+    // Уже запущенный отсчёт тегом не отменить — только перезагрузкой. Без localStorage это дало бы цикл.
+    if (saved) { location.reload(); return true; }
+    return false;
   }
 
   function checkDailyReload() {
