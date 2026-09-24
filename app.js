@@ -8,7 +8,8 @@
   'use strict';
 
   var M = window.TorsherModel;
-  gsap.registerPlugin(SplitText, CustomEase, ScrambleTextPlugin);
+  // плагины регистрируем только те, что загрузились (защита от устаревшего index.html в кеше)
+  gsap.registerPlugin.apply(gsap, [window.SplitText, window.CustomEase, window.ScrambleTextPlugin].filter(Boolean));
   CustomEase.create('soft', 'M0,0 C0.16,0.84 0.3,1 1,1');
 
   var W = 1080, H = 1920;
@@ -469,6 +470,7 @@
 
   function nameEffect(tl, names, effect, dur, pos, stagger) {
     var accent = getComputedStyle(names[0]).getPropertyValue('--accent-local').trim() || settings().accent;
+    if (effect === 'scramble' && !window.ScrambleTextPlugin) effect = 'chars';
     if (effect === 'scramble') {
       names.forEach(function (el, i) {
         var text = el.textContent;

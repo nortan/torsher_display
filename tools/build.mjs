@@ -61,6 +61,24 @@ fs.writeFileSync(path.join(out, 'content/data.js'), 'window.__TORSHER_DATA__ = '
 let commit = process.env.GITHUB_SHA;
 if (!commit) { try { commit = execSync('git rev-parse HEAD', { cwd: root }).toString().trim(); } catch { commit = 'local'; } }
 fs.writeFileSync(path.join(out, 'build.json'), JSON.stringify({ commit, builtAt: new Date().toISOString() }) + '\n');
+
+// Сброс кеша браузера: к локальным .js/.css (и к предпросмотру в админке) добавляем ?v=<версия>,
+// чтобы после публикации браузер не смешивал новые файлы со старыми из кеша.
+const ver = String(commit).slice(0, 12);
+function stamp(rel) {
+  const file = path.join(out, rel);
+  if (!fs.existsSync(file)) return;
+  const html = fs.readFileSync(file, 'utf8')
+    .replace(/(\s(?:src|href)=")(?!https?:|data:|\/\/)([^"?#]+\.(?:js|css))(")/g, `$1$2?v=${ver}$3`)
+    .replace(/(src="\.\.\/index\.html\?preview=1)(")/, `$1&v=${ver}$2`);
+  fs.writeFileSync(file, html);
+}
+stamp('index.html');
+stamp('admin/index.html');
+if (fs.existsSync(path.join(out, 'api/install.php'))) {
+  const f = path.join(out, 'api/install.php');
+  fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace('bootstrap.min.css"', `bootstrap.min.css?v=${ver}"`));
+}
 fs.copyFileSync(path.join(root, 'docs/SERVER.md'), path.join(out, 'SERVER.md'));
 fs.copyFileSync(path.join(root, 'docs/nginx.conf.example'), path.join(out, 'nginx.conf.example'));
 
