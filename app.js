@@ -112,7 +112,11 @@
   }
 
   function fitAll() {
+    // Скрытые слайды (content-visibility) не имеют размеров — на время замера показываем все.
+    var lean = els.stage.getAttribute('data-lean');
+    els.stage.removeAttribute('data-lean');
     Array.prototype.forEach.call(els.slides.querySelectorAll('.slide'), fitSlide);
+    if (lean) els.stage.setAttribute('data-lean', lean);
   }
 
   /* ---------- Шаблоны ---------- */
@@ -194,7 +198,10 @@
       var k = Number(pos.scale) || 1;
       st = ' style="translate:' + (Number(pos.x) || 0) + 'px ' + (Number(pos.y) || 0) + 'px;scale:' + (pos.flip ? -k : k) + ' ' + k + ';rotate:' + (Number(pos.rotate) || 0) + 'deg"';
     }
-    return '<div class="plate plate--' + n + ' a-img" data-el="plate-' + n + '"><img class="plate__img a-plate" src="' + esc(d.photo) + '" alt=""' + st + '></div>';
+    // Тень и маска — на картинке, анимируется обёртка .plate__in: тень растеризуется один раз
+    // вместе со слоем, а не пересчитывается каждый кадр анимации.
+    return '<div class="plate plate--' + n + ' a-img" data-el="plate-' + n + '"><div class="plate__in a-plate"' + st + '>' +
+      '<img class="plate__img" src="' + esc(d.photo) + '" alt="" decoding="async"></div></div>';
   }
   function feat(d, n, small) {
     return frame(d, ' feat--' + n + (small ? ' feat--sm' : ''));
@@ -524,7 +531,22 @@
       var shines = prices.map(function (p) { return p.querySelector('.shine'); }).filter(Boolean);
       gsap.to(shines, { xPercent: 520, duration: 1.1, ease: 'power2.inOut', repeat: -1, repeatDelay: strong ? 1.2 : 2.4, delay: 1.4, stagger: 0.25 });
     } else if (effect === 'pulse') gsap.to(prices, { scale: 1 + 0.07 * k, transformOrigin: '50% 50%', duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1, repeatDelay: 0.4, delay: 1.6 });
-    else if (effect === 'glow') gsap.to(prices, { textShadow: '0 0 ' + Math.round(22 * k) + 'px ' + accent, duration: 1.2, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.4 });
+    else if (effect === 'glow') {
+      // Анимировать text-shadow дорого (перерисовка каждый кадр) — мигает прозрачность копии с готовой тенью.
+      var glows = prices.map(function (p) {
+        var old = p.querySelector('.price-glow');
+        if (old) old.remove();
+        var g = document.createElement('span');
+        g.className = 'price-glow';
+        g.setAttribute('aria-hidden', 'true');
+        g.innerHTML = p.innerHTML;
+        Array.prototype.forEach.call(g.querySelectorAll('.shine'), function (x) { x.remove(); });
+        g.style.textShadow = '0 0 ' + Math.round(22 * k) + 'px ' + accent + ', 0 0 ' + Math.round(8 * k) + 'px ' + accent;
+        p.appendChild(g);
+        return g;
+      });
+      gsap.to(glows, { opacity: 1, duration: 1.2, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.4 });
+    }
     else if (effect === 'swing') gsap.to(prices, { rotation: 4 * k, transformOrigin: '50% 50%', duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
     else if (effect === 'bounce') gsap.to(prices, { y: -10 * k, duration: 0.32, ease: 'power1.out', yoyo: true, repeat: -1, repeatDelay: 1.6, delay: 1.6, stagger: 0.2 });
   }
@@ -671,6 +693,15 @@
     });
   }
 
+  /* Заранее декодируем фото следующего слайда: иначе декодирование попадает на первый кадр перехода. */
+  function predecode(s) {
+    var next = s.slides[(s.activeIndex + 1) % s.slides.length];
+    if (!next || next === s.slides[s.activeIndex]) return;
+    Array.prototype.forEach.call(next.querySelectorAll('img'), function (img) {
+      if (img.decode) img.decode().catch(function () { /* нет файла — не страшно */ });
+    });
+  }
+
   function setProgress(p) { gsap.set(els.progress, { scaleX: p }); }
 
   function buildSlider(visible, html) {
@@ -700,9 +731,12 @@
     opts.allowTouchMove = false;
     opts.keyboard = { enabled: true };
     opts.autoplay = multi ? { delay: st.slideDuration * 1000, disableOnInteraction: false } : false;
+    // Невидимые слайды не рисуем. «Колода карт» показывает стопку: там видны ещё три карты за текущей.
+    els.stage.setAttribute('data-lean', opts.effect === 'cards' ? 'cards' : 'on');
     opts.on = {
-      init: function (s) { animateSlide(s.slides[s.activeIndex]); },
+      init: function (s) { animateSlide(s.slides[s.activeIndex]); predecode(s); },
       slideChangeTransitionStart: function (s) { animateSlide(s.slides[s.activeIndex]); },
+      slideChangeTransitionEnd: predecode,
       autoplayTimeLeft: function (s, left, pct) { setProgress(1 - pct); }
     };
     state.swiper = new Swiper(els.stage, opts);
@@ -817,7 +851,9 @@
     if (text === state.dataText) return;
     state.data = JSON.parse(text);
     state.dataText = text;
-    if (save) { try { localStorage.setItem(CACHE_KEY, text); } catch (e) { /* нет хранилища */ } }
+    var saved = false;
+    if (save) { try { localStorage.setItem(CACHE_KEY, text); saved = localStorage.getItem(CACHE_KEY) === text; } catch (e) { /* нет хранилища */ } }
+    if (syncAutoRefresh(saved)) return;
     applyBrand();
     refreshSlides(true);
     buildTicker(true);
@@ -866,6 +902,30 @@
       if (state.build && v && v !== state.build) location.reload();
       state.build = v;
     }).catch(function () { /* нет build.json — пропускаем */ });
+  }
+
+  /* Страховочная перезагрузка <meta http-equiv="refresh">: её ставит скрипт в <head> index.html
+     по данным из localStorage. Если настройка изменилась, вставляем тег (его не было) или
+     перезагружаем страницу, чтобы <head> прочитал новое значение (уже сохранённое в localStorage).
+     Возвращает true, если страница уходит на перезагрузку. */
+  function syncAutoRefresh(saved) {
+    if (PREVIEW) return false;
+    var v = settings().autoRefreshMinutes;
+    var sec = v === undefined || v === null || v === '' || isNaN(v) ? 1800 : Math.max(0, Math.round(+v * 60));
+    var meta = document.getElementById('autoRefresh');
+    var cur = meta ? +meta.getAttribute('content') : 0;
+    if (sec === cur) return false;
+    if (!meta && sec > 0) {
+      meta = document.createElement('meta');
+      meta.id = 'autoRefresh';
+      meta.httpEquiv = 'refresh';
+      meta.content = String(sec);
+      document.head.appendChild(meta);
+      return false;
+    }
+    // Уже запущенный отсчёт тегом не отменить — только перезагрузкой. Без localStorage это дало бы цикл.
+    if (saved) { location.reload(); return true; }
+    return false;
   }
 
   function checkDailyReload() {

@@ -1193,7 +1193,9 @@
         h('div', { class: 'row g-3 mt-1' }, h('div', { class: 'col-md-4' }, field('Скорость, пикс/с', input(st, 'tickerSpeed', { type: 'number', min: 20, max: 300 })))))),
       card('Работа экрана', row(
         field('Проверять обновления, с', input(st, 'refreshInterval', { type: 'number', min: 10, max: 3600 })),
-        field('Ежедневная перезагрузка', input(st, 'dailyReloadAt', { type: 'time' }), 'Освобождает память ТВ-браузера'))));
+        field('Ежедневная перезагрузка', input(st, 'dailyReloadAt', { type: 'time' }), 'Освобождает память ТВ-браузера'),
+        field('Автоперезагрузка, мин', input(st, 'autoRefreshMinutes', { type: 'number', min: 0, max: 1440 }),
+          'Тег <meta http-equiv="refresh"> в шапке страницы: если что-то пошло не так, экран перезагрузится сам. 0 — выключено'))));
   }
 
   /* ===== Публикация ===== */

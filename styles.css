@@ -118,7 +118,6 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   border-radius: 50%;
   opacity: calc(.16 * var(--bg-k, 1));
   background: radial-gradient(circle, var(--bg1, var(--accent-local)) 0, transparent 62%);
-  will-change: transform;
 }
 .slide-bg__blob--1 { top: -260px; left: -300px; }
 .slide-bg__blob--2 { right: -320px; bottom: -280px; opacity: calc(.1 * var(--bg-k, 1)); background: radial-gradient(circle, var(--bg2, #e0873a) 0, transparent 62%); }
@@ -242,19 +241,24 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .comp .txt .row__dots { min-width: 16px; }
 
 .plate { position: relative; z-index: 1; min-height: 0; pointer-events: none; }
-.plate__img {
+.plate__in {
   position: absolute;
   width: calc(100% - var(--l, 0px) - var(--r, 0px));
   height: calc(100% - var(--t, 0px) - var(--b, 0px));
   left: var(--l, 0px);
   top: var(--t, 0px);
+}
+.plate__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: var(--pos, center);
   filter: drop-shadow(0 26px 34px rgba(0, 0, 0, .55));
   /* мягко гасим возможные прямые срезы исходного фото по краям */
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
-  will-change: transform;
 }
 .theme-light .plate__img { filter: drop-shadow(0 22px 28px rgba(60, 40, 20, .28)); }
 
@@ -462,7 +466,7 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 /* ---------- Обратный отсчёт ---------- */
 .cd { display: flex; flex-direction: column; justify-content: center; gap: 34px; }
 .cd__photo { align-self: stretch; height: 640px; border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-.cd__photo img { width: 100%; height: 100%; object-fit: cover; display: block; will-change: transform; }
+.cd__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cd__name { font-family: var(--display); font-size: calc(70px * var(--dish-scale)); font-weight: var(--display-weight); text-transform: uppercase; line-height: 1.02; color: var(--c-ev-title, var(--ink)); }
 .cd__time { font-size: calc(40px * var(--text-scale)); color: var(--c-ev-desc, var(--muted)); }
 .cd__time b { font-family: var(--display); font-weight: 600; color: var(--c-ev-time, var(--accent-local)); }
@@ -623,3 +627,22 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .frame__name, .frame__desc { overflow-wrap: anywhere; }
 .feat--sm .frame__desc { font-size: calc(16px * var(--dish-scale)); line-height: 1.3; }
 .comp--p3t6-row .frame__desc, .comp--p4t4 .frame__desc { font-size: calc(15px * var(--dish-scale)); margin-top: 6px; }
+
+/* ---------- Производительность ----------
+   Отдельные GPU-слои — только у видимого слайда: на слабом ТВ десятки слоёв по 1080×1920
+   (пятна фона, фото на всех 36 слайдах) съедают видеопамять и роняют частоту кадров. */
+.swiper-slide-active .slide-bg__blob,
+.swiper-slide-active .plate__in,
+.swiper-slide-active .cd__photo img { will-change: transform; }
+/* Слайды, которые не участвуют в переходе, браузер не рисует и не пересчитывает: иначе каждое чтение
+   стилей в GSAP (getComputedStyle) пересчитывает стили и раскладку всех слайдов разом. */
+.stage[data-lean="on"] .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-prev):not(.swiper-slide-next),
+.stage[data-lean="cards"] .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-prev):not(.swiper-slide-next):not(.swiper-slide-next + .swiper-slide):not(.swiper-slide-next + .swiper-slide + .swiper-slide):not(.swiper-slide-next + .swiper-slide + .swiper-slide + .swiper-slide) {
+  visibility: hidden;
+  content-visibility: hidden;
+}
+/* Свечение цены: копия текста с тенью, анимируется только прозрачность (без перерисовки тени). */
+.price { position: relative; }
+.price-glow { position: absolute; inset: 0; display: flex; gap: inherit; align-items: inherit; color: transparent !important; pointer-events: none; opacity: 0; will-change: opacity; }
+.price-glow * { color: transparent !important; }
+.progress__bar { will-change: transform; }

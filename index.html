@@ -2,6 +2,21 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
+  <script>
+    /* Страховочная перезагрузка: стандартный <meta http-equiv="refresh"> через settings.autoRefreshMinutes
+       (берётся из последних данных в localStorage, по умолчанию 30 мин, 0 — выключено).
+       Срабатывает, даже если дальше что-то сломалось. В предпросмотре админки не ставится. */
+    (function () {
+      if (/[?&]preview=1/.test(location.search)) return;
+      var m = 30;
+      try {
+        var d = JSON.parse(localStorage.getItem('torsher-display-data'));
+        var v = d && d.settings && d.settings.autoRefreshMinutes;
+        if (v !== undefined && v !== null && v !== '' && !isNaN(v)) m = +v;
+      } catch (e) { /* нет хранилища */ }
+      if (m > 0) document.write('<meta http-equiv="refresh" id="autoRefresh" content="' + Math.round(m * 60) + '">');
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Торшер — витрина</title>
   <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
