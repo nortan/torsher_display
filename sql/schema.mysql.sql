@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS dishes (
   tag         VARCHAR(64)   NOT NULL DEFAULT '',
   photo       VARCHAR(255)  NULL,
   active      TINYINT(1)    NOT NULL DEFAULT 1,
+  extra       TEXT          NULL,
   KEY idx_dishes_position (position)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS events (
   photo       VARCHAR(255) NULL,
   highlight   TINYINT(1)   NOT NULL DEFAULT 0,
   active      TINYINT(1)   NOT NULL DEFAULT 1,
+  extra       TEXT         NULL,
   KEY idx_events_date (event_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

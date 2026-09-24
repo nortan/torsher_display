@@ -19,7 +19,7 @@ const out = path.join(root, 'dist');
 
 const PLAYER = ['index.html', 'app.js', 'styles.css', 'shared', 'vendor/gsap', 'vendor/swiper', 'assets/fonts', 'assets/img'];
 const ADMIN = ['admin', 'vendor/jszip', 'vendor/bootstrap', 'docs', 'build-files.json'];
-const SERVER = ['api', 'sql', 'uploads/.htaccess', 'content/data.json'];
+const SERVER = ['api', 'sql', 'uploads/.htaccess', 'data/.htaccess', 'content/data.json'];
 
 function walk(rel) {
   const abs = path.join(root, rel);

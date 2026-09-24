@@ -11,8 +11,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     if (isset($_GET['revision'])) {
-        $rev = db()->query('SELECT version FROM site WHERE id = 1')->fetchColumn();
-        json_out(['revision' => (int)$rev]);
+        json_out(['revision' => current_revision()]);
     }
     json_out(load_data());
 }

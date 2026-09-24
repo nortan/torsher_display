@@ -13,40 +13,37 @@ require __DIR__ . '/lib.php';
 
 $cli = PHP_SAPI === 'cli';
 
-function installed(PDO $pdo): bool
+function installed(): bool
 {
     try {
-        return (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn() > 0;
-    } catch (PDOException $e) {
+        return count(users_all()) > 0;
+    } catch (Throwable $e) {
         return false;
     }
 }
 
-function install(string $login, string $password): string
+/* Установка в выбранное хранилище: 'db' (MySQL) или 'files' (JSON в папке data/). */
+function install(string $login, string $password, string $mode): string
 {
     if (!preg_match('/^[A-Za-z0-9_.@-]{3,64}$/', $login)) throw new RuntimeException('Логин: 3–64 символа, латиница, цифры, _.@-');
     if (mb_strlen($password) < 8) throw new RuntimeException('Пароль — не короче 8 символов');
+    if (!in_array($mode, STORAGE_MODES, true)) throw new RuntimeException('Хранилище: db или files');
+    $err = $mode === 'db' ? db_try() : files_try();
+    if ($err) throw new RuntimeException($err);
 
-    $pdo = db();
-    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-    $schema = file_get_contents(ROOT . '/sql/schema.' . ($driver === 'sqlite' ? 'sqlite' : 'mysql') . '.sql');
-    $schema = preg_replace('/^--.*$/m', '', $schema);
-    foreach (array_filter(array_map('trim', explode(';', $schema))) as $sql) $pdo->exec($sql);
-
-    if (installed($pdo)) throw new RuntimeException('Уже установлено');
+    storage_force_mode($mode);
+    if ($mode === 'db') ensure_db_schema();
+    if (installed()) throw new RuntimeException('Уже установлено');
 
     $raw = (string)@file_get_contents(ROOT . '/content/data.json');
     $seed = json_decode($raw, true) ?: [];
-    $seedObjects = json_decode($raw);
-    $enc = fn($v) => json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    $pdo->exec('DELETE FROM site');
-    $pdo->prepare('INSERT INTO site (id, cafe, settings, ticker, version) VALUES (1, ?, ?, ?, 1)')
-        ->execute([$enc($seed['cafe'] ?? ['name' => 'Кафе']), $enc($seed['settings'] ?? new stdClass()), $enc($seed['ticker'] ?? [])]);
     save_data(['cafe' => $seed['cafe'] ?? [], 'settings' => $seed['settings'] ?? [], 'ticker' => $seed['ticker'] ?? [],
-        'dishes' => $seed['dishes'] ?? [], 'events' => $seed['events'] ?? [], 'slides' => $seed['slides'] ?? []], $seedObjects);
+        'dishes' => $seed['dishes'] ?? [], 'events' => $seed['events'] ?? [], 'slides' => $seed['slides'] ?? []], json_decode($raw));
+    user_create($login, password_hash($password, PASSWORD_DEFAULT));
+    try { storage_set_mode($mode); } catch (Throwable $e) { if ($mode === 'files') throw $e; } // для MySQL папка data/ не обязательна
 
-    $pdo->prepare('INSERT INTO users (login, password_hash) VALUES (?, ?)')->execute([$login, password_hash($password, PASSWORD_DEFAULT)]);
-    return sprintf('Готово: таблицы созданы, загружено блюд — %d, мероприятий — %d, слайдов — %d. Администратор: %s',
+    return sprintf('Готово (%s): загружено блюд — %d, мероприятий — %d, слайдов — %d. Администратор: %s',
+        $mode === 'db' ? 'хранение в базе данных' : 'хранение в файлах ' . data_dir(),
         count($seed['dishes'] ?? []), count($seed['events'] ?? []), count($seed['slides'] ?? []), $login);
 }
 
@@ -57,19 +54,19 @@ if (empty(config()['install_enabled'])) {
 }
 
 if ($cli) {
-    [$_, $login, $password] = array_pad($argv, 3, '');
-    if ($login === '' || $password === '') { fwrite(STDERR, "Использование: php api/install.php <логин> <пароль>\n"); exit(1); }
-    try { echo install($login, $password), "\n"; exit(0); }
+    [$_, $login, $password, $mode] = array_pad($argv, 4, '');
+    if ($login === '' || $password === '') { fwrite(STDERR, "Использование: php api/install.php <логин> <пароль> [db|files]\n"); exit(1); }
+    try { echo install($login, $password, $mode ?: (string)(config()['storage'] ?? 'db')), "\n"; exit(0); }
     catch (Throwable $e) { fwrite(STDERR, 'Ошибка: ' . $e->getMessage() . "\n"); exit(1); }
 }
 
 $message = '';
 $ok = false;
-if (installed(db())) {
+if (installed()) {
     $message = 'Витрина уже установлена. Для безопасности выключите install_enabled в api/config.php.';
     $ok = true;
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try { $message = install((string)($_POST['login'] ?? ''), (string)($_POST['password'] ?? '')); $ok = true; }
+    try { $message = install((string)($_POST['login'] ?? ''), (string)($_POST['password'] ?? ''), (string)($_POST['storage'] ?? 'db')); $ok = true; }
     catch (Throwable $e) { $message = 'Ошибка: ' . $e->getMessage(); }
 }
 $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
@@ -91,7 +88,20 @@ $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
       <a class="btn btn-primary" href="../admin/">Перейти в админку</a>
     <?php else: ?>
       <form method="post" class="card card-body">
-        <p class="text-body-secondary">Будут созданы таблицы в MySQL, первый администратор и стартовые данные из <code>content/data.json</code>.</p>
+        <p class="text-body-secondary">Будут созданы хранилище, первый администратор и стартовые данные из <code>content/data.json</code>.</p>
+        <div class="mb-3">
+          <label class="form-label">Где хранить данные</label>
+          <?php $dbErr = db_try(); $fErr = files_try(); $def = (string)(config()['storage'] ?? 'db'); ?>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="storage" id="stDb" value="db" <?= $def !== 'files' ? 'checked' : '' ?> <?= $dbErr ? 'disabled' : '' ?>>
+            <label class="form-check-label" for="stDb">В базе данных MySQL <?= $dbErr ? '<span class="text-danger small">— ' . $h($dbErr) . '</span>' : '' ?></label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="storage" id="stFiles" value="files" <?= $def === 'files' || $dbErr ? 'checked' : '' ?> <?= $fErr ? 'disabled' : '' ?>>
+            <label class="form-check-label" for="stFiles">В файлах на сервере (папка <code><?= $h(data_dir()) ?></code>) <?= $fErr ? '<span class="text-danger small">— ' . $h($fErr) . '</span>' : '' ?></label>
+          </div>
+          <div class="form-text">Режим можно поменять позже в админке: Публикация → «Хранение данных» (данные перенесутся).</div>
+        </div>
         <div class="mb-3"><label class="form-label">Логин администратора</label><input class="form-control" name="login" required pattern="[A-Za-z0-9_.@-]{3,64}" value="admin"></div>
         <div class="mb-3"><label class="form-label">Пароль (от 8 символов)</label><input class="form-control" type="password" name="password" minlength="8" required></div>
         <button class="btn btn-primary">Установить</button>

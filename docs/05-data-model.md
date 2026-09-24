@@ -62,14 +62,27 @@
 `body`, `photo`, `evname`, `evtime`, `timer`, `near`. Список для конкретного слайда возвращает
 `TorsherModel.slideElements(slide)`.
 
+## Хранилище
+
+Сервер хранит данные в одном из двух режимов (`api/storage.php`):
+
+- **db** — таблицы MySQL (ниже);
+- **files** — JSON в папке `data/`: `site.json` (весь документ, как `data.json`, плюс `revision`, `updatedAt`),
+  `users.json` (`id`, `login`, `password_hash`), `options.json` (например, `deploy_ftp`), `media.json`
+  (реестр загруженных фото), `storage.json` (`{"mode": "db"|"files"}`). Запись атомарная
+  (временный файл + `rename`, `flock`).
+
+Переключение (`POST api/store.php`) переносит всё содержимое и не удаляет старое хранилище.
+Номер ревизии при переносе только растёт.
+
 ## Таблицы MySQL (`sql/schema.mysql.sql`)
 
 | Таблица | Содержимое |
 |---|---|
 | `users` | Администраторы: `login`, `password_hash` (bcrypt через `password_hash`) |
 | `site` | Одна строка: `cafe`, `settings`, `ticker` (JSON), `version` (ревизия), `updated_at` |
-| `dishes` | Блюда: колонки по полям, `position` задаёт порядок |
-| `events` | Мероприятия: `event_date`, `time_start`, `time_end` и т. д. |
+| `dishes` | Блюда: колонки по полям, `position` задаёт порядок; поля без своей колонки (`accent`, `isNew`…) — в JSON `extra` |
+| `events` | Мероприятия: `event_date`, `time_start`, `time_end` и т. д.; прочие поля — в `extra` |
 | `slides` | `id`, `position`, `type`, `enabled`, `config` (JSON со всеми остальными полями слайда) |
 | `media` | Загруженные фото: путь, тип, размеры, признак прозрачности |
 | `options` | Настройки сервера, например `deploy_ftp` (пароль зашифрован libsodium ключом `app_key`) |
@@ -88,6 +101,8 @@
 | `POST api/auth.php` `{action:"login", login, password}` | — | `{ user, csrf }` |
 | `POST api/auth.php` `{action:"logout"}` / `{action:"password", current, next}` | вход + CSRF | `{ ok }` |
 | `POST api/upload.php` (multipart `file`, `hasAlpha`) | вход + CSRF | `{ path, width, height, hasAlpha }` |
+| `GET api/store.php` | вход | `{ mode, db: {ok, error}, files: {ok, error, dir}, revision }` |
+| `POST api/store.php` `{action:"switch", mode}` | вход + CSRF | Перенос данных: `{ from, to, dishes, events, slides, users }` |
 | `GET api/deploy.php` | вход | Настройки FTP (без пароля) |
 | `POST api/deploy.php` `{action:"save" / "test" / "upload"}` | вход + CSRF | Результат и журнал |
 
