@@ -14,7 +14,8 @@
   var W = 1080, H = 1920;
   var params = new URLSearchParams(location.search);
   var PREVIEW = params.get('preview') === '1';
-  var DATA_URL = params.get('src') || 'content/data.json';
+  // Источник данных: PHP-бэкенд (api/data.php), а если его нет (статическая сборка) — content/data.json.
+  var DATA_SOURCES = params.get('src') ? [params.get('src')] : ['api/data.php', 'content/data.json'];
   var CACHE_KEY = 'torsher-display-data';
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var WEEKDAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
@@ -117,7 +118,7 @@
 
   function head(s) {
     if (s.showTitle === false) return '';
-    return '<header class="s-head s-head--' + (s.titleAlign || 'left') + '">' +
+    return '<header data-el="head" class="s-head s-head--' + (s.titleAlign || 'left') + '">' +
       (s.subtitle ? '<div class="s-kicker a-kick">' + esc(s.subtitle) + '</div>' : '') +
       '<h1 class="s-title a-title">' + esc(s.title || '') + '</h1>' +
     '</header>';
@@ -135,12 +136,13 @@
   function list(ids, size) {
     var items = ids.map(dishById).filter(Boolean);
     if (!items.length) return '';
-    return '<div class="list list--' + size + (size === 'sm' || size === '2col' ? '' : ' grow') + '">' + items.map(row).join('') + '</div>';
+    return '<div data-el="list" class="list list--' + size + (size === 'sm' || size === '2col' ? '' : ' grow') + '">' + items.map(row).join('') + '</div>';
   }
 
   /* Главное блюдо: рамка с «перекрестьем» по углам, крупная цена под рамкой — как в печатном меню. */
   function frame(d, extra) {
-    return '<div class="feat' + (extra || '') + ' a-card">' +
+    var n = /feat--(\d)/.exec(extra || '');
+    return '<div class="feat' + (extra || '') + ' a-card" data-el="feat-' + (n ? n[1] : 1) + '">' +
       '<div class="frame"><div class="frame__name">' + esc(d.name) + chip(d.tag) + '</div>' +
         (d.description ? '<div class="frame__desc">' + esc(d.description) + '</div>' : '') + '</div>' +
       '<div class="feat__price price a-price shine-host">' + priceHTML(d.price, d.weight, d.oldPrice) + '<span class="shine"></span></div>' +
@@ -151,7 +153,7 @@
     if (!s.nearest || !s.nearest.enabled) return '';
     var evs = M.nearestEvents(state.data.events, now, s.nearest.count);
     if (!evs.length) return '';
-    return '<div class="near a-near"><div class="near__label">Скоро у нас</div>' + evs.map(function (e) {
+    return '<div class="near a-near" data-el="near"><div class="near__label">Скоро у нас</div>' + evs.map(function (e) {
       var f = M.formatEventDate(e, now);
       var d = M.parseDate(e.date);
       var rel = (f.relative === 'сегодня' || f.relative === 'завтра') ? f.relative + ', ' : '';
@@ -169,27 +171,35 @@
       if (!byName[k]) { byName[k] = []; groups.push(k); }
       byName[k].push(d);
     });
-    return '<div class="groups grow">' + groups.map(function (g) {
+    return '<div class="groups grow" data-el="list">' + groups.map(function (g) {
       return '<section class="group"><div class="group__head a-row">' + esc(g) + '</div>' +
         '<div class="list list--sm">' + byName[g].map(row).join('') + '</div></section>';
     }).join('') + '</div>';
   }
 
   /* Обтравленная тарелка в своей области сетки; вылет за край задаётся в CSS. */
-  function plate(d, n) {
-    return '<div class="plate plate--' + n + ' a-img"><img class="plate__img a-plate" src="' + esc(d.photo) + '" alt=""></div>';
+  function plateHTML(d, n, pos) {
+    // Ручное смещение из настроек слайда: CSS-свойства translate/scale/rotate
+    // складываются с transform, который анимирует GSAP, и не мешают ему.
+    var st = '';
+    if (pos) {
+      var k = Number(pos.scale) || 1;
+      st = ' style="translate:' + (Number(pos.x) || 0) + 'px ' + (Number(pos.y) || 0) + 'px;scale:' + (pos.flip ? -k : k) + ' ' + k + ';rotate:' + (Number(pos.rotate) || 0) + 'deg"';
+    }
+    return '<div class="plate plate--' + n + ' a-img" data-el="plate-' + n + '"><img class="plate__img a-plate" src="' + esc(d.photo) + '" alt=""' + st + '></div>';
   }
   function feat(d, n, small) {
     return frame(d, ' feat--' + n + (small ? ' feat--sm' : ''));
   }
   function txt(ids, n, size) {
     var l = list(ids, size || 'sm');
-    return l ? '<div class="txt txt--' + n + '">' + l + '</div>' : '';
+    return l ? '<div class="txt txt--' + n + '" data-el="txt-' + n + '">' + l + '</div>' : '';
   }
 
   /* Композиции «фото : текст» по мотивам печатного меню. */
-  function composition(layout, photos, texts) {
+  function composition(layout, photos, texts, positions) {
     var p = photos, t = texts, out = '';
+    var plate = function (d, n) { return plateHTML(d, n, (positions || [])[n - 1]); };
     switch (layout) {
       case 'hero':
         out = feat(p[0], 1) + plate(p[0], 1); break;
@@ -228,7 +238,7 @@
 
     if (view === 'comp') {
       if (photos.length === L.photos) {
-        return { cls: 'comp-slide', html: fit(composition(s.layout, photos, texts), ' slide__fit--comp') };
+        return { cls: 'comp-slide', html: fit(composition(s.layout, photos, texts, s.photoPos), ' slide__fit--comp') };
       }
       view = 'list';   // не хватает блюд с фото — показываем списком
       texts = photos.map(function (d) { return d.id; }).concat(texts);
@@ -262,7 +272,7 @@
       var thisWeek = M.dateKey(weekStart(now));
       var lastHead = '';
       var withHeads = s.range === '2weeks' && style !== 'cards';
-      html = '<div class="events grow events--' + style + (evs.length > 5 ? ' events--dense' : '') + '">' + evs.map(function (e) {
+      html = '<div data-el="events" class="events grow events--' + style + (evs.length > 5 ? ' events--dense' : '') + '">' + evs.map(function (e) {
         var f = M.formatEventDate(e, now);
         var h = '';
         if (withHeads) {
@@ -291,7 +301,7 @@
 
   function renderInfo(s, now) {
     return { cls: 'info', html: '<div class="slide__fit">' + head(s) +
-      '<div class="info-grid grow">' + (s.lines || []).map(function (l) {
+      '<div class="info-grid grow" data-el="info">' + (s.lines || []).map(function (l) {
         return '<div class="info-card a-row"><div class="info-card__label">' + esc(l.label) + '</div><div class="info-card__value">' + esc(l.value) + '</div></div>';
       }).join('') + '</div>' + nearBlock(s, now) + '</div>' };
   }
@@ -299,7 +309,13 @@
   function renderSlide(s, now) {
     var r = s.type === 'events' ? renderEvents(s, now) : s.type === 'info' ? renderInfo(s, now) : renderDishes(s, now);
     var dur = Math.round((Number(s.duration) || settings().slideDuration) * 1000);
-    var style = s.accent ? ' style="--accent-local:' + esc(s.accent) + '"' : '';
+    var vars = [];
+    if (s.accent) vars.push('--accent-local:' + esc(s.accent));
+    var z = s.sizes || {};
+    if (z.title) vars.push('--title-scale:' + Number(z.title));
+    if (z.dish) vars.push('--dish-scale:' + Number(z.dish));
+    if (z.text) vars.push('--text-scale:' + Number(z.text));
+    var style = vars.length ? ' style="' + vars.join(';') + '"' : '';
     return '<div class="swiper-slide" data-swiper-autoplay="' + dur + '" data-slide-id="' + esc(s.id) + '">' +
       '<div class="slide slide--' + r.cls + '"' + style + '>' + r.html + '</div></div>';
   }
@@ -340,8 +356,17 @@
     var P = PRESETS[a.preset] || PRESETS.rise;
     var duration = (Number(s && s.duration) || settings().slideDuration);
 
+    var elCfg = (s && s.elements) || {};
     state.slideCtx = gsap.context(function () {
-      var q = gsap.utils.selector(slideEl);
+      // Элементы со своим эффектом анимируются отдельно, остальные — общей последовательностью слайда.
+      var custom = [];
+      Array.prototype.forEach.call(slideEl.querySelectorAll('[data-el]'), function (el) {
+        var c = elCfg[el.getAttribute('data-el')];
+        if (c && c.effect) { el.setAttribute('data-custom', ''); custom.push({ el: el, c: c }); }
+        else el.removeAttribute('data-custom');
+      });
+      var free = function (list) { return list.filter(function (n) { return !n.closest('[data-custom]'); }); };
+      var q = function (sel) { return free(gsap.utils.toArray(slideEl.querySelectorAll(sel))); };
       var tl = gsap.timeline({ defaults: { duration: 0.8, ease: 'soft' }, delay: 0.2 });
       var stagger = Number(a.stagger) || 0.08;
       var seq = a.order !== 'together';
@@ -382,10 +407,33 @@
       }
 
       tl.timeScale(Math.max(0.25, Number(a.speed) || 1));
+
+      custom.forEach(function (x) {
+        if (x.c.effect === 'none') return;
+        var CP = PRESETS[x.c.effect] || P;
+        var dur = Number(x.c.duration) > 0 ? Number(x.c.duration) : 0.9;
+        var del = x.c.delay != null && x.c.delay !== '' ? Number(x.c.delay) : 0.2;
+        gsap.from(x.el, Object.assign({ ease: 'soft' }, CP.item, { duration: dur, delay: del, stagger: 0 }));
+      });
     }, slideEl);
   }
 
   /* ---------- Swiper ---------- */
+
+  /* Настройки элементов слайда: показ и смещение относительно запрограммированной точки.
+     Смещение — через CSS translate: оно складывается с transform, который анимирует GSAP. */
+  function applyElements() {
+    Array.prototype.forEach.call(els.slides.querySelectorAll('.swiper-slide'), function (slideEl) {
+      var s = slideData(slideEl);
+      var cfg = (s && s.elements) || {};
+      Array.prototype.forEach.call(slideEl.querySelectorAll('[data-el]'), function (el) {
+        var c = cfg[el.getAttribute('data-el')];
+        if (!c) return;
+        if (c.visible === false) el.style.display = 'none';
+        if (Number(c.x) || Number(c.y)) el.style.translate = (Number(c.x) || 0) + 'px ' + (Number(c.y) || 0) + 'px';
+      });
+    });
+  }
 
   function setProgress(p) { gsap.set(els.progress, { scaleX: p }); }
 
@@ -397,6 +445,7 @@
     state.slideMeta = visible;
 
     els.slides.innerHTML = html;
+    applyElements();
     fitAll();
 
     var st = settings();
@@ -437,7 +486,7 @@
       visible = [{ id: 'fallback', type: 'info', title: cafe.name || 'Добро пожаловать', subtitle: cafe.tagline || '', lines: [] }];
     }
     var html = visible.map(function (s) { return renderSlide(s, now); }).join('');
-    var key = html + '|' + JSON.stringify(settings().transition) + JSON.stringify(settings().animation) + settings().slideDuration;
+    var key = html + '|' + JSON.stringify(visible.map(function (s) { return s.elements || {}; })) + JSON.stringify(settings().transition) + JSON.stringify(settings().animation) + settings().slideDuration;
     if (!force && key === state.renderKey) return;
     state.renderKey = key;
     buildSlider(visible, html);
@@ -478,6 +527,17 @@
     if (cafe.logo) els.logo.src = cafe.logo;
     document.title = (cafe.name || 'Кафе') + ' — витрина';
     document.body.className = 'theme-' + (st.theme === 'light' ? 'light' : 'dark');
+    var f = Object.assign(M.defaultFonts(), st.fonts || {});
+    var root = document.documentElement.style;
+    function font(key, fallback) { return M.FONTS[f[key]] || M.FONTS[fallback]; }
+    root.setProperty('--heading', font('heading', 'Nunito').stack);
+    root.setProperty('--heading-weight', font('heading', 'Nunito').weight);
+    root.setProperty('--display', font('dish', 'Montserrat').stack);
+    root.setProperty('--display-weight', f.dish === 'Montserrat' ? 500 : font('dish', 'Montserrat').weight);
+    root.setProperty('--font', font('text', 'Calibri').stack);
+    root.setProperty('--title-scale', Number(f.headingScale) || 1);
+    root.setProperty('--dish-scale', Number(f.dishScale) || 1);
+    root.setProperty('--text-scale', Number(f.textScale) || 1);
     document.documentElement.style.setProperty('--accent', st.accent);
     document.documentElement.style.setProperty('--on-accent', isLight(st.accent) ? '#151412' : '#ffffff');
   }
@@ -507,8 +567,24 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + url); return r.text(); });
   }
 
+  function fetchData() {
+    var list = state.source ? [state.source] : DATA_SOURCES.slice();
+    function next(i) {
+      return fetchText(list[i]).then(function (text) {
+        JSON.parse(text); // на хостинге без PHP api/data.php вернётся не JSON — пробуем следующий источник
+        state.source = list[i];
+        return text;
+      }).catch(function (err) {
+        if (i + 1 < list.length) return next(i + 1);
+        if (state.source) { state.source = null; }
+        throw err;
+      });
+    }
+    return next(0);
+  }
+
   function loadData() {
-    return fetchText(DATA_URL).then(function (text) {
+    return fetchData().then(function (text) {
       applyData(text, true);
       showStatus('');
     }).catch(function (err) {
@@ -590,7 +666,7 @@
   function fontsReady() {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
     var sample = 'Меню Menu 0123 ₽';
-    var loads = Promise.all(['600 1em Oswald', '500 1em Oswald', '400 1em Manrope', '500 1em Manrope', '700 1em Manrope']
+    var loads = Promise.all(['800 1em Nunito', '700 1em Comfortaa', '500 1em Montserrat', '600 1em Montserrat', '700 1em Montserrat', '400 1em Calibri', '700 1em Calibri']
       .map(function (f) { return document.fonts.load(f, sample); })).then(function () { return document.fonts.ready; });
     return Promise.race([loads, new Promise(function (r) { setTimeout(r, 3000); })]).catch(function () {});
   }

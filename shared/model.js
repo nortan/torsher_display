@@ -67,6 +67,42 @@
     cards:       { label: 'Колода карт', opts: { effect: 'cards', cardsEffect: { slideShadows: false, rotate: true } } }
   };
 
+  /* Шрифты: все лежат локально в assets/fonts (Calibri — системный, с запасным Carlito). */
+  var FONTS = {
+    Nunito:     { label: 'Nunito — округлый',                   stack: '"Nunito", "Segoe UI", Arial, sans-serif',          weight: 800 },
+    Comfortaa:  { label: 'Comfortaa — округлый геометрический', stack: '"Comfortaa", "Segoe UI", Arial, sans-serif',       weight: 700 },
+    Montserrat: { label: 'Montserrat — строгий геометрический', stack: '"Montserrat", "Segoe UI", Arial, sans-serif',      weight: 600 },
+    Calibri:    { label: 'Calibri — спокойный гротеск',         stack: '"Calibri", Carlito, "Segoe UI", Arial, sans-serif', weight: 700 }
+  };
+  /* Элементы слайда, которые можно настраивать по отдельности (эффект, время, показ, смещение). */
+  var TXT_BLOCKS = { hero: 0, 'p2t4': 2, 'p3t6': 3 };
+  function slideElements(s) {
+    var out = [];
+    if (s.showTitle !== false) out.push({ key: 'head', label: 'Заголовок' });
+    if (s.type === 'dishes') {
+      var L = LAYOUTS[s.layout] || LAYOUTS['text-10'];
+      if (L.view === 'comp') {
+        for (var i = 1; i <= L.photos; i++) {
+          out.push({ key: 'feat-' + i, label: 'Блюдо ' + i + ': рамка и цена' });
+          out.push({ key: 'plate-' + i, label: 'Блюдо ' + i + ': фото' });
+        }
+        var t = TXT_BLOCKS[s.layout] != null ? TXT_BLOCKS[s.layout] : (L.texts ? 1 : 0);
+        for (var j = 1; j <= t; j++) out.push({ key: 'txt-' + j, label: 'Текстовый список ' + (t > 1 ? j : '') });
+      } else {
+        if (L.view === 'list-feature') out.push({ key: 'feat-1', label: 'Главное блюдо в рамке' });
+        out.push({ key: 'list', label: 'Список блюд' });
+      }
+    } else if (s.type === 'events') out.push({ key: 'events', label: 'Список событий' });
+    else if (s.type === 'info') out.push({ key: 'info', label: 'Карточки информации' });
+    out.push({ key: 'near', label: 'Блок «Скоро у нас»' });
+    return out;
+  }
+  function defaultElement() { return { visible: true, effect: '', duration: null, delay: null, x: 0, y: 0 }; }
+
+  function defaultPhotoPos() { return { x: 0, y: 0, scale: 1, rotate: 0, flip: false }; }
+  function defaultFonts() {
+    return { heading: 'Nunito', dish: 'Montserrat', text: 'Calibri', headingScale: 1, dishScale: 1, textScale: 1 };
+  }
   var THEMES = { dark: 'Тёмная (как в печатном меню)', light: 'Светлая (крафт)' };
   var EVENT_STYLES = { list: 'Список с датами', cards: 'Карточки', timeline: 'Таймлайн' };
 
@@ -87,6 +123,7 @@
   function defaultSettings() {
     return {
       theme: 'dark',
+      fonts: defaultFonts(),
       accent: '#d4df3f',
       slideDuration: 12,
       transition: { effect: 'fade', speed: 1100 },
@@ -112,6 +149,9 @@
       id: uid('slide'), type: type, name: '', enabled: true, showTitle: true, titleAlign: 'left', duration: null, accent: null,
       schedule: { days: [], from: '', to: '', dateFrom: '', dateTo: '' },
       nearest: { enabled: false, count: 2 },
+      sizes: { title: null, dish: null, text: null },
+      photoPos: [],
+      elements: {},
       animation: null
     };
     if (type === 'dishes') {
@@ -289,7 +329,7 @@
   var api = {
     LAYOUTS: LAYOUTS, TITLE_ALIGNS: TITLE_ALIGNS, ANIMATION_PRESETS: ANIMATION_PRESETS, TITLE_EFFECTS: TITLE_EFFECTS,
     PHOTO_EFFECTS: PHOTO_EFFECTS, PRICE_EFFECTS: PRICE_EFFECTS, ORDERS: ORDERS,
-    TRANSITIONS: TRANSITIONS, THEMES: THEMES, EVENT_STYLES: EVENT_STYLES,
+    TRANSITIONS: TRANSITIONS, THEMES: THEMES, FONTS: FONTS, defaultFonts: defaultFonts, defaultPhotoPos: defaultPhotoPos, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
     uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
     newDish: newDish, newEvent: newEvent, newSlide: newSlide, generateSlides: generateSlides,
     dateKey: dateKey, parseDate: parseDate, addDays: addDays, minutes: minutes,

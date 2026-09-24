@@ -1,5 +1,7 @@
-name: Публикация витрины на GitHub Pages
+name: Витрина → GitHub Pages
 
+# Публикует плеер и админку на GitHub Pages при каждом изменении main
+# (в том числе при коммите из админки кнопкой «Опубликовать в Git»).
 on:
   push:
     branches: [main]
@@ -22,19 +24,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Проверка content/config.json
-        run: python3 -m json.tool content/config.json > /dev/null
-
-      - name: Метка сборки (экран перезагрузится, увидев новый коммит)
-        run: |
-          mkdir -p _site
-          rsync -a --exclude '.git' --exclude '.github' --exclude '_site' ./ _site/
-          printf '{"commit":"%s","builtAt":"%s"}\n' "${GITHUB_SHA}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _site/build.json
-
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Проверка данных
+        run: node -e "JSON.parse(require('fs').readFileSync('content/data.json','utf8'))"
+      - name: Сборка
+        run: node tools/build.mjs --with-admin
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

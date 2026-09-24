@@ -1,0 +1,8 @@
+dist/
+node_modules/
+.DS_Store
+api/config.php
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep
+*.sqlite
