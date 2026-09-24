@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Витрина — панель управления</title>
+  <link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#"><img src="../assets/img/logo.svg" width="28" height="28" alt=""> Витрина</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav" aria-label="Меню"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="topnav">
+        <ul class="navbar-nav me-auto" id="nav">
+          <li class="nav-item"><a class="nav-link active" href="#" data-tab="slides">Экраны</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="dishes">Блюда</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="events">Мероприятия</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="design">Анимация и оформление</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="publish">Публикация</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2" id="navRight">
+          <span class="navbar-text small" id="saveStatus"></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-3" id="app" hidden>
+    <div class="row g-3">
+      <main class="col" id="main"></main>
+      <aside class="col-12 col-xl-auto">
+        <div class="preview card shadow-sm">
+          <div class="card-header d-flex align-items-center gap-2">
+            <strong class="me-auto">Предпросмотр</strong>
+            <select class="form-select form-select-sm w-auto" id="previewMode">
+              <option value="slide">Выбранный слайд</option>
+              <option value="show">Вся программа</option>
+              <option value="show-now">Программа по расписанию</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary" id="replay" title="Повторить анимацию">↻</button>
+          </div>
+          <div class="preview__screen" id="previewScreen">
+            <iframe id="previewFrame" src="../index.html?preview=1" title="Предпросмотр витрины"></iframe>
+          </div>
+          <div class="card-footer small text-body-secondary">Экран 1080×1920 (вертикальный FullHD), масштаб уменьшен.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="container py-5" id="login" hidden>
+    <div class="row justify-content-center">
+      <div class="col-sm-8 col-md-5 col-lg-4">
+        <form class="card shadow-sm" id="loginForm">
+          <div class="card-body p-4">
+            <h1 class="h4 mb-3">Вход в панель управления</h1>
+            <div class="mb-3"><label class="form-label" for="loginName">Логин</label><input class="form-control" id="loginName" autocomplete="username" required></div>
+            <div class="mb-3"><label class="form-label" for="loginPass">Пароль</label><input class="form-control" id="loginPass" type="password" autocomplete="current-password" required></div>
+            <div class="alert alert-danger py-2 small" id="loginError" hidden></div>
+            <button class="btn btn-primary w-100">Войти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+    <div class="toast text-bg-dark border-0" id="toast" role="status"><div class="toast-body" id="toastBody"></div></div>
+  </div>
+
+  <script src="../vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="../shared/model.js"></script>
+  <script src="../vendor/jszip/jszip.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

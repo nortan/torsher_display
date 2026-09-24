@@ -1,0 +1,43 @@
+name: Витрина → свой сервер (rsync по SSH)
+
+# Выгружает статическую сборку на ваш сервер, где экран крутится автономно.
+# Работает, только если в Settings → Secrets and variables → Actions заданы:
+#   DEPLOY_SSH_KEY  — приватный ключ (публичный добавьте в ~/.ssh/authorized_keys на сервере)
+#   DEPLOY_TARGET   — куда выгружать, например deploy@display.example.ru:/var/www/torsher-display
+#   DEPLOY_KNOWN_HOSTS (необязательно) — вывод `ssh-keyscan ваш-сервер`
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TARGET: ${{ secrets.DEPLOY_TARGET }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+    steps:
+      - name: Сервер не настроен — пропускаем
+        if: env.DEPLOY_TARGET == '' || env.DEPLOY_SSH_KEY == ''
+        run: echo "Секреты DEPLOY_TARGET / DEPLOY_SSH_KEY не заданы — выгрузка на сервер пропущена."
+      - uses: actions/checkout@v4
+        if: env.DEPLOY_TARGET != '' && env.DEPLOY_SSH_KEY != ''
+      - uses: actions/setup-node@v4
+        if: env.DEPLOY_TARGET != '' && env.DEPLOY_SSH_KEY != ''
+        with:
+          node-version: 22
+      - name: SSH-ключ
+        if: env.DEPLOY_TARGET != '' && env.DEPLOY_SSH_KEY != ''
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          if [ -n "$DEPLOY_KNOWN_HOSTS" ]; then printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts; fi
+          printf 'Host *\n  IdentityFile ~/.ssh/id_deploy\n  StrictHostKeyChecking %s\n' "$([ -n "$DEPLOY_KNOWN_HOSTS" ] && echo yes || echo accept-new)" > ~/.ssh/config
+      - name: Сборка и выгрузка
+        if: env.DEPLOY_TARGET != '' && env.DEPLOY_SSH_KEY != ''
+        run: tools/deploy.sh

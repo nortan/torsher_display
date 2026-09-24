@@ -1,0 +1,1822 @@
+{
+  "version": 2,
+  "cafe": {
+    "name": "Торшер",
+    "tagline": "кафе · кухня весь день",
+    "logo": "assets/img/logo.svg"
+  },
+  "settings": {
+    "theme": "dark",
+    "fonts": {
+      "heading": "Nunito",
+      "dish": "Montserrat",
+      "text": "Calibri",
+      "headingScale": 1,
+      "dishScale": 1,
+      "textScale": 1
+    },
+    "accent": "#d4df3f",
+    "slideDuration": 12,
+    "transition": {
+      "effect": "fade",
+      "speed": 1100
+    },
+    "animation": {
+      "preset": "rise",
+      "title": "chars",
+      "photo": "kenburns",
+      "price": "pop",
+      "order": "sequence",
+      "speed": 1,
+      "stagger": 0.08
+    },
+    "currency": "",
+    "refreshInterval": 60,
+    "tickerSpeed": 80,
+    "dailyReloadAt": "04:00"
+  },
+  "ticker": [
+    "Завтраки подаём весь день",
+    "Wi-Fi: Torsher_Guest · пароль coffee2026",
+    "Скидка 10% на напитки в свою кружку",
+    "Принимаем заказы на торты — спросите у бариста"
+  ],
+  "dishes": [
+    {
+      "id": "dish-01",
+      "name": "Омлет с креветками",
+      "category": "Завтраки",
+      "description": "Томаты, соус биск, микрозелень",
+      "weight": "250 г",
+      "price": 540,
+      "oldPrice": null,
+      "tag": "хит",
+      "photo": "assets/dishes/omelette.webp",
+      "active": true
+    },
+    {
+      "id": "dish-02",
+      "name": "Каре ягнёнка",
+      "category": "Горячее",
+      "description": "Печёный перец и кукуруза гриль",
+      "weight": "350 г",
+      "price": 2590,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/lamb.webp",
+      "active": true
+    },
+    {
+      "id": "dish-03",
+      "name": "Огуречный салат",
+      "category": "Салаты",
+      "description": "Перепелиные яйца, щучья икра",
+      "weight": "240 г",
+      "price": 640,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/salad-eggs.webp",
+      "active": true
+    },
+    {
+      "id": "dish-04",
+      "name": "Салат с тунцом",
+      "category": "Салаты",
+      "description": "Тунец medium, микс салата, кунжут",
+      "weight": "320 г",
+      "price": 990,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/salad-tuna.webp",
+      "active": true
+    },
+    {
+      "id": "dish-05",
+      "name": "Мидии в сливочном соусе",
+      "category": "Горячие закуски",
+      "description": "Соус с песто, чесночные гренки",
+      "weight": "400 г",
+      "price": 1390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/mussels.webp",
+      "active": true
+    },
+    {
+      "id": "dish-06",
+      "name": "Филе кальмара",
+      "category": "Горячие закуски",
+      "description": "С печёным рамиро",
+      "weight": "205 г",
+      "price": 740,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/squid.webp",
+      "active": true
+    },
+    {
+      "id": "dish-07",
+      "name": "Пельмени домашние",
+      "category": "Горячее",
+      "description": "Лепим вручную, со сметаной",
+      "weight": "200 г",
+      "price": 740,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/pelmeni.webp",
+      "active": true
+    },
+    {
+      "id": "dish-08",
+      "name": "Томлёные щёки",
+      "category": "Горячее",
+      "description": "Картофельное пюре, соус демигляс",
+      "weight": "290 г",
+      "price": 1290,
+      "oldPrice": null,
+      "tag": "хит",
+      "photo": "assets/dishes/cheeks.webp",
+      "active": true
+    },
+    {
+      "id": "dish-09",
+      "name": "Шашлык из свинины",
+      "category": "Мангал",
+      "description": "Маринованный лук, соус",
+      "weight": "200 г",
+      "price": 590,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/shashlik.webp",
+      "active": true
+    },
+    {
+      "id": "dish-10",
+      "name": "Сёмга на углях",
+      "category": "Мангал",
+      "description": "Стейк с лимоном и оливками",
+      "weight": "200 г",
+      "price": 1840,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/salmon.webp",
+      "active": true
+    },
+    {
+      "id": "dish-11",
+      "name": "Овощи гриль",
+      "category": "Мангал",
+      "description": "Баклажан, кабачок, перец, шампиньоны",
+      "weight": "300 г",
+      "price": 440,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/grill-veg.webp",
+      "active": true
+    },
+    {
+      "id": "dish-12",
+      "name": "Брокколи терияки",
+      "category": "Гарниры",
+      "description": "С кунжутом",
+      "weight": "180 г",
+      "price": 430,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/broccoli.webp",
+      "active": true
+    },
+    {
+      "id": "dish-13",
+      "name": "Паста с морепродуктами",
+      "category": "Паста",
+      "description": "Мидии, креветки, сливочный соус",
+      "weight": "410 г",
+      "price": 1390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/pasta.webp",
+      "active": true
+    },
+    {
+      "id": "dish-14",
+      "name": "Бургер классический",
+      "category": "Бургеры",
+      "description": "Говядина, чеддер, маринованный огурец",
+      "weight": "350 г",
+      "price": 790,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/burger.webp",
+      "active": true
+    },
+    {
+      "id": "dish-15",
+      "name": "Пицца «Охотничья»",
+      "category": "Пицца",
+      "description": "Охотничьи колбаски, томаты, руккола",
+      "weight": "570 г",
+      "price": 1040,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-16",
+      "name": "Десерт «Калинник»",
+      "category": "Десерты",
+      "description": "Калина и черносмородиновое суфле",
+      "weight": "120 г",
+      "price": 450,
+      "oldPrice": null,
+      "tag": "новинка",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-17",
+      "name": "Медовик",
+      "category": "Десерты",
+      "description": "С сотовым мёдом",
+      "weight": "180 г",
+      "price": 590,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-18",
+      "name": "Яблочный штрудель",
+      "category": "Десерты",
+      "description": "С карамельным соусом",
+      "weight": "190 г",
+      "price": 590,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/strudel.webp",
+      "active": true
+    },
+    {
+      "id": "dish-19",
+      "name": "Мороженое с ягодами",
+      "category": "Десерты",
+      "description": "Желейные шарики, сироп",
+      "weight": "150 г",
+      "price": 440,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-20",
+      "name": "Окрошка на квасе",
+      "category": "Супы",
+      "description": "Сезонное предложение",
+      "weight": "350 г",
+      "price": 540,
+      "oldPrice": 620,
+      "tag": "",
+      "photo": "assets/dishes/okroshka.webp",
+      "active": true
+    },
+    {
+      "id": "dish-21",
+      "name": "Солянка сборная",
+      "category": "Супы",
+      "description": "Копчёности, маслины, лимон",
+      "weight": "300 г",
+      "price": 530,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/solyanka.webp",
+      "active": true
+    },
+    {
+      "id": "dish-22",
+      "name": "Борщ с чесночной булочкой",
+      "category": "Супы",
+      "description": "Со сметаной и зеленью",
+      "weight": "350 г",
+      "price": 530,
+      "oldPrice": null,
+      "tag": "хит",
+      "photo": "assets/dishes/borsch.webp",
+      "active": true
+    },
+    {
+      "id": "dish-23",
+      "name": "Куриный бульон с лапшой",
+      "category": "Супы",
+      "description": "",
+      "weight": "300 г",
+      "price": 430,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-24",
+      "name": "Уха с муксуном",
+      "category": "Супы",
+      "description": "",
+      "weight": "400 г",
+      "price": 830,
+      "oldPrice": null,
+      "tag": "хит",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-25",
+      "name": "Ризотто с телятиной",
+      "category": "Горячее",
+      "description": "Пармезан, зелёный горошек",
+      "weight": "300 г",
+      "price": 890,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "assets/dishes/risotto.webp",
+      "active": true
+    },
+    {
+      "id": "dish-26",
+      "name": "Цезарь с курицей",
+      "category": "Салаты",
+      "description": "Романо, пармезан, соус цезарь",
+      "weight": "250 г",
+      "price": 620,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-27",
+      "name": "Греческий салат",
+      "category": "Салаты",
+      "description": "",
+      "weight": "260 г",
+      "price": 640,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-28",
+      "name": "Картофель фри",
+      "category": "Гарниры",
+      "description": "",
+      "weight": "150 г",
+      "price": 330,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-29",
+      "name": "Картофельное пюре",
+      "category": "Гарниры",
+      "description": "",
+      "weight": "200 г",
+      "price": 330,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-30",
+      "name": "Морс из ягод",
+      "category": "Напитки",
+      "description": "",
+      "weight": "300 мл",
+      "price": 200,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-31",
+      "name": "Лимонад облепиховый",
+      "category": "Напитки",
+      "description": "",
+      "weight": "400 мл",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-32",
+      "name": "Капучино",
+      "category": "Напитки",
+      "description": "",
+      "weight": "300 мл",
+      "price": 250,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "id": "dish-33",
+      "name": "Наполеон",
+      "category": "Десерты",
+      "description": "",
+      "weight": "160 г",
+      "price": 530,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    }
+  ],
+  "events": [
+    {
+      "id": "ev-34",
+      "title": "Джазовый вечер",
+      "date": "2026-09-25",
+      "time": "19:30",
+      "endTime": "22:00",
+      "description": "Трио Павла Лебедева: стандарты и босса-нова",
+      "price": "500 ₽",
+      "tag": "Музыка",
+      "photo": null,
+      "highlight": true,
+      "active": true
+    },
+    {
+      "id": "ev-35",
+      "title": "Мастер-класс: домашний медовик",
+      "date": "2026-09-26",
+      "time": "12:00",
+      "endTime": "",
+      "description": "Шеф-кондитер покажет все секреты",
+      "price": "1 200 ₽",
+      "tag": "Мастер-класс",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-36",
+      "title": "Квиз «Торшер»",
+      "date": "2026-09-27",
+      "time": "18:00",
+      "endTime": "",
+      "description": "Команды до 6 человек, запись у бариста",
+      "price": "400 ₽ с человека",
+      "tag": "Игра",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-37",
+      "title": "Вечер настольных игр",
+      "date": "2026-09-29",
+      "time": "19:00",
+      "endTime": "",
+      "description": "Более 40 игр, ведущий поможет разобраться",
+      "price": "Вход свободный",
+      "tag": "Игры",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-38",
+      "title": "Кино на проекторе",
+      "date": "2026-10-01",
+      "time": "20:00",
+      "endTime": "",
+      "description": "«Амели» — в оригинале с субтитрами",
+      "price": "Вход свободный",
+      "tag": "Кино",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-39",
+      "title": "Детская кулинарная студия",
+      "date": "2026-10-03",
+      "time": "11:00",
+      "endTime": "",
+      "description": "Готовим штрудель вместе, 6–10 лет",
+      "price": "900 ₽",
+      "tag": "Детям",
+      "photo": "assets/dishes/strudel.webp",
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-40",
+      "title": "Акустический концерт",
+      "date": "2026-10-04",
+      "time": "19:00",
+      "endTime": "",
+      "description": "Анна Звонарёва, авторские песни",
+      "price": "600 ₽",
+      "tag": "Музыка",
+      "photo": null,
+      "highlight": true,
+      "active": true
+    },
+    {
+      "id": "ev-41",
+      "title": "Стендап-микрофон",
+      "date": "2026-10-06",
+      "time": "19:30",
+      "endTime": "",
+      "description": "Открытый микрофон, запись участников до 18:00",
+      "price": "Вход свободный",
+      "tag": "Юмор",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    },
+    {
+      "id": "ev-42",
+      "title": "Гастроужин «Мангал»",
+      "date": "2026-10-08",
+      "time": "19:00",
+      "endTime": "",
+      "description": "Сет из пяти блюд от шефа",
+      "price": "700 ₽",
+      "tag": "Ужин",
+      "photo": null,
+      "highlight": false,
+      "active": true
+    }
+  ],
+  "slides": [
+    {
+      "id": "slide-01",
+      "type": "dishes",
+      "name": "1 : 2 · тарелка внизу в край",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": true,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "rise",
+        "title": "chars",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Блюдо дня",
+      "subtitle": "",
+      "layout": "p1t2-bottom",
+      "photoDishes": [
+        "dish-14"
+      ],
+      "textDishes": [
+        "dish-28",
+        "dish-29"
+      ]
+    },
+    {
+      "id": "slide-02",
+      "type": "dishes",
+      "name": "Текст · 8–10 позиций списком",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "rise",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Меню",
+      "subtitle": "Основные позиции",
+      "layout": "text-10",
+      "photoDishes": [],
+      "textDishes": [
+        "dish-28",
+        "dish-29",
+        "dish-02",
+        "dish-07",
+        "dish-08",
+        "dish-25",
+        "dish-05",
+        "dish-06",
+        "dish-16",
+        "dish-17"
+      ]
+    },
+    {
+      "id": "slide-03",
+      "type": "dishes",
+      "name": "2 : 4 · зигзаг",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "right",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "slide",
+        "title": "words",
+        "photo": "zoom",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Рекомендует шеф",
+      "subtitle": "",
+      "layout": "p2t4",
+      "photoDishes": [
+        "dish-12",
+        "dish-02"
+      ],
+      "textDishes": [
+        "dish-23",
+        "dish-24",
+        "dish-28",
+        "dish-29"
+      ]
+    },
+    {
+      "id": "slide-04",
+      "type": "dishes",
+      "name": "1 : 2 · тарелка справа в край",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "cascade",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "shine",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Горячее",
+      "subtitle": "",
+      "layout": "p1t2-side",
+      "photoDishes": [
+        "dish-07"
+      ],
+      "textDishes": [
+        "dish-16",
+        "dish-17"
+      ]
+    },
+    {
+      "id": "slide-05",
+      "type": "dishes",
+      "name": "3 : 6 · зигзаг",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "zoom",
+        "title": "words",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Хиты кухни",
+      "subtitle": "",
+      "layout": "p3t6",
+      "photoDishes": [
+        "dish-08",
+        "dish-25",
+        "dish-05"
+      ],
+      "textDishes": [
+        "dish-19",
+        "dish-33",
+        "dish-30",
+        "dish-31",
+        "dish-32",
+        "dish-15"
+      ]
+    },
+    {
+      "id": "slide-06",
+      "type": "dishes",
+      "name": "Текст · 8–10 позиций по категориям",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "slide",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Меню дня",
+      "subtitle": "По разделам",
+      "layout": "text-groups",
+      "photoDishes": [],
+      "textDishes": [
+        "dish-03",
+        "dish-04",
+        "dish-26",
+        "dish-27",
+        "dish-20",
+        "dish-21",
+        "dish-22",
+        "dish-23",
+        "dish-24",
+        "dish-14"
+      ]
+    },
+    {
+      "id": "slide-07",
+      "type": "dishes",
+      "name": "1 : 2 · тарелка сверху, афишный",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "blur",
+        "title": "lines",
+        "photo": "zoom",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Сезонное",
+      "subtitle": "",
+      "layout": "p1t2-top",
+      "photoDishes": [
+        "dish-06"
+      ],
+      "textDishes": [
+        "dish-30",
+        "dish-31"
+      ]
+    },
+    {
+      "id": "slide-08",
+      "type": "dishes",
+      "name": "2 : 4 · по диагонали",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "right",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "flip",
+        "title": "lines",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Попробуйте",
+      "subtitle": "",
+      "layout": "p2t4-bottom",
+      "photoDishes": [
+        "dish-18",
+        "dish-01"
+      ],
+      "textDishes": [
+        "dish-32",
+        "dish-15",
+        "dish-26",
+        "dish-27"
+      ]
+    },
+    {
+      "id": "slide-09",
+      "type": "dishes",
+      "name": "1 : 0 · одно блюдо крупно",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": true,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "zoom",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "shine",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Блюдо недели",
+      "subtitle": "",
+      "layout": "hero",
+      "photoDishes": [
+        "dish-09"
+      ],
+      "textDishes": []
+    },
+    {
+      "id": "slide-10",
+      "type": "dishes",
+      "name": "1 : 2 · тарелка внизу в край",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "typewriter",
+        "title": "chars",
+        "photo": "zoom",
+        "price": "pulse",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "С пылу с жару",
+      "subtitle": "",
+      "layout": "p1t2-bottom",
+      "photoDishes": [
+        "dish-10"
+      ],
+      "textDishes": [
+        "dish-23",
+        "dish-24"
+      ]
+    },
+    {
+      "id": "slide-11",
+      "type": "dishes",
+      "name": "3 : 6 · три тарелки внизу",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "rise",
+        "title": "words",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Выбор гостей",
+      "subtitle": "",
+      "layout": "p3t6-row",
+      "photoDishes": [
+        "dish-11",
+        "dish-13",
+        "dish-03"
+      ],
+      "textDishes": [
+        "dish-28",
+        "dish-29",
+        "dish-16",
+        "dish-17",
+        "dish-19",
+        "dish-33"
+      ]
+    },
+    {
+      "id": "slide-12",
+      "type": "dishes",
+      "name": "1 : 8 · две колонки текста + тарелка",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "fade",
+        "title": "lines",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Кухня",
+      "subtitle": "Всё меню на одном экране",
+      "layout": "p1t8-2col",
+      "photoDishes": [
+        "dish-04"
+      ],
+      "textDishes": [
+        "dish-30",
+        "dish-31",
+        "dish-32",
+        "dish-15",
+        "dish-26",
+        "dish-27",
+        "dish-23",
+        "dish-24"
+      ]
+    },
+    {
+      "id": "slide-13",
+      "type": "dishes",
+      "name": "1 : 4 · тарелка слева в край",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "right",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "slide",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Рыба и мясо",
+      "subtitle": "",
+      "layout": "p1t4",
+      "photoDishes": [
+        "dish-20"
+      ],
+      "textDishes": [
+        "dish-28",
+        "dish-29",
+        "dish-16",
+        "dish-17"
+      ]
+    },
+    {
+      "id": "slide-14",
+      "type": "dishes",
+      "name": "2 : 4 · зигзаг",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "cascade",
+        "title": "words",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "К столу",
+      "subtitle": "",
+      "layout": "p2t4",
+      "photoDishes": [
+        "dish-21",
+        "dish-22"
+      ],
+      "textDishes": [
+        "dish-19",
+        "dish-33",
+        "dish-30",
+        "dish-31"
+      ]
+    },
+    {
+      "id": "slide-15",
+      "type": "dishes",
+      "name": "1 : 6 · тарелка справа, список слева",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": true,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "fade",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Весь день",
+      "subtitle": "",
+      "layout": "p1t6",
+      "photoDishes": [
+        "dish-14"
+      ],
+      "textDishes": [
+        "dish-32",
+        "dish-15",
+        "dish-26",
+        "dish-27",
+        "dish-23",
+        "dish-24"
+      ]
+    },
+    {
+      "id": "slide-16",
+      "type": "dishes",
+      "name": "Текст · 6–8 позиций крупно",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "typewriter",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Наш выбор",
+      "subtitle": "Готовим весь день",
+      "layout": "text-8",
+      "photoDishes": [],
+      "textDishes": [
+        "dish-02",
+        "dish-07",
+        "dish-08",
+        "dish-25",
+        "dish-05",
+        "dish-06",
+        "dish-16",
+        "dish-17"
+      ]
+    },
+    {
+      "id": "slide-17",
+      "type": "dishes",
+      "name": "1 : 2 · тарелка справа в край",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "zoom",
+        "title": "chars",
+        "photo": "zoom",
+        "price": "shine",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Новинка",
+      "subtitle": "",
+      "layout": "p1t2-side",
+      "photoDishes": [
+        "dish-12"
+      ],
+      "textDishes": [
+        "dish-32",
+        "dish-15"
+      ]
+    },
+    {
+      "id": "slide-18",
+      "type": "dishes",
+      "name": "4 : 4 · тарелки по углам",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "blur",
+        "title": "words",
+        "photo": "float",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Всё самое вкусное",
+      "subtitle": "",
+      "layout": "p4t4",
+      "photoDishes": [
+        "dish-02",
+        "dish-07",
+        "dish-08",
+        "dish-25"
+      ],
+      "textDishes": [
+        "dish-26",
+        "dish-27",
+        "dish-23",
+        "dish-24"
+      ]
+    },
+    {
+      "id": "slide-19",
+      "type": "dishes",
+      "name": "Текст · главное блюдо в рамке + 8",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "zoom",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "shine",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Горячее",
+      "subtitle": "",
+      "layout": "text-feature",
+      "photoDishes": [],
+      "textDishes": [
+        "dish-11",
+        "dish-30",
+        "dish-31",
+        "dish-32",
+        "dish-13",
+        "dish-15",
+        "dish-03",
+        "dish-04",
+        "dish-26"
+      ]
+    },
+    {
+      "id": "slide-20",
+      "type": "dishes",
+      "name": "3 : 6 · зигзаг",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "right",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "flip",
+        "title": "lines",
+        "photo": "zoom",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Большой обед",
+      "subtitle": "",
+      "layout": "p3t6",
+      "photoDishes": [
+        "dish-05",
+        "dish-06",
+        "dish-18"
+      ],
+      "textDishes": [
+        "dish-15",
+        "dish-26",
+        "dish-27",
+        "dish-23",
+        "dish-24",
+        "dish-28"
+      ]
+    },
+    {
+      "id": "slide-21",
+      "type": "events",
+      "name": "Афиша на неделю",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "rise",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Афиша недели",
+      "subtitle": "",
+      "range": "week",
+      "start": "today",
+      "max": 7,
+      "style": "list",
+      "show": {
+        "photo": true,
+        "description": true,
+        "price": true,
+        "tag": true
+      },
+      "emptyText": "Скоро анонсируем новые события"
+    },
+    {
+      "id": "slide-22",
+      "type": "events",
+      "name": "Афиша на неделю · карточки",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "zoom",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "На этой неделе",
+      "subtitle": "",
+      "range": "week",
+      "start": "today",
+      "max": 5,
+      "style": "cards",
+      "show": {
+        "photo": true,
+        "description": true,
+        "price": true,
+        "tag": true
+      },
+      "emptyText": "Скоро анонсируем новые события"
+    },
+    {
+      "id": "slide-23",
+      "type": "events",
+      "name": "Афиша на две недели",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "cascade",
+        "title": "chars",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Афиша",
+      "subtitle": "Ближайшие две недели",
+      "range": "2weeks",
+      "start": "today",
+      "max": 7,
+      "style": "timeline",
+      "show": {
+        "photo": true,
+        "description": true,
+        "price": true,
+        "tag": true
+      },
+      "emptyText": "Скоро анонсируем новые события"
+    },
+    {
+      "id": "slide-24",
+      "type": "events",
+      "name": "Афиша на две недели · список",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": false,
+        "count": 2
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "flip",
+        "title": "lines",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Скоро",
+      "subtitle": "Две недели событий",
+      "range": "2weeks",
+      "start": "monday",
+      "max": 7,
+      "style": "list",
+      "show": {
+        "photo": false,
+        "description": true,
+        "price": true,
+        "tag": true
+      },
+      "emptyText": "Скоро анонсируем новые события"
+    },
+    {
+      "id": "slide-25",
+      "type": "info",
+      "name": "Информация",
+      "enabled": true,
+      "showTitle": true,
+      "titleAlign": "left",
+      "duration": null,
+      "accent": null,
+      "schedule": {
+        "days": [],
+        "from": "",
+        "to": "",
+        "dateFrom": "",
+        "dateTo": ""
+      },
+      "nearest": {
+        "enabled": true,
+        "count": 3
+      },
+      "sizes": {
+        "title": null,
+        "dish": null,
+        "text": null
+      },
+      "photoPos": [],
+      "elements": {},
+      "animation": {
+        "preset": "fade",
+        "title": "words",
+        "photo": "kenburns",
+        "price": "pop",
+        "order": "sequence",
+        "speed": 1,
+        "stagger": 0.08
+      },
+      "title": "Мы рядом",
+      "subtitle": "Заходите, мы всегда рады",
+      "lines": [
+        {
+          "label": "Часы работы",
+          "value": "Пн–Пт 7:30–22:00\nСб–Вс 9:00–22:00"
+        },
+        {
+          "label": "Wi-Fi",
+          "value": "Torsher_Guest · coffee2026"
+        },
+        {
+          "label": "Доставка",
+          "value": "Яндекс Еда"
+        },
+        {
+          "label": "Соцсети",
+          "value": "@torsher.cafe"
+        }
+      ]
+    }
+  ]
+}

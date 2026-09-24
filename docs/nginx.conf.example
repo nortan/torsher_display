@@ -1,0 +1,29 @@
+server {
+    listen 80;
+    server_name display.local;
+    root /var/www/torsher-display;
+    index index.html;
+
+    # данные и версия — без кеша, чтобы экран сразу видел обновления
+    location ~* ^/(content/.*\.(json|js)|build\.json)$ {
+        add_header Cache-Control "no-store";
+    }
+
+    location ~* \.(js|css|woff2|webp|png|jpg|jpeg|svg)$ {
+        add_header Cache-Control "public, max-age=86400";
+    }
+}
+
+# ---------------------------------------------------------------
+# Полный сайт с PHP-бэкендом (сборка tools/build.mjs --server):
+# добавьте в server { } обработку PHP и закройте служебные файлы.
+#
+#    location ~ ^/api/(lib|config|config\.sample)\.php$ { deny all; }
+#    location ^~ /sql/ { deny all; }
+#    location ~ ^/uploads/.*\.(php\d?|phtml|phar)$ { deny all; }
+#    location ~ \.php$ {
+#        include fastcgi_params;
+#        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+#        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+#    }
+#    client_max_body_size 10m;   # загрузка фото
