@@ -4,6 +4,7 @@
   "styles.css",
   "shared/model.js",
   "vendor/gsap/CustomEase.min.js",
+  "vendor/gsap/ScrambleTextPlugin.min.js",
   "vendor/gsap/SplitText.min.js",
   "vendor/gsap/gsap.min.js",
   "vendor/swiper/LICENSE",

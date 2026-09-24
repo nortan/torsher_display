@@ -35,7 +35,7 @@ if (args.has('--manifest')) process.exit(0);
 
 const data = JSON.parse(fs.readFileSync(path.join(root, 'content/data.json'), 'utf8'));
 const photos = new Set();
-for (const o of [...(data.dishes || []), ...(data.events || [])]) if (o.photo && !/^(https?:|data:)/.test(o.photo)) photos.add(o.photo);
+for (const o of [...(data.dishes || []), ...(data.events || []), ...(data.slides || [])]) if (typeof o.photo === 'string' && o.photo && !/^(https?:|data:)/.test(o.photo)) photos.add(o.photo);
 if (data.cafe && data.cafe.logo) photos.add(data.cafe.logo);
 
 const files = new Set(playerFiles);

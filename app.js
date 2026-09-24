@@ -8,7 +8,7 @@
   'use strict';
 
   var M = window.TorsherModel;
-  gsap.registerPlugin(SplitText, CustomEase);
+  gsap.registerPlugin(SplitText, CustomEase, ScrambleTextPlugin);
   CustomEase.create('soft', 'M0,0 C0.16,0.84 0.3,1 1,1');
 
   var W = 1080, H = 1920;
@@ -61,7 +61,7 @@
     if (price == null || price === '') return '';
     var cur = settings().currency;
     var main = typeof price === 'number'
-      ? esc(price.toLocaleString('ru-RU')) + (cur ? '<span class="price__cur">' + esc(cur) + '</span>' : '')
+      ? '<span class="price__num" data-n="' + price + '">' + esc(price.toLocaleString('ru-RU')) + '</span>' + (cur ? '<span class="price__cur">' + esc(cur) + '</span>' : '')
       : esc(price);
     return (old ? '<span class="price__old">' + esc(Number(old).toLocaleString('ru-RU')) + '</span>' : '') +
       main + (weight ? '<span class="price__w">/' + esc(weight) + '</span>' : '');
@@ -124,10 +124,17 @@
     '</header>';
   }
 
+  /* Значок NEW у новинки. */
+  function newBadge(d) {
+    if (!d.isNew) return '';
+    var nb = settings().newBadge || {};
+    return '<span class="new-badge a-new"><span class="new-badge__t">' + esc(nb.text || 'NEW') + '</span><span class="shine"></span></span>';
+  }
+
   function row(d) {
-    return '<div class="row a-row">' +
-      '<div class="row__line"><span class="row__name">' + esc(d.name) + chip(d.tag) + '</span>' +
-      '<span class="row__dots"></span><span class="row__price price a-price">' + priceHTML(d.price, null, d.oldPrice) + '</span></div>' +
+    return '<div class="row a-row' + (d.accent ? ' is-accent' : '') + '">' +
+      '<div class="row__line"><span class="row__name"><span class="n-t a-name">' + esc(d.name) + '</span>' + chip(d.tag) + newBadge(d) + '</span>' +
+      '<span class="row__dots"></span><span class="row__price price a-price shine-host">' + priceHTML(d.price, null, d.oldPrice) + '<span class="shine"></span></span></div>' +
       (d.description ? '<div class="row__desc">' + esc(d.description) + '</div>' : '') +
       (d.weight ? '<div class="row__w">(' + esc(d.weight) + ')</div>' : '') +
     '</div>';
@@ -142,8 +149,8 @@
   /* Главное блюдо: рамка с «перекрестьем» по углам, крупная цена под рамкой — как в печатном меню. */
   function frame(d, extra) {
     var n = /feat--(\d)/.exec(extra || '');
-    return '<div class="feat' + (extra || '') + ' a-card" data-el="feat-' + (n ? n[1] : 1) + '">' +
-      '<div class="frame"><div class="frame__name">' + esc(d.name) + chip(d.tag) + '</div>' +
+    return '<div class="feat' + (extra || '') + (d.accent ? ' is-accent' : '') + ' a-card" data-el="feat-' + (n ? n[1] : 1) + '">' +
+      '<div class="frame">' + newBadge(d) + '<div class="frame__name"><span class="n-t a-name">' + esc(d.name) + '</span>' + chip(d.tag) + '</div>' +
         (d.description ? '<div class="frame__desc">' + esc(d.description) + '</div>' : '') + '</div>' +
       '<div class="feat__price price a-price shine-host">' + priceHTML(d.price, d.weight, d.oldPrice) + '<span class="shine"></span></div>' +
     '</div>';
@@ -198,7 +205,7 @@
 
   /* Композиции «фото : текст» по мотивам печатного меню. */
   function composition(layout, photos, texts, positions) {
-    var p = photos, t = texts, out = '';
+    var p = photos, t = texts, out = '', base = layout;
     var plate = function (d, n) { return plateHTML(d, n, (positions || [])[n - 1]); };
     switch (layout) {
       case 'hero':
@@ -224,11 +231,30 @@
       case 'p4t4':
         out = txt(t.slice(0, 4), 1, '2col');
         p.forEach(function (d, i) { out += feat(d, i + 1, true) + plate(d, i + 1); }); break;
+      // только фото и фото + 1–2 текстом; часть использует сетку уже существующих композиций
+      case 'p1-center':
+        out = plate(p[0], 1) + feat(p[0], 1); break;
+      case 'p2': case 'p3':
+        p.forEach(function (d, i) { out += feat(d, i + 1, layout === 'p3') + plate(d, i + 1); }); break;
+      case 'p1t1':
+        base = 'p1t2-bottom'; out = feat(p[0], 1) + txt(t.slice(0, 1), 1, 'md') + plate(p[0], 1); break;
+      case 'p1t2-center':
+        out = feat(p[0], 1) + plate(p[0], 1) + txt(t.slice(0, 2), 1, '2col'); break;
+      case 'p2t1':
+        base = 'p2t4-bottom'; out = txt(t.slice(0, 1), 1, 'lg');
+        p.forEach(function (d, i) { out += feat(d, i + 1) + plate(d, i + 1); }); break;
+      case 'p2t2':
+        base = 'p2t4';
+        p.forEach(function (d, i) { out += feat(d, i + 1) + txt(t.slice(i, i + 1), i + 1, 'md') + plate(d, i + 1); }); break;
+      case 'p3t1': case 'p3t2':
+        base = 'p3'; out = txt(t.slice(0, 2), 1, t.length > 1 ? '2col' : 'md');
+        p.forEach(function (d, i) { out += feat(d, i + 1, true) + plate(d, i + 1); }); break;
     }
-    return '<div class="comp comp--' + layout + ' comp--n' + p.length + '">' + out + '</div>';
+    return '<div class="comp comp--' + base + (base !== layout ? ' comp--' + layout : '') + ' comp--n' + p.length + '">' + out + '</div>';
   }
 
   function renderDishes(s, now) {
+    if (M.LAYOUT_ALIASES[s.layout]) s = Object.assign({}, s, { layout: M.LAYOUT_ALIASES[s.layout] });
     var L = M.LAYOUTS[s.layout] || M.LAYOUTS['text-10'];
     var photos = (s.photoDishes || []).map(dishById).filter(function (d) { return d && d.photo; }).slice(0, L.photos);
     var texts = (s.textDishes || []).filter(Boolean).slice(0, L.texts);
@@ -306,8 +332,77 @@
       }).join('') + '</div>' + nearBlock(s, now) + '</div>' };
   }
 
+  /* Обратный отсчёт до мероприятия: название, время, живой счётчик, изображение. */
+  function renderCountdown(s, now) {
+    var ev = M.countdownEvent(state.data.events, s, now);
+    if (!ev) {
+      return { cls: 'countdown', html: '<div class="slide__fit">' + head(s) +
+        '<div class="cd grow"><div class="cd__empty a-row">Сегодня мероприятий нет — слайд не показывается на экране</div></div></div>' };
+    }
+    var photo = s.photo || ev.photo;
+    var f = M.formatEventDate(ev, now);
+    var start = M.eventStart(ev).getTime();
+    return { cls: 'countdown', html: '<div class="slide__fit">' + head(s) +
+      '<div class="cd grow">' +
+        (photo ? '<div class="cd__photo a-card" data-el="photo"><img class="a-img" src="' + esc(photo) + '" alt=""></div>' : '') +
+        '<div class="cd__name a-row" data-el="evname">' + esc(ev.title) + '</div>' +
+        '<div class="cd__time a-row" data-el="evtime">' + esc(f.relative === 'сегодня' ? 'Сегодня' : f.weekday + ', ' + f.day + ' ' + f.month) +
+          ' в <b>' + esc(ev.time || '—') + '</b></div>' +
+        '<div class="cd__timer a-row" data-el="timer" data-target="' + start + '" data-started="' + esc(s.startedText || 'Уже началось!') + '">' +
+          '<div class="cd__label">' + esc(s.label || 'До начала') + '</div>' +
+          '<div class="cd__digits">' +
+            '<span class="cd__u cd__u--d"><b data-u="d">0</b><i data-l="d">дней</i></span>' +
+            '<span class="cd__u"><b data-u="h">00</b><i data-l="h">часов</i></span>' +
+            '<span class="cd__u"><b data-u="m">00</b><i data-l="m">минут</i></span>' +
+            '<span class="cd__u"><b data-u="s">00</b><i data-l="s">секунд</i></span>' +
+          '</div></div>' +
+      '</div>' + nearBlock(s, now) + '</div>' };
+  }
+
+  function plural(n, one, few, many) {
+    var a = n % 100, b = n % 10;
+    if (a > 10 && a < 20) return many;
+    return b === 1 ? one : b >= 2 && b <= 4 ? few : many;
+  }
+  var UNITS = { d: ['день', 'дня', 'дней'], h: ['час', 'часа', 'часов'], m: ['минута', 'минуты', 'минут'], s: ['секунда', 'секунды', 'секунд'] };
+
+  /* Раз в секунду обновляем все счётчики на экране. */
+  function tickCountdowns() {
+    var now = Date.now();
+    Array.prototype.forEach.call(els.slides.querySelectorAll('.cd__timer[data-target]'), function (t) {
+      var left = Math.max(0, Math.floor((Number(t.getAttribute('data-target')) - now) / 1000));
+      if (left <= 0) {
+        if (!t.classList.contains('is-started')) { t.classList.add('is-started'); t.querySelector('.cd__digits').textContent = t.getAttribute('data-started'); }
+        return;
+      }
+      var v = { d: Math.floor(left / 86400), h: Math.floor(left % 86400 / 3600), m: Math.floor(left % 3600 / 60), s: left % 60 };
+      Object.keys(v).forEach(function (u) {
+        var b = t.querySelector('[data-u="' + u + '"]'), l = t.querySelector('[data-l="' + u + '"]');
+        if (!b) return;
+        b.textContent = u === 'd' ? String(v.d) : ('0' + v[u]).slice(-2);
+        l.textContent = plural(v[u], UNITS[u][0], UNITS[u][1], UNITS[u][2]);
+      });
+      t.classList.toggle('has-days', v.d > 0);
+    });
+  }
+
+  /* Объявление: крупный текст, пометка и (по желанию) фото в трёх вариантах. */
+  function renderAnnounce(s, now) {
+    var variant = M.ANNOUNCE_STYLES[s.variant] ? s.variant : 'center';
+    var body = '<div class="ann ann--' + variant + (variant === 'center' ? ' grow' : '') + '" data-el="body">' +
+      '<div class="ann__text a-row">' + esc(s.text || '') + '</div>' +
+      (s.note ? '<div class="ann__note a-row">' + esc(s.note) + '</div>' : '') + '</div>';
+    var photo = s.photo ? esc(s.photo) : '';
+    if (variant === 'photo-bg' && photo) {
+      return { cls: 'announce announce--bg', html: '<div class="ann-bg a-img" data-el="photo"><img src="' + photo + '" alt=""></div>' +
+        '<div class="slide__fit">' + head(s) + body + nearBlock(s, now) + '</div>' };
+    }
+    var ph = variant === 'photo-top' && photo ? '<div class="ann__photo a-card" data-el="photo"><img class="a-img" src="' + photo + '" alt=""></div>' : '';
+    return { cls: 'announce', html: '<div class="slide__fit">' + head(s) + ph + body + nearBlock(s, now) + '</div>' };
+  }
+
   function renderSlide(s, now) {
-    var r = s.type === 'events' ? renderEvents(s, now) : s.type === 'info' ? renderInfo(s, now) : renderDishes(s, now);
+    var r = s.type === 'events' ? renderEvents(s, now) : s.type === 'info' ? renderInfo(s, now) : s.type === 'announce' ? renderAnnounce(s, now) : s.type === 'countdown' ? renderCountdown(s, now) : renderDishes(s, now);
     var dur = Math.round((Number(s.duration) || settings().slideDuration) * 1000);
     var vars = [];
     if (s.accent) vars.push('--accent-local:' + esc(s.accent));
@@ -315,10 +410,23 @@
     if (z.title) vars.push('--title-scale:' + Number(z.title));
     if (z.dish) vars.push('--dish-scale:' + Number(z.dish));
     if (z.text) vars.push('--text-scale:' + Number(z.text));
+    var sc = s.colors && !Array.isArray(s.colors) ? s.colors : {};
+    Object.keys(M.TEXT_ROLES).forEach(function (role) {
+      var c = M.resolveColor(sc[role], settings().palette);
+      if (c) vars.push(M.TEXT_ROLES[role].css + ':' + c);
+    });
     var style = vars.length ? ' style="' + vars.join(';') + '"' : '';
     // лёгкий анимированный градиент на фоне: у слайда своё значение или общее из настроек
     var bgOn = s.bgGradient == null || s.bgGradient === '' ? settings().bgGradient !== false : !!s.bgGradient;
-    var bg = bgOn ? '<div class="slide-bg" aria-hidden="true"><i class="slide-bg__blob slide-bg__blob--1"></i><i class="slide-bg__blob slide-bg__blob--2"></i></div>' : '';
+    var bgc = Object.assign({}, settings().bg || {});
+    var own = s.bg && !Array.isArray(s.bg) ? s.bg : {};
+    Object.keys(own).forEach(function (k) { if (own[k] != null && own[k] !== '') bgc[k] = own[k]; }); // пустое — как в общих
+    var c1 = M.resolveColor(bgc.color1, settings().palette), c2 = M.resolveColor(bgc.color2, settings().palette);
+    if (bgOn && c1) vars.push('--bg1:' + c1);
+    if (bgOn && c2) vars.push('--bg2:' + c2);
+    if (bgOn) vars.push('--bg-k:' + (Number(bgc.intensity) > 0 ? Number(bgc.intensity) : 1));
+    style = vars.length ? ' style="' + vars.join(';') + '"' : '';
+    var bg = bgOn ? '<div class="slide-bg" aria-hidden="true" data-speed="' + (Number(bgc.speed) > 0 ? Number(bgc.speed) : 1) + '"><i class="slide-bg__blob slide-bg__blob--1"></i><i class="slide-bg__blob slide-bg__blob--2"></i></div>' : '';
     return '<div class="swiper-slide" data-swiper-autoplay="' + dur + '" data-slide-id="' + esc(s.id) + '">' +
       '<div class="slide slide--' + r.cls + '"' + style + '>' + bg + r.html + '</div></div>';
   }
@@ -336,6 +444,99 @@
     cascade:    { item: { x: function (i) { return i % 2 ? 240 : -240; }, autoAlpha: 0 }, title: { yPercent: -110 }, mask: true }
   };
 
+  /* ---------- Изображения, названия, цены, акцент, NEW ---------- */
+
+  var PHOTO_IN = {
+    rise:  function () { return { y: 180 }; },
+    slide: function () { return { x: function (i) { return i % 2 ? 340 : -340; } }; },
+    zoom:  function () { return { scale: 1.5, ease: 'power3.out' }; },
+    spin:  function () { return { rotation: -140, scale: 0.5 }; },
+    drop:  function (d) { return { y: -420, ease: 'bounce.out', duration: d * 1.3 }; },
+    roll:  function () { return { x: -700, rotation: -320, ease: 'power3.out' }; },
+    flip:  function () { return { rotationY: 90, transformPerspective: 1200 }; },
+    fade:  function () { return {}; }
+  };
+
+  var PHOTO_LOOP = {
+    kenburns: function (t, dur) { gsap.fromTo(t, { scale: 1.12 }, { scale: 1, duration: dur + 2, ease: 'none' }); },
+    float:    function (t, dur, d) { gsap.to(t, { y: -18, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.5, delay: d }); },
+    breathe:  function (t, dur, d) { gsap.to(t, { scale: 1.045, duration: 3.5, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.6, delay: d }); },
+    sway:     function (t, dur, d) { gsap.to(t, { rotation: 2.5, transformOrigin: '50% 100%', duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.4, delay: d }); },
+    drift:    function (t, dur, d) { gsap.to(t, { x: function (i) { return i % 2 ? -26 : 26; }, duration: 6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: d }); }
+  };
+
+  var SCRAMBLE_CHARS = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ';
+
+  function nameEffect(tl, names, effect, dur, pos, stagger) {
+    var accent = getComputedStyle(names[0]).getPropertyValue('--accent-local').trim() || settings().accent;
+    if (effect === 'scramble') {
+      names.forEach(function (el, i) {
+        var text = el.textContent;
+        tl.to(el, { duration: dur * 2, scrambleText: { text: text, chars: SCRAMBLE_CHARS, speed: 0.5, revealDelay: dur * 0.6 } }, typeof pos === 'number' ? pos + i * stagger : pos + '+=' + (i * stagger));
+      });
+      return;
+    }
+    if (effect === 'highlight') {
+      gsap.set(names, { backgroundImage: 'linear-gradient(' + accent + ',' + accent + ')', backgroundRepeat: 'no-repeat', backgroundPosition: '0 96%', backgroundSize: '0% 4px' });
+      tl.to(names, { backgroundSize: '100% 4px', duration: dur, ease: 'power2.inOut', stagger: stagger }, pos);
+      return;
+    }
+    if (effect === 'blur') { tl.from(names, { filter: 'blur(10px)', autoAlpha: 0, duration: dur, stagger: stagger }, pos); return; }
+    var byWords = effect === 'words';
+    var parts = [];
+    names.forEach(function (el) {
+      // буквы всегда внутри слов — иначе перенос строки может разорвать слово посередине
+      var sp = SplitText.create(el, { type: byWords ? 'words' : 'words,chars', mask: effect === 'chars' ? 'chars' : undefined, aria: 'auto' });
+      parts = parts.concat(byWords ? sp.words : sp.chars);
+    });
+    if (effect === 'chars') tl.from(parts, { yPercent: 110, duration: dur, stagger: 0.012 }, pos);
+    else if (effect === 'words') tl.from(parts, { y: 26, autoAlpha: 0, duration: dur, stagger: 0.05 }, pos);
+    else if (effect === 'typewriter') tl.from(parts, { autoAlpha: 0, duration: 0.01, ease: 'none', stagger: Math.max(0.015, dur / 20) }, pos);
+    else if (effect === 'wave') tl.from(parts, { y: -26, autoAlpha: 0, duration: dur, ease: 'back.out(3)', stagger: { each: 0.02, from: 'center' } }, pos);
+  }
+
+  function priceIn(tl, prices, effect, dur, pos, stagger) {
+    var st = stagger / 2;
+    if (effect === 'pop') tl.from(prices, { scale: 0.3, autoAlpha: 0, transformOrigin: '0% 50%', ease: 'back.out(2.6)', duration: dur, stagger: st }, pos);
+    else if (effect === 'stamp') tl.from(prices, { scale: 2.4, rotation: -10, autoAlpha: 0, transformOrigin: '50% 50%', ease: 'power4.in', duration: dur * 0.7, stagger: st }, pos);
+    else if (effect === 'slide') tl.from(prices, { x: 90, autoAlpha: 0, duration: dur, stagger: st }, pos);
+    else if (effect === 'flip') tl.from(prices, { rotationX: -95, transformPerspective: 500, transformOrigin: '50% 0%', autoAlpha: 0, duration: dur, stagger: st }, pos);
+    else if (effect === 'fade') tl.from(prices, { autoAlpha: 0, duration: dur, stagger: st }, pos);
+    else if (effect === 'count') {
+      tl.from(prices, { autoAlpha: 0, duration: 0.25, stagger: st }, pos);
+      prices.forEach(function (p, i) {
+        var num = p.querySelector('.price__num');
+        if (!num) return;
+        var n = Number(num.getAttribute('data-n')) || 0, o = { v: 0 };
+        tl.to(o, { v: n, duration: Math.max(0.6, dur * 2), ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(o.v).toLocaleString('ru-RU'); } },
+          typeof pos === 'number' ? pos + i * st : pos + '+=' + (i * st));
+      });
+    }
+  }
+
+  function priceLoop(prices, effect, q, strong) {
+    if (!prices.length || !effect || effect === 'none') return;
+    var k = strong ? 1.6 : 1;
+    var accent = settings().accent;
+    if (effect === 'shine') {
+      var shines = prices.map(function (p) { return p.querySelector('.shine'); }).filter(Boolean);
+      gsap.to(shines, { xPercent: 520, duration: 1.1, ease: 'power2.inOut', repeat: -1, repeatDelay: strong ? 1.2 : 2.4, delay: 1.4, stagger: 0.25 });
+    } else if (effect === 'pulse') gsap.to(prices, { scale: 1 + 0.07 * k, transformOrigin: '50% 50%', duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1, repeatDelay: 0.4, delay: 1.6 });
+    else if (effect === 'glow') gsap.to(prices, { textShadow: '0 0 ' + Math.round(22 * k) + 'px ' + accent, duration: 1.2, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.4 });
+    else if (effect === 'swing') gsap.to(prices, { rotation: 4 * k, transformOrigin: '50% 50%', duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
+    else if (effect === 'bounce') gsap.to(prices, { y: -10 * k, duration: 0.32, ease: 'power1.out', yoyo: true, repeat: -1, repeatDelay: 1.6, delay: 1.6, stagger: 0.2 });
+  }
+
+  var ACCENT_TO_LOOP = { pulse: 'pulse', glow: 'glow', shine: 'shine', bounce: 'bounce', none: 'none' };
+
+  function newLoop(badges, anim) {
+    if (anim === 'pulse') gsap.to(badges, { scale: 1.18, duration: 0.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.5 });
+    else if (anim === 'spin') gsap.to(badges, { rotation: '+=360', duration: 1.2, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.5, delay: 1.8 });
+    else if (anim === 'wobble') gsap.to(badges, { rotation: 14, duration: 0.18, ease: 'sine.inOut', yoyo: true, repeat: 5, repeatDelay: 0, delay: 1.8, onComplete: function () { gsap.to(badges, { rotation: -12, duration: 0.3, delay: 0 }); } });
+    else if (anim === 'bounce') gsap.to(badges, { y: -12, duration: 0.3, ease: 'power1.out', yoyo: true, repeat: -1, repeatDelay: 1.4, delay: 1.6 });
+    else if (anim === 'shine') gsap.to(badges.map(function (b) { return b.querySelector('.shine'); }), { xPercent: 520, duration: 0.9, ease: 'power2.inOut', repeat: -1, repeatDelay: 1.8, delay: 1.4 });
+  }
+
   function slideData(el) {
     var id = el.getAttribute('data-slide-id');
     for (var i = 0; i < state.slideMeta.length; i++) if (state.slideMeta[i].id === id) return state.slideMeta[i];
@@ -345,7 +546,7 @@
   function animationFor(s) {
     var a = M.clone(settings().animation || M.defaultAnimation());
     if (s && s.animation) Object.keys(s.animation).forEach(function (k) { if (s.animation[k] != null && s.animation[k] !== '') a[k] = s.animation[k]; });
-    return a;
+    return M.normalizeAnimation(a);
   }
 
   function animateSlide(slideEl, force) {
@@ -359,8 +560,9 @@
     var blobs = slideEl.querySelectorAll('.slide-bg__blob');
     if (blobs.length && !REDUCED) {
       state.bgCtx = gsap.context(function () {
-        gsap.to(blobs[0], { xPercent: 30, yPercent: 22, scale: 1.25, duration: 11, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-        gsap.to(blobs[1], { xPercent: -26, yPercent: -18, scale: 0.85, duration: 14, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+        var sp = Number(blobs[0].parentNode.getAttribute('data-speed')) || 1;   // скорость изменения градиента
+        gsap.to(blobs[0], { xPercent: 30, yPercent: 22, scale: 1.25, duration: 11 / sp, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+        gsap.to(blobs[1], { xPercent: -26, yPercent: -18, scale: 0.85, duration: 14 / sp, ease: 'sine.inOut', yoyo: true, repeat: -1 });
       }, slideEl);
     }
     var s = slideData(slideEl);
@@ -399,24 +601,41 @@
         tl.from(parts, Object.assign({}, P.title, { stagger: P.titleStagger || (a.title === 'chars' ? 0.025 : 0.08) }), 0);
       }
       from(q('.a-kick'), P.item, 0);
-      var plates = q('.a-plate');
-      if (plates.length) tl.from(plates, { autoAlpha: 0, scale: 0.8, rotation: -12, duration: 1.3, ease: 'soft', stagger: 0.2 }, 0.05);
+      var photoDur = Number(a.photoDur) > 0 ? Number(a.photoDur) : 1.3;
+      var photoIn = PHOTO_IN[a.photoIn];
+      var plates = q('.a-plate, .ev__photo');
+      if (plates.length && photoIn) tl.from(plates, Object.assign({ autoAlpha: 0, duration: photoDur, ease: 'soft', stagger: 0.2 }, photoIn(photoDur)), 0.05);
+      tl.addLabel('items', 0.3);
       from(q('.a-card'), P.item, at('>-0.45'));
       from(q('.a-row'), P.item, at('>-0.5'));
       from(q('.a-near'), { y: 50, autoAlpha: 0 }, at('>-0.3'));
 
-      var imgs = q('.a-img');
-      if (imgs.length) {
-        if (a.photo === 'kenburns') gsap.fromTo(imgs, { scale: 1.16 }, { scale: 1, duration: duration + 2, ease: 'none' });
-        else if (a.photo === 'zoom') tl.from(imgs, { scale: 1.4, duration: 1.6, ease: 'power3.out', stagger: stagger }, 0);
-        else if (a.photo === 'float') gsap.to(imgs, { y: -16, scale: 1.03, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: 0.4 });
+      // --- Изображения: постоянный эффект (на обёртке, чтобы не спорить с появлением)
+      var loopTargets = q('.plate.a-img');
+      var loop = PHOTO_LOOP[a.photoLoop];
+      if (loopTargets.length && loop) loop(loopTargets, duration, photoDur);
+
+      // --- Названия блюд
+      var names = q('.a-name');
+      var nameDur = Number(a.nameDur) > 0 ? Number(a.nameDur) : 0.6;
+      var namePos = seq ? 'items+=0.35' : 0.3;
+      if (names.length && a.name && a.name !== 'none') nameEffect(tl, names, a.name, nameDur, namePos, stagger);
+
+      // --- Цены: появление и постоянный эффект
+      var prices = q('.a-price');
+      var priceDur = Number(a.priceDur) > 0 ? Number(a.priceDur) : 0.6;
+      if (prices.length) {
+        priceIn(tl, prices, a.priceIn, priceDur, seq ? 'items+=0.6' : 0.4, stagger);
+        priceLoop(prices.filter(function (p) { return !p.closest('.is-accent'); }), a.priceLoop, q);
       }
 
-      var prices = q('.a-price');
-      if (prices.length) {
-        if (a.price === 'pop') tl.from(prices, { scale: 0.3, autoAlpha: 0, transformOrigin: '0% 50%', ease: 'back.out(2.6)', duration: 0.6, stagger: stagger / 2 }, seq ? '>-0.3' : 0.4);
-        else if (a.price === 'pulse') gsap.to(prices, { scale: 1.07, transformOrigin: '0% 50%', duration: 0.7, ease: 'sine.inOut', yoyo: true, repeat: -1, repeatDelay: 0.6, delay: 1.5 });
-        else if (a.price === 'shine') gsap.to(q('.shine'), { xPercent: 520, duration: 1.1, ease: 'power2.inOut', repeat: -1, repeatDelay: 2.2, delay: 1.2, stagger: 0.25 });
+      // --- Акцентные блюда и значок NEW
+      var accentPrices = q('.is-accent .a-price');
+      if (accentPrices.length) priceLoop(accentPrices, ACCENT_TO_LOOP[settings().accentAnim] || 'none', q, true);
+      var badges = q('.a-new');
+      if (badges.length) {
+        tl.from(badges, { scale: 0, rotation: -140, duration: 0.7, ease: 'back.out(2.5)', stagger: 0.1 }, seq ? 'items+=0.9' : 0.6);
+        newLoop(badges, (settings().newBadge || {}).anim);
       }
 
       tl.timeScale(Math.max(0.25, Number(a.speed) || 1));
@@ -444,6 +663,8 @@
         if (!c) return;
         if (c.visible === false) el.style.display = 'none';
         if (Number(c.x) || Number(c.y)) el.style.translate = (Number(c.x) || 0) + 'px ' + (Number(c.y) || 0) + 'px';
+        var k = Number(c.size) > 0 ? Number(c.size) / 100 : 1;
+        if (k !== 1) { el.style.scale = String(k); el.style.transformOrigin = 'left top'; }
       });
     });
   }
@@ -460,6 +681,7 @@
 
     els.slides.innerHTML = html;
     applyElements();
+    tickCountdowns();
     fitAll();
 
     var st = settings();
@@ -489,7 +711,10 @@
     if (PREVIEW && state.preview.slideId) {
       return (state.data.slides || []).filter(function (s) { return s.id === state.preview.slideId; });
     }
-    return all.filter(function (s) { return (PREVIEW && state.preview.ignoreSchedule) || M.isScheduled(s, now); });
+    return all.filter(function (s) {
+      if (s.type === 'countdown' && !M.countdownEvent(state.data.events, s, now)) return false; // нет мероприятия — не показываем
+      return (PREVIEW && state.preview.ignoreSchedule) || M.isScheduled(s, now);
+    });
   }
 
   /* Пересобираем, только если изменился итоговый HTML (данные, расписание, даты афиши). */
@@ -503,7 +728,8 @@
     }
     var html = visible.map(function (s) { return renderSlide(s, now); }).join('');
     var key = html + '|' + JSON.stringify(visible.map(function (s) { return s.elements || {}; })) + JSON.stringify(settings().transition) + JSON.stringify(settings().animation) + settings().slideDuration +
-      JSON.stringify(settings().header) + settings().tickerEnabled + settings().progressEnabled; // шапка и строка меняют высоту сцены
+      JSON.stringify(settings().header) + settings().tickerEnabled + settings().progressEnabled +
+      settings().accentStyle + settings().accentAnim + JSON.stringify(settings().newBadge) + JSON.stringify(settings().colors) + JSON.stringify(settings().palette) + JSON.stringify(settings().bg); // шапка и строка меняют высоту сцены
     if (!force && key === state.renderKey) return;
     state.renderKey = key;
     buildSlider(visible, html);
@@ -554,7 +780,7 @@
     show(els.clock, hd.clock || hd.date);
     show(els.topbar, hd.enabled && (els.brand.style.display !== 'none' || els.clock.style.display !== 'none'));
     document.title = (cafe.name || 'Кафе') + ' — витрина';
-    document.body.className = 'theme-' + (st.theme === 'light' ? 'light' : 'dark');
+    document.body.className = 'theme-' + (st.theme === 'light' ? 'light' : 'dark') + ' accent-' + (M.ACCENT_STYLES[st.accentStyle] ? st.accentStyle : 'pill');
     var f = Object.assign(M.defaultFonts(), st.fonts || {});
     var root = document.documentElement.style;
     function font(key, fallback) { return M.FONTS[f[key]] || M.FONTS[fallback]; }
@@ -566,6 +792,11 @@
     root.setProperty('--title-scale', Number(f.headingScale) || 1);
     root.setProperty('--dish-scale', Number(f.dishScale) || 1);
     root.setProperty('--text-scale', Number(f.textScale) || 1);
+    // цвета надписей из палитры (пусто — цвет темы)
+    Object.keys(M.TEXT_ROLES).forEach(function (role) {
+      var c = M.resolveColor((st.colors || {})[role], st.palette);
+      if (c) root.setProperty(M.TEXT_ROLES[role].css, c); else root.removeProperty(M.TEXT_ROLES[role].css);
+    });
     document.documentElement.style.setProperty('--accent', st.accent);
     document.documentElement.style.setProperty('--on-accent', isLight(st.accent) ? '#151412' : '#ffffff');
   }
@@ -702,7 +933,7 @@
   function start() {
     layoutCanvas();
     tickClock();
-    setInterval(tickClock, 1000);
+    setInterval(function () { tickClock(); tickCountdowns(); }, 1000);
     setupControls();
 
     fontsReady().then(function () {
