@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="cup" x1="0" x2="1">
+      <stop offset="0" stop-color="#fbf3e8"/>
+      <stop offset="1" stop-color="#e6d5bf"/>
+    </linearGradient>
+    <radialGradient id="foam" cx="50%" cy="45%" r="60%">
+      <stop offset="0" stop-color="#f4d9b2"/>
+      <stop offset="1" stop-color="#b8743f"/>
+    </radialGradient>
+  </defs>
+  <g class="steam" fill="none" stroke="#f3e6d3" stroke-width="10" stroke-linecap="round" opacity=".55">
+    <path d="M160 120c-20-25 20-40 0-70"/>
+    <path d="M205 110c-20-25 20-40 0-70"/>
+    <path d="M250 120c-20-25 20-40 0-70"/>
+  </g>
+  <ellipse cx="200" cy="330" rx="150" ry="30" fill="#2a1a12" opacity=".5"/>
+  <ellipse cx="200" cy="318" rx="140" ry="26" fill="#efe2cf"/>
+  <path d="M300 205c50 0 55 70 0 72" fill="none" stroke="#e6d5bf" stroke-width="18"/>
+  <path d="M90 160h220l-20 130c-3 20-20 32-40 32H150c-20 0-37-12-40-32z" fill="url(#cup)"/>
+  <ellipse cx="200" cy="160" rx="110" ry="26" fill="url(#foam)"/>
+  <path d="M200 147c-14-12-34 2-20 16l20 14 20-14c14-14-6-28-20-16z" fill="#fbf3e8" opacity=".9"/>
+</svg>
