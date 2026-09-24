@@ -17,6 +17,7 @@
   var DATA_URL = params.get('src') || 'content/data.json';
   var CACHE_KEY = 'torsher-display-data';
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var WEEKDAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
   var MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -95,7 +96,11 @@
     var fit = slideEl.querySelector('.slide__fit');
     if (!fit) return;
     fit.style.transform = ''; fit.style.width = '';
+    // Тарелки специально вылетают за край — при замере их не учитываем.
+    var plates = fit.querySelectorAll('.plate');
+    Array.prototype.forEach.call(plates, function (p) { p.style.display = 'none'; });
     var avail = slideEl.clientHeight, need = fit.scrollHeight;
+    Array.prototype.forEach.call(plates, function (p) { p.style.display = ''; });
     if (need > avail + 1 && avail > 0) {
       var k = Math.max(0.6, avail / need);
       fit.style.transformOrigin = '0 0';
@@ -111,42 +116,34 @@
   /* ---------- Шаблоны ---------- */
 
   function head(s) {
-    return '<header>' +
+    if (s.showTitle === false) return '';
+    return '<header class="s-head s-head--' + (s.titleAlign || 'left') + '">' +
       (s.subtitle ? '<div class="s-kicker a-kick">' + esc(s.subtitle) + '</div>' : '') +
       '<h1 class="s-title a-title">' + esc(s.title || '') + '</h1>' +
     '</header>';
   }
 
   function row(d) {
-    var desc = d.description;
     return '<div class="row a-row">' +
       '<div class="row__line"><span class="row__name">' + esc(d.name) + chip(d.tag) + '</span>' +
-      '<span class="row__dots"></span><span class="row__price price a-price">' + priceHTML(d.price, d.weight, d.oldPrice) + '</span></div>' +
-      (desc ? '<div class="row__desc">' + esc(desc) + '</div>' : '') +
+      '<span class="row__dots"></span><span class="row__price price a-price">' + priceHTML(d.price, null, d.oldPrice) + '</span></div>' +
+      (d.description ? '<div class="row__desc">' + esc(d.description) + '</div>' : '') +
+      (d.weight ? '<div class="row__w">(' + esc(d.weight) + ')</div>' : '') +
     '</div>';
   }
 
   function list(ids, size) {
     var items = ids.map(dishById).filter(Boolean);
     if (!items.length) return '';
-    return '<div class="list grow list--' + size + '">' + items.map(row).join('') + '</div>';
+    return '<div class="list list--' + size + (size === 'sm' || size === '2col' ? '' : ' grow') + '">' + items.map(row).join('') + '</div>';
   }
 
-  function card(d) {
-    return '<article class="card a-card">' +
-      '<div class="card__media"><img class="a-img" src="' + esc(d.photo) + '" alt="">' + (d.tag ? '<span class="chip">' + esc(d.tag) + '</span>' : '') + '</div>' +
-      '<div class="card__name">' + esc(d.name) + '</div>' +
-      (d.description ? '<div class="card__desc">' + esc(d.description) + '</div>' : '') +
-      '<div class="card__price price a-price shine-host">' + priceHTML(d.price, d.weight, d.oldPrice) + '<span class="shine"></span></div>' +
-    '</article>';
-  }
-
-  function frame(d) {
-    return '<div class="frame a-card shine-host">' +
-      '<div class="frame__name">' + esc(d.name) + chip(d.tag) + '</div>' +
-      (d.description ? '<div class="frame__desc">' + esc(d.description) + '</div>' : '') +
-      '<div class="frame__price price a-price">' + priceHTML(d.price, d.weight, d.oldPrice) + '</div>' +
-      '<span class="shine"></span>' +
+  /* Главное блюдо: рамка с «перекрестьем» по углам, крупная цена под рамкой — как в печатном меню. */
+  function frame(d, extra) {
+    return '<div class="feat' + (extra || '') + ' a-card">' +
+      '<div class="frame"><div class="frame__name">' + esc(d.name) + chip(d.tag) + '</div>' +
+        (d.description ? '<div class="frame__desc">' + esc(d.description) + '</div>' : '') + '</div>' +
+      '<div class="feat__price price a-price shine-host">' + priceHTML(d.price, d.weight, d.oldPrice) + '<span class="shine"></span></div>' +
     '</div>';
   }
 
@@ -157,33 +154,99 @@
     return '<div class="near a-near"><div class="near__label">Скоро у нас</div>' + evs.map(function (e) {
       var f = M.formatEventDate(e, now);
       var d = M.parseDate(e.date);
-      var when = (f.relative === 'сегодня' || f.relative === 'завтра') ? f.relative : f.weekday + ', ' + f.day + ' ' + MONTHS_SHORT[d.getMonth()];
+      var rel = (f.relative === 'сегодня' || f.relative === 'завтра') ? f.relative + ', ' : '';
+      var when = rel + f.weekday + ' ' + f.day + ' ' + MONTHS_SHORT[d.getMonth()];
       return '<div class="near__item"><div class="near__when">' + esc(when + (e.time ? ' · ' + e.time : '')) + '</div>' +
         '<div class="near__title">' + esc(e.title) + '</div></div>';
     }).join('') + '</div>';
   }
 
+  function groupedList(ids) {
+    var items = ids.map(dishById).filter(Boolean);
+    var groups = [], byName = {};
+    items.forEach(function (d) {
+      var k = d.category || 'Меню';
+      if (!byName[k]) { byName[k] = []; groups.push(k); }
+      byName[k].push(d);
+    });
+    return '<div class="groups grow">' + groups.map(function (g) {
+      return '<section class="group"><div class="group__head a-row">' + esc(g) + '</div>' +
+        '<div class="list list--sm">' + byName[g].map(row).join('') + '</div></section>';
+    }).join('') + '</div>';
+  }
+
+  /* Обтравленная тарелка в своей области сетки; вылет за край задаётся в CSS. */
+  function plate(d, n) {
+    return '<div class="plate plate--' + n + ' a-img"><img class="plate__img a-plate" src="' + esc(d.photo) + '" alt=""></div>';
+  }
+  function feat(d, n, small) {
+    return frame(d, ' feat--' + n + (small ? ' feat--sm' : ''));
+  }
+  function txt(ids, n, size) {
+    var l = list(ids, size || 'sm');
+    return l ? '<div class="txt txt--' + n + '">' + l + '</div>' : '';
+  }
+
+  /* Композиции «фото : текст» по мотивам печатного меню. */
+  function composition(layout, photos, texts) {
+    var p = photos, t = texts, out = '';
+    switch (layout) {
+      case 'hero':
+        out = feat(p[0], 1) + plate(p[0], 1); break;
+      case 'p1t2-bottom': case 'p1t2-side': case 'p1t2-top':
+        out = feat(p[0], 1) + txt(t.slice(0, 2), 1, 'md') + plate(p[0], 1); break;
+      case 'p1t4':
+        out = feat(p[0], 1) + txt(t.slice(0, 4), 1) + plate(p[0], 1); break;
+      case 'p1t6':
+        out = feat(p[0], 1) + txt(t.slice(0, 6), 1) + plate(p[0], 1); break;
+      case 'p2t4':
+        p.forEach(function (d, i) { out += feat(d, i + 1) + txt(t.slice(i * 2, i * 2 + 2), i + 1) + plate(d, i + 1); }); break;
+      case 'p2t4-bottom':
+        out = txt(t.slice(0, 4), 1, '2col');
+        p.forEach(function (d, i) { out += feat(d, i + 1) + plate(d, i + 1); }); break;
+      case 'p1t8-2col':
+        out = txt(t.slice(0, 8), 1, '2col') + feat(p[0], 1) + plate(p[0], 1); break;
+      case 'p3t6':
+        p.forEach(function (d, i) { out += feat(d, i + 1, true) + txt(t.slice(i * 2, i * 2 + 2), i + 1) + plate(d, i + 1); }); break;
+      case 'p3t6-row':
+        out = txt(t.slice(0, 6), 1, '2col');
+        p.forEach(function (d, i) { out += feat(d, i + 1, true) + plate(d, i + 1); }); break;
+      case 'p4t4':
+        out = txt(t.slice(0, 4), 1, '2col');
+        p.forEach(function (d, i) { out += feat(d, i + 1, true) + plate(d, i + 1); }); break;
+    }
+    return '<div class="comp comp--' + layout + ' comp--n' + p.length + '">' + out + '</div>';
+  }
+
   function renderDishes(s, now) {
     var L = M.LAYOUTS[s.layout] || M.LAYOUTS['text-10'];
     var photos = (s.photoDishes || []).map(dishById).filter(function (d) { return d && d.photo; }).slice(0, L.photos);
-    var texts = (s.textDishes || []).slice(0, L.texts);
+    var texts = (s.textDishes || []).filter(Boolean).slice(0, L.texts);
     var near = nearBlock(s, now);
+    var view = L.view;
+    var fit = function (body, extra) { return '<div class="slide__fit' + (extra || '') + '">' + head(s) + body + near + '</div>'; };
 
-    if (s.layout === 'hero' && photos[0]) {
-      return { cls: 'hero', html:
-        '<div class="bleed"><img class="a-img" src="' + esc(photos[0].photo) + '" alt=""></div>' +
-        '<div class="slide__fit">' + head(s) + frame(photos[0]) + near + '</div>' };
+    if (view === 'comp') {
+      if (photos.length === L.photos) {
+        return { cls: 'comp-slide', html: fit(composition(s.layout, photos, texts), ' slide__fit--comp') };
+      }
+      view = 'list';   // не хватает блюд с фото — показываем списком
+      texts = photos.map(function (d) { return d.id; }).concat(texts);
     }
 
-    var body = '';
-    if (photos.length === 1) {
-      body += '<div class="cards cards--1">' + card(photos[0]).replace('class="card a-card"', 'class="card card--wide a-card"') + '</div>';
-    } else if (photos.length) {
-      body += '<div class="cards cards--' + photos.length + '">' + photos.map(card).join('') + '</div>';
+    switch (view) {
+      case 'list-2col':
+        return { cls: 'dishes', html: fit(list(texts, '2col grow')) };
+      case 'list-groups':
+        return { cls: 'dishes', html: fit(groupedList(texts)) };
+      case 'list-feature':
+        var first = dishById(texts[0]);
+        return { cls: 'dishes', html: fit((first ? frame(first) : '') + list(texts.slice(1), 'md')) };
+      case 'list-lg':
+        return { cls: 'dishes', html: fit(list(texts, 'lg')) };
+      default:
+        return { cls: 'dishes', html: fit(list(texts, 'md')) };
     }
-    var size = !L.photos ? (texts.length <= 8 && s.layout === 'text-8' ? 'lg' : 'md') : (L.photos >= 4 || texts.length > 5 ? 'sm' : 'md');
-    body += list(texts, size);
-    return { cls: 'dishes', html: '<div class="slide__fit">' + head(s) + body + near + '</div>' };
   }
 
   function weekStart(d) { return M.addDays(d, -((d.getDay() || 7) - 1)); }
@@ -207,15 +270,17 @@
           var label = wk === thisWeek ? 'Эта неделя' : 'Следующая неделя';
           if (label !== lastHead) { h = '<div class="week-head a-row">' + label + '</div>'; lastHead = label; }
         }
-        var rel = f.relative === 'сегодня' || f.relative === 'завтра' ? f.relative : f.weekday;
+        var d = M.parseDate(e.date);
+        var soon = f.relative === 'сегодня' || f.relative === 'завтра' ? '<span class="chip">' + f.relative + '</span>' : '';
         return h + '<div class="ev a-row' + (e.highlight ? ' ev--hl' : '') + '">' +
-          '<div class="ev__date"><div class="ev__day">' + f.day + '</div><div class="ev__month">' + esc(f.month) + '</div><div class="ev__wd">' + esc(rel) + '</div></div>' +
+          '<div class="ev__date"><div class="ev__day">' + f.day + '</div><div class="ev__month">' + esc(f.month) + '</div>' +
+            '<div class="ev__wd">' + esc(WEEKDAYS[d.getDay()]) + '</div></div>' +
           '<div class="ev__body">' +
-            (show.tag !== false && e.tag ? '<div class="ev__tag">' + esc(e.tag) + '</div>' : '') +
+            '<div class="ev__top"><span class="ev__time">' + esc(f.time || 'весь день') + '</span>' + soon +
+              (show.tag !== false && e.tag ? '<span class="ev__tag">' + esc(e.tag) + '</span>' : '') + '</div>' +
             '<div class="ev__title">' + esc(e.title) + '</div>' +
             (show.description !== false && e.description ? '<div class="ev__desc">' + esc(e.description) + '</div>' : '') +
-            '<div class="ev__meta">' + (f.time ? '<span>' + esc(f.time) + '</span>' : '') +
-              (show.price !== false && e.price ? '<span>' + esc(e.price) + '</span>' : '') + '</div>' +
+            (show.price !== false && e.price ? '<div class="ev__price">' + esc(e.price) + '</div>' : '') +
           '</div>' +
           (show.photo !== false && e.photo ? '<img class="ev__photo a-img" src="' + esc(e.photo) + '" alt="">' : '') +
         '</div>';
@@ -296,6 +361,8 @@
         tl.from(parts, Object.assign({}, P.title, { stagger: P.titleStagger || (a.title === 'chars' ? 0.025 : 0.08) }), 0);
       }
       from(q('.a-kick'), P.item, 0);
+      var plates = q('.a-plate');
+      if (plates.length) tl.from(plates, { autoAlpha: 0, scale: 0.8, rotation: -12, duration: 1.3, ease: 'soft', stagger: 0.2 }, 0.05);
       from(q('.a-card'), P.item, at('>-0.45'));
       from(q('.a-row'), P.item, at('>-0.5'));
       from(q('.a-near'), { y: 50, autoAlpha: 0 }, at('>-0.3'));

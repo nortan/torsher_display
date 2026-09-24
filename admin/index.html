@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Торшер — админка витрины</title>
+  <link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="side__brand"><img src="../assets/img/logo.svg" alt=""><span>Витрина</span></div>
+      <nav class="nav" id="nav">
+        <button data-tab="slides" class="is-active">Экраны</button>
+        <button data-tab="dishes">Блюда</button>
+        <button data-tab="events">Мероприятия</button>
+        <button data-tab="design">Анимация и оформление</button>
+        <button data-tab="publish">Публикация</button>
+      </nav>
+      <div class="side__status" id="saveStatus">Изменения сохраняются в браузере</div>
+    </aside>
+
+    <main class="main" id="main"></main>
+
+    <section class="preview">
+      <div class="preview__bar">
+        <strong>Предпросмотр</strong>
+        <select id="previewMode">
+          <option value="slide">Выбранный слайд</option>
+          <option value="show">Вся программа</option>
+          <option value="show-now">Программа по расписанию</option>
+        </select>
+        <button class="btn btn--ghost" id="replay" title="Повторить анимацию">↻</button>
+      </div>
+      <div class="preview__screen" id="previewScreen">
+        <iframe id="previewFrame" src="../index.html?preview=1" title="Предпросмотр витрины"></iframe>
+      </div>
+      <p class="preview__hint">Экран 1080×1920 (вертикальный FullHD), масштаб уменьшен.</p>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="../shared/model.js"></script>
+  <script src="../vendor/jszip/jszip.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

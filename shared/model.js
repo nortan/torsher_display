@@ -7,15 +7,28 @@
 
   /* Раскладки слайдов с блюдами: сколько позиций с фото и сколько текстом. */
   var LAYOUTS = {
-    'text-10':      { label: 'Текст · 8–10 позиций',          photos: 0, texts: 10 },
-    'text-8':       { label: 'Текст · 6–8 позиций крупно',    photos: 0, texts: 8 },
-    'hero':         { label: 'Одно блюдо крупно (промо)',     photos: 1, texts: 0 },
-    'photo1-text6': { label: '1 фото + 6 текстом',            photos: 1, texts: 6 },
-    'photo2-text5': { label: '2 фото + 5 текстом',            photos: 2, texts: 5 },
-    'photo3-text4': { label: '3 фото + 4 текстом',            photos: 3, texts: 4 },
-    'photo4-text3': { label: '4 фото + 3 текстом',            photos: 4, texts: 3 },
-    'photo4-text4': { label: '4 фото + 4 текстом',            photos: 4, texts: 4 }
+    // Только текст
+    'text-10':      { label: 'Текст · 8–10 позиций списком',          photos: 0, texts: 10, view: 'list' },
+    'text-8':       { label: 'Текст · 6–8 позиций крупно',            photos: 0, texts: 8,  view: 'list-lg' },
+    'text-2col':    { label: 'Текст · 10 позиций в две колонки',      photos: 0, texts: 10, view: 'list-2col' },
+    'text-groups':  { label: 'Текст · 8–10 позиций по категориям',    photos: 0, texts: 10, view: 'list-groups' },
+    'text-feature': { label: 'Текст · главное блюдо в рамке + 8',     photos: 0, texts: 9,  view: 'list-feature' },
+    // Фото (обтравленные) раскиданы по слайду, соотношение фото : текст
+    'hero':         { label: '1 : 0 · одно блюдо крупно',             photos: 1, texts: 0,  view: 'comp' },
+    'p1t2-bottom':  { label: '1 : 2 · тарелка внизу в край',          photos: 1, texts: 2,  view: 'comp' },
+    'p1t2-side':    { label: '1 : 2 · тарелка справа в край',         photos: 1, texts: 2,  view: 'comp' },
+    'p1t2-top':     { label: '1 : 2 · тарелка сверху, афишный',       photos: 1, texts: 2,  view: 'comp' },
+    'p1t4':         { label: '1 : 4 · тарелка слева в край',          photos: 1, texts: 4,  view: 'comp' },
+    'p1t6':         { label: '1 : 6 · тарелка справа, список слева',  photos: 1, texts: 6,  view: 'comp' },
+    'p2t4':         { label: '2 : 4 · зигзаг',                        photos: 2, texts: 4,  view: 'comp' },
+    'p2t4-bottom':  { label: '2 : 4 · по диагонали',                  photos: 2, texts: 4,  view: 'comp' },
+    'p1t8-2col':    { label: '1 : 8 · две колонки текста + тарелка',  photos: 1, texts: 8,  view: 'comp' },
+    'p3t6':         { label: '3 : 6 · зигзаг',                        photos: 3, texts: 6,  view: 'comp' },
+    'p3t6-row':     { label: '3 : 6 · три тарелки внизу',             photos: 3, texts: 6,  view: 'comp' },
+    'p4t4':         { label: '4 : 4 · тарелки по углам',              photos: 4, texts: 4,  view: 'comp' }
   };
+
+
 
   /* Появление информации на слайде (GSAP). */
   var ANIMATION_PRESETS = {
@@ -29,6 +42,7 @@
     cascade:    'Каскад слева/справа',
     none:       'Без анимации'
   };
+  var TITLE_ALIGNS = { left: 'Слева', right: 'Справа', center: 'По центру' };
   var TITLE_EFFECTS = { chars: 'По буквам', words: 'По словам', lines: 'По строкам', none: 'Без эффекта' };
   var PHOTO_EFFECTS = { kenburns: 'Медленный наезд (Ken Burns)', float: 'Парение', zoom: 'Приближение при появлении', none: 'Статично' };
   var PRICE_EFFECTS = { pop: 'Выпрыгивание', shine: 'Блик', pulse: 'Пульс', none: 'Без эффекта' };
@@ -77,7 +91,7 @@
       slideDuration: 12,
       transition: { effect: 'fade', speed: 1100 },
       animation: defaultAnimation(),
-      currency: '₽',
+      currency: '',
       refreshInterval: 60,
       tickerSpeed: 80,
       dailyReloadAt: '04:00'
@@ -95,7 +109,7 @@
 
   function newSlide(type) {
     var base = {
-      id: uid('slide'), type: type, name: '', enabled: true, duration: null, accent: null,
+      id: uid('slide'), type: type, name: '', enabled: true, showTitle: true, titleAlign: 'left', duration: null, accent: null,
       schedule: { days: [], from: '', to: '', dateFrom: '', dateTo: '' },
       nearest: { enabled: false, count: 2 },
       animation: null
@@ -205,15 +219,29 @@
     var all = dishes.map(function (d) { return d.id; });
 
     var plan = [
-      { layout: 'text-10', title: 'Меню', subtitle: 'Основные позиции', anim: { preset: 'rise', title: 'chars' } },
-      { layout: 'hero', title: 'Блюдо недели', anim: { preset: 'zoom', title: 'words', photo: 'kenburns', price: 'shine' }, nearest: true },
-      { layout: 'photo1-text6', title: 'Рекомендует шеф', anim: { preset: 'slide', title: 'words', photo: 'zoom' } },
-      { layout: 'text-8', title: 'Меню дня', subtitle: 'Готовим весь день', anim: { preset: 'typewriter', title: 'chars' }, nearest: true },
-      { layout: 'photo2-text5', title: 'Попробуйте', anim: { preset: 'flip', title: 'lines', photo: 'float' } },
-      { layout: 'photo3-text4', title: 'Популярное', anim: { preset: 'cascade', title: 'chars', price: 'pulse' } },
-      { layout: 'photo4-text3', title: 'Хиты кухни', anim: { preset: 'blur', title: 'words' } },
-      { layout: 'photo4-text4', title: 'Весь день', anim: { preset: 'fade', title: 'lines', photo: 'kenburns' }, nearest: true }
+      { layout: 'p1t2-bottom',  title: 'Блюдо дня',          anim: { preset: 'rise', title: 'chars', photo: 'float', price: 'pop' }, nearest: true },
+      { layout: 'text-10',      title: 'Меню', subtitle: 'Основные позиции', anim: { preset: 'rise', title: 'chars' } },
+      { align: 'right', layout: 'p2t4',         title: 'Рекомендует шеф',    anim: { preset: 'slide', title: 'words', photo: 'zoom' } },
+      { layout: 'p1t2-side',    title: 'Горячее',            anim: { preset: 'cascade', title: 'chars', photo: 'kenburns', price: 'shine' } },
+      { layout: 'p3t6',         title: 'Хиты кухни',         anim: { preset: 'zoom', title: 'words', photo: 'float' } },
+      { layout: 'text-groups',  title: 'Меню дня', subtitle: 'По разделам', anim: { preset: 'slide', title: 'words' } },
+      { layout: 'p1t2-top',     title: 'Сезонное',           anim: { preset: 'blur', title: 'lines', photo: 'zoom' } },
+      { align: 'right', layout: 'p2t4-bottom',  title: 'Попробуйте',         anim: { preset: 'flip', title: 'lines', photo: 'float' } },
+      { layout: 'hero',         title: 'Блюдо недели',       anim: { preset: 'zoom', title: 'words', photo: 'kenburns', price: 'shine' }, nearest: true },
+      { layout: 'p1t2-bottom',  title: 'С пылу с жару',      anim: { preset: 'typewriter', title: 'chars', photo: 'zoom', price: 'pulse' } },
+      { layout: 'p3t6-row',     title: 'Выбор гостей',       anim: { preset: 'rise', title: 'words', photo: 'float' } },
+      { layout: 'p1t8-2col',    title: 'Кухня', subtitle: 'Всё меню на одном экране', anim: { preset: 'fade', title: 'lines', photo: 'kenburns' } },
+      { align: 'right', layout: 'p1t4',         title: 'Рыба и мясо',        anim: { preset: 'slide', title: 'chars', photo: 'kenburns' } },
+      { layout: 'p2t4',         title: 'К столу',            anim: { preset: 'cascade', title: 'words', photo: 'float', price: 'pop' } },
+      { layout: 'p1t6',         title: 'Весь день',          anim: { preset: 'fade', title: 'words', photo: 'kenburns' }, nearest: true },
+      { layout: 'text-8',       title: 'Наш выбор', subtitle: 'Готовим весь день', anim: { preset: 'typewriter', title: 'chars' } },
+      { layout: 'p1t2-side',    title: 'Новинка',            anim: { preset: 'zoom', title: 'chars', photo: 'zoom', price: 'shine' } },
+      { layout: 'p4t4',         title: 'Всё самое вкусное',  anim: { preset: 'blur', title: 'words', photo: 'float' } },
+      { layout: 'text-feature', title: 'Горячее',            anim: { preset: 'zoom', title: 'words', price: 'shine' } },
+      { align: 'right', layout: 'p3t6',         title: 'Большой обед',       anim: { preset: 'flip', title: 'lines', photo: 'zoom' } }
     ];
+
+
 
     var slides = [];
     var pOff = 0, tOff = 0;
@@ -223,12 +251,13 @@
       var s = newSlide('dishes');
       s.name = L.label; s.title = p.title; s.subtitle = p.subtitle || ''; s.layout = p.layout;
       s.photoDishes = takeRound(withPhoto, L.photos, pOff); pOff += L.photos;
-      var pool = L.photos ? (textOnly.length >= L.texts ? textOnly : all.filter(function (id) { return s.photoDishes.indexOf(id) === -1; })) : all;
+      var pool = !L.photos ? all : textOnly.length >= L.texts ? textOnly : all.filter(function (id) { return s.photoDishes.indexOf(id) === -1; });
       s.textDishes = takeRound(pool, L.texts, tOff); tOff += L.texts;
       var a = defaultAnimation();
       Object.keys(p.anim).forEach(function (k) { a[k] = p.anim[k]; });
       s.animation = a;
       if (p.nearest) s.nearest = { enabled: true, count: 2 };
+      if (p.align) s.titleAlign = p.align;
       slides.push(s);
     });
 
@@ -236,17 +265,29 @@
     week.animation = Object.assign(defaultAnimation(), { preset: 'rise', title: 'words' });
     slides.push(week);
 
+    var weekCards = newSlide('events');
+    weekCards.name = 'Афиша на неделю · карточки'; weekCards.title = 'На этой неделе'; weekCards.style = 'cards'; weekCards.max = 5;
+    weekCards.animation = Object.assign(defaultAnimation(), { preset: 'zoom', title: 'chars', photo: 'kenburns' });
+    slides.push(weekCards);
+
     var two = newSlide('events');
     two.name = 'Афиша на две недели'; two.title = 'Афиша'; two.subtitle = 'Ближайшие две недели';
     two.range = '2weeks'; two.style = 'timeline';
     two.animation = Object.assign(defaultAnimation(), { preset: 'cascade', title: 'chars' });
     slides.push(two);
 
+    var twoList = newSlide('events');
+    twoList.name = 'Афиша на две недели · список'; twoList.title = 'Скоро'; twoList.subtitle = 'Две недели событий';
+    twoList.range = '2weeks'; twoList.start = 'monday'; twoList.style = 'list';
+    twoList.show = { photo: false, description: true, price: true, tag: true };
+    twoList.animation = Object.assign(defaultAnimation(), { preset: 'flip', title: 'lines' });
+    slides.push(twoList);
+
     return slides;
   }
 
   var api = {
-    LAYOUTS: LAYOUTS, ANIMATION_PRESETS: ANIMATION_PRESETS, TITLE_EFFECTS: TITLE_EFFECTS,
+    LAYOUTS: LAYOUTS, TITLE_ALIGNS: TITLE_ALIGNS, ANIMATION_PRESETS: ANIMATION_PRESETS, TITLE_EFFECTS: TITLE_EFFECTS,
     PHOTO_EFFECTS: PHOTO_EFFECTS, PRICE_EFFECTS: PRICE_EFFECTS, ORDERS: ORDERS,
     TRANSITIONS: TRANSITIONS, THEMES: THEMES, EVENT_STYLES: EVENT_STYLES,
     uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
