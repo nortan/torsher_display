@@ -23,7 +23,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
-    canvas: $('canvas'), logo: $('logo'), name: $('cafeName'), tagline: $('cafeTagline'),
+    canvas: $('canvas'), topbar: $('topbar'), brand: $('brand'), clock: $('clock'), logo: $('logo'), name: $('cafeName'), tagline: $('cafeTagline'),
     time: $('clockTime'), date: $('clockDate'), stage: $('stage'), slides: $('slides'),
     progressWrap: $('progressWrap'), progress: $('progress'),
     ticker: $('ticker'), tickerTrack: $('tickerTrack'), status: $('status')
@@ -316,8 +316,11 @@
     if (z.dish) vars.push('--dish-scale:' + Number(z.dish));
     if (z.text) vars.push('--text-scale:' + Number(z.text));
     var style = vars.length ? ' style="' + vars.join(';') + '"' : '';
+    // лёгкий анимированный градиент на фоне: у слайда своё значение или общее из настроек
+    var bgOn = s.bgGradient == null || s.bgGradient === '' ? settings().bgGradient !== false : !!s.bgGradient;
+    var bg = bgOn ? '<div class="slide-bg" aria-hidden="true"><i class="slide-bg__blob slide-bg__blob--1"></i><i class="slide-bg__blob slide-bg__blob--2"></i></div>' : '';
     return '<div class="swiper-slide" data-swiper-autoplay="' + dur + '" data-slide-id="' + esc(s.id) + '">' +
-      '<div class="slide slide--' + r.cls + '"' + style + '>' + r.html + '</div></div>';
+      '<div class="slide slide--' + r.cls + '"' + style + '>' + bg + r.html + '</div></div>';
   }
 
   /* ---------- GSAP: появление информации ---------- */
@@ -350,6 +353,16 @@
     state.activeEl = slideEl;
     if (state.slideCtx) state.slideCtx.revert();
     state.slideCtx = null;
+    if (state.bgCtx) state.bgCtx.revert();
+    state.bgCtx = null;
+    // фон анимируется только у активного слайда — на слабом ТВ это важно
+    var blobs = slideEl.querySelectorAll('.slide-bg__blob');
+    if (blobs.length && !REDUCED) {
+      state.bgCtx = gsap.context(function () {
+        gsap.to(blobs[0], { xPercent: 30, yPercent: 22, scale: 1.25, duration: 11, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+        gsap.to(blobs[1], { xPercent: -26, yPercent: -18, scale: 0.85, duration: 14, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+      }, slideEl);
+    }
     var s = slideData(slideEl);
     var a = animationFor(s);
     if (REDUCED || a.preset === 'none') return;
@@ -440,7 +453,8 @@
   function buildSlider(visible, html) {
     if (state.swiper) { state.swiper.autoplay.stop(); state.swiper.destroy(true, true); state.swiper = null; }
     if (state.slideCtx) state.slideCtx.revert();
-    state.slideCtx = null;
+    if (state.bgCtx) state.bgCtx.revert();
+    state.slideCtx = state.bgCtx = null;
     state.activeEl = null;
     state.slideMeta = visible;
 
@@ -450,6 +464,8 @@
 
     var st = settings();
     var multi = visible.length > 1;
+    // полоса оставшегося времени слайда: можно выключить в настройках
+    els.progressWrap.style.display = st.progressEnabled === false ? 'none' : '';
     els.progressWrap.style.visibility = multi ? '' : 'hidden';
     setProgress(0);
 
@@ -486,7 +502,8 @@
       visible = [{ id: 'fallback', type: 'info', title: cafe.name || 'Добро пожаловать', subtitle: cafe.tagline || '', lines: [] }];
     }
     var html = visible.map(function (s) { return renderSlide(s, now); }).join('');
-    var key = html + '|' + JSON.stringify(visible.map(function (s) { return s.elements || {}; })) + JSON.stringify(settings().transition) + JSON.stringify(settings().animation) + settings().slideDuration;
+    var key = html + '|' + JSON.stringify(visible.map(function (s) { return s.elements || {}; })) + JSON.stringify(settings().transition) + JSON.stringify(settings().animation) + settings().slideDuration +
+      JSON.stringify(settings().header) + settings().tickerEnabled + settings().progressEnabled; // шапка и строка меняют высоту сцены
     if (!force && key === state.renderKey) return;
     state.renderKey = key;
     buildSlider(visible, html);
@@ -495,7 +512,7 @@
   /* ---------- Бегущая строка ---------- */
 
   function buildTicker(force) {
-    var items = (state.data && state.data.ticker) || [];
+    var items = settings().tickerEnabled === false ? [] : ((state.data && state.data.ticker) || []);
     var key = JSON.stringify(items) + '|' + settings().tickerSpeed;
     if (!force && key === state.tickerKey) return;
     state.tickerKey = key;
@@ -523,8 +540,19 @@
     var st = settings();
     els.name.textContent = cafe.name || '';
     els.tagline.textContent = cafe.tagline || '';
-    els.logo.hidden = !cafe.logo;
     if (cafe.logo) els.logo.src = cafe.logo;
+
+    // Шапка: целиком или по частям. Если скрыто всё — шапка убирается, слайды занимают её высоту.
+    var hd = Object.assign(M.defaultHeader(), st.header || {});
+    var show = function (el, on) { el.style.display = on ? '' : 'none'; };
+    show(els.name, hd.name);
+    show(els.tagline, hd.tagline && !!cafe.tagline);
+    show(els.logo, hd.logo && !!cafe.logo);
+    show(els.brand, hd.name || (hd.tagline && !!cafe.tagline) || (hd.logo && !!cafe.logo));
+    show(els.time, hd.clock);
+    show(els.date, hd.date);
+    show(els.clock, hd.clock || hd.date);
+    show(els.topbar, hd.enabled && (els.brand.style.display !== 'none' || els.clock.style.display !== 'none'));
     document.title = (cafe.name || 'Кафе') + ' — витрина';
     document.body.className = 'theme-' + (st.theme === 'light' ? 'light' : 'dark');
     var f = Object.assign(M.defaultFonts(), st.fonts || {});
