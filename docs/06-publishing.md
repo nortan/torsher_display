@@ -7,6 +7,7 @@
 | **ZIP** | Разовая выгрузка, флешка, любой хостинг | Админка → Публикация → «Скачать сборку .zip» |
 | **GitHub Pages** | Бесплатный хостинг статики | Пуш в `main` → workflow `pages.yml` |
 | **rsync / SSH** | Свой сервер, автоматическая выкладка из Git | Workflow `deploy-server.yml` или `tools/deploy.sh` |
+| **Сайт целиком на хостинг по FTP** | Хостинг PHP + MySQL (display.torsher-cafe.ru), выкладка из Git | Workflow `deploy-ftp.yml` |
 
 ## FTP
 
@@ -17,6 +18,31 @@
 - Файлы, размер которых не изменился, пропускаются. Данные и `build.json` выгружаются последними,
   поэтому экран не увидит новую версию раньше файлов.
 - Выгружаются **опубликованные** данные, а не черновик.
+
+## Сайт целиком на хостинг по FTP (`deploy-ftp.yml`)
+
+Выкладывает **весь сайт** (экран, админку, `api/`, `sql/`) на обычный хостинг PHP + MySQL и сам
+его устанавливает. Работает на серверах GitHub, поэтому пароли нигде в репозитории не хранятся.
+
+1. Settings → Secrets and variables → Actions → **Secrets**:
+   `FTP_USER`, `FTP_PASSWORD`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (если не задан — как `DB_USER`),
+   `ADMIN_LOGIN`, `ADMIN_PASSWORD` (администратор админки для первой установки), по желанию `APP_KEY`.
+2. **Variables** (по желанию): `FTP_HOST` (по умолчанию `display.torsher-cafe.ru`), `FTP_DIR` (`/`) —
+   папка сайта на FTP, `SITE_URL` (`https://display.torsher-cafe.ru`), `DB_HOST` (`localhost`),
+   `FTP_SSL_VERIFY` (`no`, если у FTP сертификат на другое имя).
+3. Actions → «Витрина → хостинг по FTP» → **Run workflow**. Дальше выкладка идёт при каждом push в `main`.
+
+Что делает workflow:
+- собирает `node tools/build.mjs --server`;
+- создаёт `api/config.php` из секретов (`tools/ftp-config.php`);
+- заливает файлы через `lftp mirror` (`tools/ftp-upload.sh`): только новые и изменённые, `uploads/` с фото не трогает;
+- вызывает `api/install.php`: если сайт не установлен — создаёт таблицы, администратора и загружает
+  стартовые данные; если установлен — ничего не меняет;
+- заливает `config.php` с `install_enabled => false` и проверяет, что `api/data.php` отвечает.
+
+Хранение — в MySQL. В логе шага выгрузки виден список файлов в `FTP_DIR`: по нему можно проверить,
+что это корень сайта. Если `APP_KEY` не задан, ключ выводится из `DB_PASSWORD`. После смены пароля
+базы пароль FTP в админке (раздел «Выгрузка на удалённый сервер») нужно ввести заново.
 
 ## GitHub Pages
 

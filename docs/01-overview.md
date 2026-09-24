@@ -15,7 +15,8 @@ assets/dishes
 vendor/                          GSAP, Swiper, Bootstrap, JSZip — лежат в репозитории, CDN не нужен.
 tools/                           build.mjs (сборка), deploy.sh (rsync), docs.mjs (таблицы в docs).
 docs/                            Эта документация.
-.github/workflows/               pages.yml (GitHub Pages), deploy-server.yml (rsync по SSH).
+.github/workflows/               pages.yml (GitHub Pages), deploy-server.yml (rsync по SSH),
+                                 deploy-ftp.yml (весь сайт на хостинг по FTP).
 ```
 
 ## Как это работает
