@@ -54,3 +54,9 @@ details.sec[open] > summary::before { content: "▾ "; }
 
 .log { margin-top: .75rem; padding: .75rem; background: #1d1c1a; color: #d6d2ca; border-radius: .5rem; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 220px; overflow: auto; }
 .log:empty { display: none; }
+.thumb--logo { width: 96px; height: 96px; background: #1d1c1a; }
+
+/* Выбор цвета из палитры */
+.swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--bs-border-color); padding: 0; cursor: pointer; }
+.swatch.is-on, .swatch-custom.is-on { box-shadow: 0 0 0 3px #5b6b12; }
+.swatch-custom { width: 38px; height: 32px; padding: 2px; }

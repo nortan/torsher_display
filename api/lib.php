@@ -194,7 +194,7 @@ function save_data(array $d, $objects = null): int
         $ins = $pdo->prepare('INSERT INTO slides (id, position, type, enabled, config) VALUES (?,?,?,?,?)');
         foreach (array_values($d['slides']) as $i => $x) {
             if (!is_array($x) || str_field($x, 'id', 64) === '') continue;
-            $type = in_array($x['type'] ?? '', ['dishes', 'events', 'info'], true) ? $x['type'] : 'dishes';
+            $type = in_array($x['type'] ?? '', ['dishes', 'events', 'info', 'announce', 'countdown'], true) ? $x['type'] : 'dishes';
             $cfg = isset($slideObjects[$i]) && is_object($slideObjects[$i]) ? clone $slideObjects[$i] : (object)$x;
             unset($cfg->id, $cfg->type, $cfg->enabled);
             $ins->execute([str_field($x, 'id', 64), $i, $type, ($x['enabled'] ?? true) !== false ? 1 : 0, enc_json($cfg)]);

@@ -1,0 +1,42 @@
+# 6. Публикация
+
+| Способ | Когда подходит | Как |
+|---|---|---|
+| **Сервер PHP + MySQL** | Постоянная работа, правки с любого компьютера | Админка → «Опубликовать на экраны». Экраны читают `api/data.php` |
+| **FTP / FTPS** | Экран крутится на другом хостинге без PHP | Админка (серверный режим) → Публикация → «Выгрузка на удалённый сервер (FTP)» |
+| **ZIP** | Разовая выгрузка, флешка, любой хостинг | Админка → Публикация → «Скачать сборку .zip» |
+| **GitHub Pages** | Бесплатный хостинг статики | Пуш в `main` → workflow `pages.yml` |
+| **rsync / SSH** | Свой сервер, автоматическая выкладка из Git | Workflow `deploy-server.yml` или `tools/deploy.sh` |
+
+## FTP
+
+- Настройки хранятся на сервере в таблице `options`. Пароль шифруется ключом `app_key` из
+  `api/config.php` и в браузер не возвращается.
+- Сборка: файлы плеера из `build-files.json`, фото, на которые ссылаются данные,
+  `content/data.json` и `content/data.js` из MySQL, `build.json` с версией.
+- Файлы, размер которых не изменился, пропускаются. Данные и `build.json` выгружаются последними,
+  поэтому экран не увидит новую версию раньше файлов.
+- Выгружаются **опубликованные** данные, а не черновик.
+
+## GitHub Pages
+
+1. Settings → Pages → Source: **GitHub Actions**.
+2. Каждый пуш в `main` запускает `pages.yml`: `node tools/build.mjs --with-admin` и публикацию `dist/`.
+3. Адрес: `https://<владелец>.github.io/<репозиторий>/`, админка — `/admin/` (в локальном режиме).
+4. Кнопка «Опубликовать в Git» в админке коммитит `content/data.json` и фото. Нужен токен GitHub
+   с правом *Contents: Read and write* на этот репозиторий.
+
+## rsync / SSH
+
+- Секреты репозитория: `DEPLOY_TARGET` (`user@host:/var/www/display`), `DEPLOY_SSH_KEY`
+  (приватный ключ), при желании `DEPLOY_KNOWN_HOSTS`. Без них workflow пропускает выгрузку.
+- Вручную: `DEPLOY_TARGET=user@host:/путь tools/deploy.sh` (`WITH_ADMIN=1` — вместе с админкой).
+
+## Сборка из консоли
+
+```bash
+node tools/build.mjs              # только экран → dist/
+node tools/build.mjs --with-admin # экран + админка (для GitHub Pages)
+node tools/build.mjs --server     # полный сайт для PHP-хостинга (без config.php)
+node tools/build.mjs --manifest   # только обновить build-files.json
+```

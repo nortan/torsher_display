@@ -174,7 +174,11 @@
     d.version = 2;
     d.cafe = d.cafe || { name: 'Кафе', tagline: '' };
     d.settings = Object.assign(M.defaultSettings(), d.settings || {});
-    d.settings.animation = Object.assign(M.defaultAnimation(), d.settings.animation || {});
+    d.settings.animation = M.normalizeAnimation(d.settings.animation || {});
+    if (!Array.isArray(d.settings.palette) || !d.settings.palette.length) d.settings.palette = M.defaultPalette();
+    if (!d.settings.colors || Array.isArray(d.settings.colors)) d.settings.colors = {};
+    d.settings.bg = Object.assign({ color1: 'lime', color2: 'orange', speed: 1, intensity: 1 }, d.settings.bg && !Array.isArray(d.settings.bg) ? d.settings.bg : {});
+    d.settings.newBadge = Object.assign({ text: 'NEW', anim: 'pulse' }, d.settings.newBadge && !Array.isArray(d.settings.newBadge) ? d.settings.newBadge : {});
     d.settings.transition = Object.assign({ effect: 'fade', speed: 1100 }, d.settings.transition || {});
     d.settings.fonts = Object.assign(M.defaultFonts(), d.settings.fonts || {});
     d.settings.header = Object.assign(M.defaultHeader(), d.settings.header && !Array.isArray(d.settings.header) ? d.settings.header : {});
@@ -188,11 +192,15 @@
     d.cafe = obj(d.cafe);
     d.slides.forEach(function (s) {
       s.elements = obj(s.elements);
+      s.colors = obj(s.colors);
+      s.bg = obj(s.bg);
       if (s.sizes != null) s.sizes = Object.assign({ title: null, dish: null, text: null }, obj(s.sizes));
       if (s.show != null) s.show = obj(s.show);
       if (s.nearest != null) s.nearest = obj(s.nearest);
       if (s.schedule != null) { s.schedule = obj(s.schedule); s.schedule.days = s.schedule.days || []; }
       if (!Array.isArray(s.photoPos)) s.photoPos = [];
+      if (s.animation) s.animation = M.normalizeAnimation(s.animation);
+      if (M.LAYOUT_ALIASES[s.layout]) s.layout = M.LAYOUT_ALIASES[s.layout];
     });
     delete d.revision; delete d.updatedAt;
     return d;
@@ -219,6 +227,66 @@
           return j;
         });
       });
+  }
+
+  /* ---------- Вход без базы данных (локальный режим) ----------
+     Если бэкенда или базы нет, панель всё равно просит вход: по умолчанию admin / pass123.
+     Пароль хранится только в виде SHA-256 в этом браузере и меняется в меню пользователя.
+     Это защита от случайного доступа к панели: данные локального режима и так живут только
+     в этом браузере, а публикация в GitHub/FTP требует своих токенов и паролей. */
+  var LOCAL_AUTH_KEY = 'torsher-admin-local-auth';
+  var LOCAL_SESSION_KEY = 'torsher-admin-local-session';
+  var DEFAULT_LOCAL = { login: 'admin', hash: '9b8769a4a742959a2d0298c36fb70623f2dfacda8436237df08d8dfd5b37374c' }; // sha256('pass123')
+
+  function sha256(text) {
+    var bytes = new TextEncoder().encode(text);
+    if (window.crypto && crypto.subtle) {
+      return crypto.subtle.digest('SHA-256', bytes).then(function (buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+      });
+    }
+    return Promise.resolve(sha256sync(bytes));
+  }
+  /* Запасной SHA-256 для file:// и http без TLS, где нет crypto.subtle. */
+  function sha256sync(bytes) {
+    var K = [], H = [], i, j;
+    var isPrime = function (n) { for (var f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+    for (var n = 2, c = 0; c < 64; n++) if (isPrime(n)) { if (c < 8) H[c] = (Math.pow(n, 1 / 2) * 4294967296) | 0; K[c++] = (Math.pow(n, 1 / 3) * 4294967296) | 0; }
+    var l = bytes.length, words = [];
+    for (i = 0; i < l; i++) words[i >> 2] |= bytes[i] << ((3 - i % 4) * 8);
+    words[l >> 2] |= 0x80 << ((3 - l % 4) * 8);
+    words[((l + 8) >> 6) * 16 + 15] = l * 8;
+    var rot = function (x, r) { return (x >>> r) | (x << (32 - r)); };
+    for (j = 0; j < words.length; j += 16) {
+      var w = [], a = H.slice(0);
+      for (i = 0; i < 16; i++) w[i] = words[j + i] | 0;
+      for (i = 0; i < 64; i++) {
+        if (i >= 16) {
+          var w15 = w[i - 15], w2 = w[i - 2];
+          w[i] = (w[i - 16] + (rot(w15, 7) ^ rot(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rot(w2, 17) ^ rot(w2, 19) ^ (w2 >>> 10))) | 0;
+        }
+        var t1 = (a[7] + (rot(a[4], 6) ^ rot(a[4], 11) ^ rot(a[4], 25)) + ((a[4] & a[5]) ^ (~a[4] & a[6])) + K[i] + (w[i] | 0)) | 0;
+        var t2 = ((rot(a[0], 2) ^ rot(a[0], 13) ^ rot(a[0], 22)) + ((a[0] & a[1]) ^ (a[0] & a[2]) ^ (a[1] & a[2]))) | 0;
+        a = [(t1 + t2) | 0].concat(a.slice(0, 7)); a[4] = (a[4] + t1) | 0;
+      }
+      for (i = 0; i < 8; i++) H[i] = (H[i] + a[i]) | 0;
+    }
+    return H.map(function (x) { return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
+  }
+
+  function localAuth() {
+    try { return Object.assign({}, DEFAULT_LOCAL, JSON.parse(localStorage.getItem(LOCAL_AUTH_KEY) || '{}')); } catch (e) { return DEFAULT_LOCAL; }
+  }
+  function localLogin(login, password) {
+    var cfg = localAuth();
+    return sha256(password).then(function (hash) {
+      if (login !== cfg.login || hash !== cfg.hash) throw new Error('Неверный логин или пароль');
+      try { sessionStorage.setItem(LOCAL_SESSION_KEY, '1'); } catch (e) { /* нет */ }
+      server.user = { login: cfg.login };
+    });
+  }
+  function localSession() {
+    try { return sessionStorage.getItem(LOCAL_SESSION_KEY) === '1'; } catch (e) { return false; }
   }
 
   function serverLoad() {
@@ -267,6 +335,13 @@
     } else {
       box.appendChild(h('span', { class: 'badge text-bg-secondary', title: 'Бэкенд не найден: данные хранятся в этом браузере', text: 'Локально' }));
     }
+    if (!server.on && server.user) {
+      box.appendChild(h('div', { class: 'dropdown' },
+        h('button', { type: 'button', class: 'btn btn-sm btn-outline-light dropdown-toggle', 'data-bs-toggle': 'dropdown', text: server.user.login }),
+        h('ul', { class: 'dropdown-menu dropdown-menu-end' },
+          h('li', null, h('a', { class: 'dropdown-item', href: '#', text: 'Сменить пароль', onclick: function (e) { e.preventDefault(); changePassword(); } })),
+          h('li', null, h('a', { class: 'dropdown-item', href: '#', text: 'Выйти', onclick: function (e) { e.preventDefault(); logout(); } })))));
+    }
     saveDraft();
   }
 
@@ -275,17 +350,23 @@
     document.getElementById('login').hidden = false;
     var err = document.getElementById('loginError');
     err.hidden = !msg; err.textContent = msg || '';
+    document.getElementById('loginMode').textContent = server.localAuth
+      ? 'База данных не подключена: вход по локальной учётной записи этого браузера.' : '';
     document.getElementById('loginName').focus();
   }
 
   document.getElementById('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    api('auth.php', { method: 'POST', json: { action: 'login', login: document.getElementById('loginName').value, password: document.getElementById('loginPass').value } })
-      .then(function (r) { server.csrf = r.csrf; server.user = r.user; return enterServerMode(); })
-      .catch(function (e2) { showLogin(e2.message); });
+    var login = document.getElementById('loginName').value.trim(), pass = document.getElementById('loginPass').value;
+    var go = server.localAuth
+      ? localLogin(login, pass).then(enterLocalMode)
+      : api('auth.php', { method: 'POST', json: { action: 'login', login: login, password: pass } })
+        .then(function (r) { server.csrf = r.csrf; server.user = r.user; return enterServerMode(); });
+    go.catch(function (e2) { showLogin(e2.message); });
   });
 
   function logout() {
+    if (server.localAuth) { try { sessionStorage.removeItem(LOCAL_SESSION_KEY); } catch (e) { /* нет */ } location.reload(); return; }
     if (server.dirty && !confirm('Есть неопубликованные изменения. Они останутся черновиком в этом браузере. Выйти?')) return;
     api('auth.php', { method: 'POST', json: { action: 'logout' } }).catch(function () {}).then(function () { location.reload(); });
   }
@@ -299,6 +380,18 @@
       h('div', { class: 'modal-body' }, field('Текущий пароль', cur), h('div', { class: 'mt-3' }, field('Новый пароль (от 8 символов)', nxt)), err),
       h('div', { class: 'modal-footer' }, btn('Отмена', null, 'btn-outline-secondary', { 'data-bs-dismiss': 'modal' }),
         btn('Сохранить', function () {
+          if (server.localAuth) {
+            if (nxt.value.length < 6) { err.hidden = false; err.textContent = 'Новый пароль — не короче 6 символов'; return; }
+            var cfg = localAuth();
+            sha256(cur.value).then(function (h1) {
+              if (h1 !== cfg.hash) throw new Error('Текущий пароль неверен');
+              return sha256(nxt.value);
+            }).then(function (h2) {
+              localStorage.setItem(LOCAL_AUTH_KEY, JSON.stringify({ login: cfg.login, hash: h2 }));
+              modal.hide(); toast('Пароль изменён (для этого браузера)');
+            }).catch(function (e) { err.hidden = false; err.textContent = e.message; });
+            return;
+          }
           api('auth.php', { method: 'POST', json: { action: 'password', current: cur.value, next: nxt.value } })
             .then(function () { modal.hide(); toast('Пароль изменён'); })
             .catch(function (e) { err.hidden = false; err.textContent = e.message; });
@@ -317,7 +410,7 @@
   function resolvedData() {
     var d = M.clone(data);
     function fix(o) { if (o && o.photo && media[o.photo]) o.photo = media[o.photo]; }
-    d.dishes.forEach(fix); d.events.forEach(fix);
+    d.dishes.forEach(fix); d.events.forEach(fix); d.slides.forEach(fix);
     if (d.cafe.logo && media[d.cafe.logo]) d.cafe.logo = media[d.cafe.logo];
     return d;
   }
@@ -386,7 +479,7 @@
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function () {
-        var k = Math.min(1, 1200 / Math.max(img.width, img.height));
+        var k = Math.min(1, ((opts && opts.max) || 1200) / Math.max(img.width || 512, img.height || 512));
         var c = document.createElement('canvas');
         c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
@@ -418,31 +511,34 @@
     return media[path] || (/^(data:|https?:)/.test(path) ? path : '../' + path);
   }
 
-  function photoPicker(obj) {
-    var fileInput = h('input', { type: 'file', accept: 'image/png,image/webp,image/*' });
-    var box = h('label', { class: 'thumb', title: 'Загрузить обтравленное фото (PNG/WebP с прозрачным фоном)' }, fileInput);
-    if (obj.photo) {
-      box.appendChild(h('img', { src: photoSrc(obj.photo), alt: '' }));
-      box.appendChild(h('button', { class: 'thumb__x', type: 'button', title: 'Убрать фото', text: '×', onclick: function (e) {
-        e.preventDefault(); obj.photo = null; changed(true);
+  /* Загрузка фото в поле объекта. opts.key — имя поля (по умолчанию photo), opts.logo — логотип (без проверки обтравки). */
+  function photoPicker(obj, opts) {
+    opts = opts || {};
+    var key = opts.key || 'photo';
+    var fileInput = h('input', { type: 'file', accept: opts.logo ? 'image/svg+xml,image/png,image/webp,image/*' : 'image/png,image/webp,image/*' });
+    var box = h('label', { class: 'thumb' + (opts.logo ? ' thumb--logo' : ''), title: opts.logo ? 'Загрузить логотип (лучше PNG/SVG с прозрачным фоном)' : 'Загрузить обтравленное фото (PNG/WebP с прозрачным фоном)' }, fileInput);
+    if (obj[key]) {
+      box.appendChild(h('img', { src: photoSrc(obj[key]), alt: '' }));
+      box.appendChild(h('button', { class: 'thumb__x', type: 'button', title: 'Убрать', text: '×', onclick: function (e) {
+        e.preventDefault(); obj[key] = null; changed(true);
       } }));
     } else {
-      box.appendChild(h('span', { text: '+ фото' }));
+      box.appendChild(h('span', { text: opts.logo ? '+ логотип' : '+ фото' }));
     }
     fileInput.addEventListener('change', function () {
       var f = fileInput.files[0];
       if (!f) return;
-      readImage(f).then(function (res) {
-        if (!res.alpha && confirm('У фото нет прозрачного фона. Для витрины нужны обтравленные фото (PNG/WebP с альфа-каналом).\n\n' +
+      readImage(f, { max: opts.logo ? 512 : 1200 }).then(function (res) {
+        if (!opts.logo && !opts.plain && !res.alpha && confirm('У фото нет прозрачного фона. Для витрины нужны обтравленные фото (PNG/WebP с альфа-каналом).\n\n' +
             'ОК — попробовать убрать однотонный фон автоматически\nОтмена — загрузить как есть')) {
           return readImage(f, { removeBg: true });
         }
         return res;
       }).then(function (res) {
         return storeImage(res).then(function (path) {
-          obj.photo = path;
+          obj[key] = path;
           changed(true);
-          toast(res.alpha ? 'Фото загружено' : 'Фото загружено без прозрачного фона');
+          toast(opts.logo ? 'Логотип загружен' : (res.alpha || opts.plain) ? 'Фото загружено' : 'Фото загружено без прозрачного фона');
         });
       }).catch(function (e) { toast('Ошибка загрузки: ' + e.message); });
     });
@@ -478,6 +574,11 @@
 
   function slideSummary(s) {
     if (s.type === 'dishes') return (M.LAYOUTS[s.layout] || {}).label || s.layout;
+    if (s.type === 'countdown') {
+      var ev = M.countdownEvent(data.events, s, new Date());
+      return 'Обратный отсчёт · ' + (ev ? ev.title + ', ' + ev.date + ' ' + (ev.time || '') : 'сейчас нет подходящего мероприятия — слайд пропускается');
+    }
+    if (s.type === 'announce') return 'Объявление · ' + (M.ANNOUNCE_STYLES[s.variant] || '') + (s.photo ? ' · с фото' : '');
     if (s.type === 'events') return (s.range === '2weeks' ? 'Афиша на 2 недели' : 'Афиша на неделю') + ' · до ' + (s.max || 7) + ' · ' + (M.EVENT_STYLES[s.style] || '');
     return 'Информация · ' + ((s.lines || []).length) + ' строк';
   }
@@ -492,17 +593,46 @@
 
   function addSlide(s) { data.slides.push(s); ui.slideId = s.id; changed(true); sendPreview(); }
 
+  /* «+ Блюда»: выбор вида слайда из всех раскладок, сгруппированных по составу. */
+  function dishLayoutMenu() {
+    var groups = [
+      { title: 'Только текст', test: function (L) { return !L.photos; } },
+      { title: 'Только фото', test: function (L) { return L.photos && !L.texts; } },
+      { title: 'Фото + текст', test: function (L) { return L.photos && L.texts; } }
+    ];
+    var menu = h('ul', { class: 'dropdown-menu shadow', style: 'max-height:70vh;overflow:auto' });
+    groups.forEach(function (g, gi) {
+      if (gi) menu.appendChild(h('li', null, h('hr', { class: 'dropdown-divider' })));
+      menu.appendChild(h('li', null, h('h6', { class: 'dropdown-header', text: g.title })));
+      Object.keys(M.LAYOUTS).filter(function (k) { return g.test(M.LAYOUTS[k]); }).forEach(function (k) {
+        var L = M.LAYOUTS[k];
+        menu.appendChild(h('li', null, h('a', { class: 'dropdown-item d-flex justify-content-between gap-3', href: '#', onclick: function (e) {
+          e.preventDefault();
+          var sl = M.newSlide('dishes');
+          sl.layout = k; sl.name = L.label; sl.title = 'Меню';
+          M.fillSlide(sl, data);
+          addSlide(sl);
+          toast('Добавлен слайд: ' + L.label);
+        } }, h('span', { text: L.label }), h('span', { class: 'badge text-bg-light border', text: '📷 ' + L.photos + ' · ✎ ' + L.texts }))));
+      });
+    });
+    return h('div', { class: 'dropdown' },
+      h('button', { type: 'button', class: 'btn btn-outline-secondary dropdown-toggle', 'data-bs-toggle': 'dropdown', 'aria-expanded': 'false', text: '+ Блюда' }), menu);
+  }
+
   function renderSlides() {
     var sel = data.slides.filter(function (s) { return s.id === ui.slideId; })[0];
     if (!sel && data.slides.length) { sel = data.slides[0]; ui.slideId = sel.id; }
 
     var head = pageHead('Экраны', 'Каждый слайд — один экран витрины. Порядок в списке = порядок показа.', [
-      btn('+ Блюда', function () { addSlide(M.newSlide('dishes')); }),
+      dishLayoutMenu(),
       btn('+ Афиша на неделю', function () { addSlide(M.newSlide('events')); }),
       btn('+ Афиша на 2 недели', function () {
         var s = M.newSlide('events'); s.name = 'Афиша на две недели'; s.title = 'Афиша'; s.subtitle = 'Ближайшие две недели'; s.range = '2weeks'; s.style = 'timeline'; addSlide(s);
       }),
       btn('+ Инфо', function () { addSlide(M.newSlide('info')); }),
+      btn('+ Объявление', function () { addSlide(M.newSlide('announce')); }),
+      btn('+ Обратный отсчёт', function () { addSlide(M.newSlide('countdown')); }),
       btn('Сгенерировать комбинации', generate, 'btn-primary')
     ]);
 
@@ -517,7 +647,7 @@
         cb,
         h('div', { class: 'flex-grow-1 min-w-0' },
           h('div', { class: 'fw-semibold' }, s.name || s.title || 'Без названия', ' ',
-            h('span', { class: 'badge rounded-pill text-bg-light border', text: s.type === 'dishes' ? 'блюда' : s.type === 'events' ? 'афиша' : 'инфо' }), ' ',
+            h('span', { class: 'badge rounded-pill text-bg-light border', text: { dishes: 'блюда', events: 'афиша', info: 'инфо', announce: 'объявление', countdown: 'отсчёт' }[s.type] || s.type }), ' ',
             s.nearest && s.nearest.enabled ? h('span', { class: 'badge rounded-pill text-bg-warning', text: 'ближайшее' }) : null, ' ',
             s.showTitle === false ? h('span', { class: 'badge rounded-pill text-bg-light border', text: 'без заголовка' }) : null, ' ',
             sched ? h('span', { class: 'badge rounded-pill text-bg-info', text: '⏰ ' + sched }) : null),
@@ -586,7 +716,7 @@
       var holder = { v: !owner.animation };
       var sw = checkbox(holder, 'v', 'Как в общих настройках');
       sw.querySelector('input').addEventListener('change', function () {
-        owner.animation = holder.v ? null : M.clone(data.settings.animation);
+        owner.animation = holder.v ? null : M.normalizeAnimation(M.clone(data.settings.animation));
         changed(true);
       });
       box.appendChild(sw);
@@ -594,15 +724,26 @@
       a = owner.animation;
       box.appendChild(h('div', { class: 'mb-3' }));
     }
+    var sec2 = function (title, content) { return h('div', { class: 'mt-3' }, h('div', { class: 'small fw-bold text-uppercase text-body-secondary mb-2', text: title }), content); };
+    var sec_ = function (v) { return Number(v).toFixed(1) + ' с'; };
     box.appendChild(row(
       field('Появление элементов', select(a, 'preset', M.ANIMATION_PRESETS)),
       field('Заголовок', select(a, 'title', M.TITLE_EFFECTS)),
-      field('Фото', select(a, 'photo', M.PHOTO_EFFECTS)),
-      field('Цены', select(a, 'price', M.PRICE_EFFECTS)),
       field('Порядок', select(a, 'order', M.ORDERS)),
       field('Скорость', range(a, 'speed', 0.5, 2, 0.1, function (v) { return '×' + Number(v).toFixed(1); })),
       field('Интервал между элементами', range(a, 'stagger', 0.02, 0.3, 0.01, function (v) { return Number(v).toFixed(2) + ' с'; }))
     ));
+    box.appendChild(sec2('Изображения', row(
+      field('Появление', select(a, 'photoIn', M.PHOTO_IN)),
+      field('Постоянный эффект', select(a, 'photoLoop', M.PHOTO_LOOP)),
+      field('Длительность появления', range(a, 'photoDur', 0.3, 3, 0.1, sec_)))));
+    box.appendChild(sec2('Названия блюд', row(
+      field('Эффект', select(a, 'name', M.NAME_EFFECTS)),
+      field('Длительность', range(a, 'nameDur', 0.2, 2, 0.1, sec_)))));
+    box.appendChild(sec2('Цены', row(
+      field('Появление', select(a, 'priceIn', M.PRICE_IN)),
+      field('Постоянный эффект', select(a, 'priceLoop', M.PRICE_LOOP)),
+      field('Длительность появления', range(a, 'priceDur', 0.2, 2, 0.1, sec_)))));
     return box;
   }
 
@@ -675,13 +816,14 @@
         h('td', null, numInput(c, 'delay', '0.2', 0.1)),
         h('td', null, numInput(c, 'x', '0', 5)),
         h('td', null, numInput(c, 'y', '0', 5)),
+        h('td', null, numInput(c, 'size', '100', 5)),
         h('td', null, btn('↺', function () { s.elements[item.key] = M.defaultElement(); changed(true); }, 'btn-outline-secondary btn-sm', { title: 'Сбросить' })));
     });
     return sec('Элементы слайда: эффекты и смещения', true, h('div', null,
       h('div', { class: 'table-responsive' }, h('table', { class: 'table table-sm align-middle mb-1' },
-        h('thead', { class: 'table-light' }, h('tr', null, ['Элемент', 'Показ', 'Эффект GSAP', 'Длит., с', 'Задержка, с', 'X, px', 'Y, px', ''].map(function (t) { return h('th', { class: 'small', text: t }); }))),
+        h('thead', { class: 'table-light' }, h('tr', null, ['Элемент', 'Показ', 'Эффект GSAP', 'Длит., с', 'Задержка, с', 'X, px', 'Y, px', 'Размер, %', ''].map(function (t) { return h('th', { class: 'small', text: t }); }))),
         h('tbody', null, rows))),
-      h('div', { class: 'form-text', text: 'Эффект «как на слайде» — элемент появляется в общей последовательности (раздел «Появление информации»). Свой эффект запускается отдельно: длительность и задержка от начала показа слайда. X/Y — сдвиг от штатного места в пикселях экрана 1080×1920 (минус — влево/вверх).' })));
+      h('div', { class: 'form-text', text: 'Эффект «как на слайде» — элемент появляется в общей последовательности (раздел «Появление информации»). Свой эффект запускается отдельно: длительность и задержка от начала показа слайда. X/Y — сдвиг от штатного места в пикселях экрана 1080×1920 (минус — влево/вверх), «Размер» — масштаб элемента в процентах.' })));
   }
 
   function slideEditor(s) {
@@ -730,6 +872,29 @@
           checkbox(s.show, 'photo', 'Фото'), checkbox(s.show, 'description', 'Описание'),
           checkbox(s.show, 'price', 'Стоимость'), checkbox(s.show, 'tag', 'Рубрика')),
         h('div', { class: 'form-text', text: 'У каждого события на экране — число, день недели, время и название. Прошедшие скрываются сами.' }))));
+    } else if (s.type === 'countdown') {
+      var evOpts = {};
+      data.events.slice().sort(function (a, b) { return (a.date + a.time).localeCompare(b.date + b.time); })
+        .forEach(function (e) { evOpts[e.id] = e.date + ' ' + (e.time || '') + ' — ' + e.title; });
+      var found = M.countdownEvent(data.events, s, new Date());
+      body.appendChild(sec('Обратный отсчёт', true, h('div', null,
+        row(field('Мероприятие', select(s, 'eventMode', M.COUNTDOWN_MODES, { rerender: true })),
+          s.eventMode === 'event' ? field('Какое', select(s, 'eventId', evOpts, { empty: '— выберите —', rerender: true })) : null,
+          field('Надпись над счётчиком', input(s, 'label', { placeholder: 'До начала' })),
+          field('Текст, когда началось', input(s, 'startedText', { placeholder: 'Уже началось!' }))),
+        h('div', { class: 'mt-3 d-flex align-items-center gap-3' },
+          h('div', null, h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Изображение' }), photoPicker(s, { plain: true })),
+          h('div', { class: 'form-text', text: 'Если не задано — берётся фото мероприятия. Название, время и счётчик двигаются и масштабируются в «Элементах слайда».' })),
+        h('div', { class: 'alert py-2 small mt-3 mb-0 ' + (found ? 'alert-success' : 'alert-warning'),
+          text: found ? 'Сейчас отсчёт идёт до: ' + found.title + ' (' + found.date + ', ' + (found.time || '') + ')' : 'Сейчас подходящего мероприятия нет — на экране слайд будет пропущен.' }))));
+    } else if (s.type === 'announce') {
+      body.appendChild(sec('Объявление', true, h('div', null,
+        row(field('Вид', select(s, 'variant', M.ANNOUNCE_STYLES, { rerender: true })),
+          field('Пометка (плашка под текстом)', input(s, 'note', { placeholder: 'Акция до 30 сентября' }))),
+        h('div', { class: 'mt-3' }, field('Текст объявления', textarea(s, 'text', { rows: 5, placeholder: 'Можно в несколько строк' }))),
+        h('div', { class: 'mt-3 d-flex align-items-center gap-3' },
+          h('div', null, h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Фото' }), photoPicker(s, { plain: true })),
+          h('div', { class: 'form-text', text: 'Фото показывается в видах «Фото сверху» и «Фото на весь экран». Подойдёт обычное фото, обтравка не нужна.' })))));
     } else if (s.type === 'info') {
       s.lines = s.lines || [];
       var linesBox = h('div', { class: 'd-flex flex-column gap-2' });
@@ -746,6 +911,17 @@
     body.appendChild(elementsEditor(s));
     if (s.type === 'dishes' && (M.LAYOUTS[s.layout] || {}).view === 'comp') body.appendChild(photoPosEditor(s));
     body.appendChild(sizesEditor(s));
+    s.bg = s.bg && !Array.isArray(s.bg) ? s.bg : {};
+    body.appendChild(sec('Градиент на фоне слайда', false, h('div', null,
+      row(
+        field('Цвет 1', colorChooser(s.bg, 'color1', 'общий')),
+        field('Цвет 2', colorChooser(s.bg, 'color2', 'общий')),
+        field('Скорость (×)', input(s.bg, 'speed', { type: 'number', min: 0.25, max: 4, step: 0.25, nullable: true, placeholder: 'общая' })),
+        field('Яркость (×)', input(s.bg, 'intensity', { type: 'number', min: 0.3, max: 3, step: 0.1, nullable: true, placeholder: 'общая' }))),
+      h('div', { class: 'form-text mt-2', text: 'Работает, если фон слайда — «Анимированный градиент» (или так в общих настройках).' }))));
+    s.colors = s.colors && !Array.isArray(s.colors) ? s.colors : {};
+    body.appendChild(sec('Цвета надписей на слайде', false, h('div', null, colorsTable(s.colors, 'общий'),
+      h('div', { class: 'form-text mt-2', text: '«общий» — как в разделе «Анимация и оформление → Цвета надписей».' }))));
 
     s.nearest = s.nearest || { enabled: false, count: 2 };
     body.appendChild(sec('Ближайшее расписание мероприятий', true, h('div', { class: 'd-flex flex-wrap align-items-center gap-3' },
@@ -795,7 +971,7 @@
     var withPhoto = data.dishes.filter(function (d) { return d.photo; }).length;
 
     var table = h('div', { class: 'table-responsive' }, h('table', { class: 'table table-sm table-hover align-middle mb-0' },
-      h('thead', { class: 'table-light' }, h('tr', null, ['Фото', 'Название / описание', 'Категория', 'Вес / объём', 'Цена', 'Старая цена', 'Метка', 'В витрине', ''].map(function (t) { return h('th', { class: 'small', text: t }); }))),
+      h('thead', { class: 'table-light' }, h('tr', null, ['Фото', 'Название / описание', 'Категория', 'Вес / объём', 'Цена', 'Старая цена', 'Метка', 'Акцент', 'New', 'В витрине', ''].map(function (t) { return h('th', { class: 'small', text: t }); }))),
       h('tbody', null, rows.map(function (d) {
         return h('tr', { class: d.active === false ? 'is-off' : '' },
           h('td', null, photoPicker(d)),
@@ -805,6 +981,8 @@
           h('td', { class: 'col-num' }, input(d, 'price', { type: 'number', min: 0, sm: true })),
           h('td', { class: 'col-num' }, input(d, 'oldPrice', { type: 'number', min: 0, nullable: true, sm: true })),
           h('td', { class: 'col-sm' }, input(d, 'tag', { sm: true, placeholder: 'хит' })),
+          h('td', { title: 'Акцентировать блюдо и цену' }, checkbox(d, 'accent', '')),
+          h('td', { title: 'Значок NEW' }, checkbox(d, 'isNew', '')),
           h('td', null, checkbox(d, 'active', '', { defaultOn: true, rerender: true })),
           h('td', null, btn('✕', function () {
             if (!confirm('Удалить «' + d.name + '»?')) return;
@@ -865,6 +1043,53 @@
 
   /* ===== Анимация и оформление ===== */
 
+  /* Выбор цвета надписи: «по умолчанию», цвет из палитры или свой. Значение — id палитры или #hex. */
+  function colorChooser(target, role, inheritLabel) {
+    var box = h('div', { class: 'd-flex flex-wrap align-items-center gap-1' });
+    function draw() {
+      box.innerHTML = '';
+      var val = target[role];
+      box.appendChild(btn(inheritLabel, function () { delete target[role]; changed(); draw(); }, 'btn-sm ' + (!val ? 'btn-dark' : 'btn-outline-secondary')));
+      data.settings.palette.forEach(function (p) {
+        box.appendChild(h('button', { type: 'button', class: 'swatch' + (val === p.id ? ' is-on' : ''), title: p.name, style: 'background:' + p.color,
+          onclick: function () { target[role] = p.id; changed(); draw(); } }));
+      });
+      var custom = h('input', { type: 'color', class: 'form-control form-control-color form-control-sm swatch-custom' + (val && val[0] === '#' ? ' is-on' : ''), title: 'Свой цвет',
+        value: M.resolveColor(val, data.settings.palette) || '#ffffff' });
+      custom.addEventListener('input', function () { target[role] = custom.value; changed(); });
+      custom.addEventListener('change', draw);
+      box.appendChild(custom);
+    }
+    draw();
+    return box;
+  }
+
+  function colorsTable(target, inheritLabel) {
+    return h('div', { class: 'd-flex flex-column gap-2' }, Object.keys(M.TEXT_ROLES).map(function (role) {
+      return h('div', { class: 'row g-2 align-items-center' },
+        h('div', { class: 'col-md-4 small fw-semibold', text: M.TEXT_ROLES[role].label }),
+        h('div', { class: 'col-md-8' }, colorChooser(target, role, inheritLabel)));
+    }));
+  }
+
+  function paletteCard(st) {
+    var list = h('div', { class: 'd-flex flex-column gap-2' });
+    st.palette.forEach(function (p, i) {
+      var color = h('input', { type: 'color', class: 'form-control form-control-color', value: p.color });
+      color.addEventListener('input', function () { p.color = color.value; changed(); });
+      color.addEventListener('change', function () { render(); });
+      list.appendChild(h('div', { class: 'd-flex align-items-center gap-2' }, color,
+        h('div', { style: 'max-width:280px', class: 'flex-grow-1' }, input(p, 'name', { sm: true })),
+        h('code', { class: 'small text-body-secondary', text: p.color }),
+        btn('✕', function () { st.palette.splice(i, 1); changed(true); }, 'btn-outline-danger btn-sm', { title: 'Удалить цвет' })));
+    });
+    return card('Палитра цветов', h('div', null, list,
+      h('div', { class: 'd-flex flex-wrap gap-2 mt-3' },
+        btn('+ Цвет', function () { st.palette.push({ id: M.uid('c'), name: 'Новый цвет', color: '#ffffff' }); changed(true); }, 'btn-outline-primary btn-sm'),
+        btn('Стандартная палитра', function () { if (confirm('Заменить палитру стандартной?')) { st.palette = M.defaultPalette(); changed(true); } }, 'btn-outline-secondary btn-sm')),
+      h('div', { class: 'form-text mt-2', text: 'Надписи ссылаются на цвета палитры: поменяйте цвет здесь — изменятся все надписи этого цвета. Удалённый цвет заменяется цветом темы.' })));
+  }
+
   function fontsCard(st) {
     st.fonts = Object.assign(M.defaultFonts(), st.fonts || {});
     var f = st.fonts;
@@ -905,14 +1130,35 @@
         h('div', { class: 'form-text mt-2', text: 'Чтобы увидеть переходы, выберите «Вся программа» в предпросмотре.' }))),
       card('Появление информации на слайде (по умолчанию)', animationEditor(st.animation, false)),
       fontsCard(st),
+      paletteCard(st),
+      card('Цвета надписей', h('div', null, colorsTable(st.colors, 'тема'),
+        h('div', { class: 'form-text mt-2', text: '«тема» — цвет по умолчанию из выбранной темы. У каждого слайда цвета можно переопределить в его настройках.' }))),
+      card('Акцент на блюде и значок NEW', h('div', null,
+        row(
+          field('Как выделять акцентные блюда', select(st, 'accentStyle', M.ACCENT_STYLES)),
+          field('Анимация цены акцентного блюда', select(st, 'accentAnim', M.ACCENT_ANIMS)),
+          field('Текст значка', input(st.newBadge, 'text', { placeholder: 'NEW' })),
+          field('Анимация значка', select(st.newBadge, 'anim', M.NEW_ANIMS))),
+        h('div', { class: 'form-text mt-2', text: 'Отметьте блюда галочками «Акцент» и «New» во вкладке «Блюда». Акцент красит название и цену, значок NEW — звезда-стикер рядом с названием.' }))),
       card('Оформление', row(
         field('Тема', select(st, 'theme', M.THEMES)),
         field('Фон слайдов', checkbox(st, 'bgGradient', 'Лёгкий анимированный градиент', { defaultOn: true }), 'Общее значение; у слайда можно переопределить'),
         field('Акцентный цвет', accent),
         field('Валюта после цены', input(st, 'currency', { placeholder: 'пусто — как в печатном меню' })),
-        field('Название заведения', input(data.cafe, 'name')),
-        field('Подпись под названием', input(data.cafe, 'tagline')))),
+        field('Название и логотип', h('div', { class: 'form-text', text: 'Задаются в блоке «Шапка экрана» ниже.' })))),
+      card('Анимированный градиент на фоне', h('div', null,
+        row(
+          field('Цвет 1 (левое верхнее пятно)', colorChooser(st.bg, 'color1', 'акцент')),
+          field('Цвет 2 (правое нижнее пятно)', colorChooser(st.bg, 'color2', 'тыквенный')),
+          field('Скорость изменения', range(st.bg, 'speed', 0.25, 4, 0.25, function (v) { return '×' + Number(v).toFixed(2).replace(/0$/, ''); })),
+          field('Яркость', range(st.bg, 'intensity', 0.3, 3, 0.1, function (v) { return Math.round(v * 100) + '%'; }))),
+        h('div', { class: 'form-text mt-2', text: 'Включается в блоке «Оформление» (общее значение) или в настройках слайда. Цвета и скорость можно переопределить на слайде.' }))),
       card('Шапка экрана', h('div', null,
+        h('div', { class: 'd-flex flex-wrap align-items-start gap-4 mb-3' },
+          h('div', null, h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Логотип' }), photoPicker(data.cafe, { key: 'logo', logo: true })),
+          h('div', { class: 'flex-grow-1' }, row(
+            field('Название', input(data.cafe, 'name', { placeholder: 'Название заведения' })),
+            field('Подпись под названием', input(data.cafe, 'tagline', { placeholder: 'кафе · кухня весь день' }))))),
         checkbox(st.header, 'enabled', 'Показывать шапку', { defaultOn: true, rerender: true }),
         st.header.enabled !== false ? h('div', { class: 'd-flex flex-wrap gap-4 mt-3 ps-1' },
           checkbox(st.header, 'logo', 'Логотип', { defaultOn: true }),
@@ -934,7 +1180,7 @@
 
   function referencedPhotos() {
     var set = {};
-    data.dishes.concat(data.events).forEach(function (o) { if (o.photo) set[o.photo] = true; });
+    data.dishes.concat(data.events, data.slides).forEach(function (o) { if (o.photo) set[o.photo] = true; });
     if (data.cafe.logo) set[data.cafe.logo] = true;
     return Object.keys(set);
   }
@@ -1192,7 +1438,9 @@
     return enterServerMode();
   }).catch(function (e) {
     if (e.status === 401) { server.csrf = e.body && e.body.csrf; showLogin(); return; }
-    if (e.status === 503) { toast('Сервер: ' + e.message); }
-    return enterLocalMode();
+    // нет бэкенда или базы данных — локальный режим, но тоже со входом
+    server.localAuth = true;
+    if (localSession()) { server.user = { login: localAuth().login }; return enterLocalMode(); }
+    showLogin(e.status === 503 ? 'Сервер: ' + e.message : '');
   });
 })();

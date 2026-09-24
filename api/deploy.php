@@ -84,7 +84,7 @@ function build_files(array $data, array &$log): array
         $files[$rel] = ['file' => ROOT . '/' . $rel];
     }
     $photos = [];
-    foreach (array_merge($data['dishes'], $data['events']) as $o) if (!empty($o['photo'])) $photos[] = $o['photo'];
+    foreach (array_merge($data['dishes'], $data['events'], $data['slides']) as $o) if (!empty($o['photo']) && is_string($o['photo'])) $photos[] = $o['photo'];
     if (!empty($data['cafe']['logo'])) $photos[] = $data['cafe']['logo'];
     foreach (array_unique($photos) as $p) {
         if (preg_match('~^(https?:|data:)~', $p) || str_contains($p, '..')) continue;

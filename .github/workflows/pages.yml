@@ -29,6 +29,8 @@ jobs:
           node-version: 22
       - name: Проверка данных
         run: node -e "JSON.parse(require('fs').readFileSync('content/data.json','utf8'))"
+      - name: Документация актуальна
+        run: node tools/docs.mjs --check
       - name: Сборка
         run: node tools/build.mjs --with-admin
       - uses: actions/configure-pages@v5
