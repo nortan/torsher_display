@@ -6,3 +6,7 @@ uploads/*
 !uploads/.htaccess
 !uploads/.gitkeep
 *.sqlite
+
+data/*
+!data/.htaccess
+!data/.gitkeep

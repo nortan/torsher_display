@@ -32,7 +32,7 @@ $name = bin2hex(random_bytes(10)) . '.' . $ext;
 if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $name)) json_error(500, 'Не удалось сохранить файл');
 $path = $rel . '/' . $name;
 
-db()->prepare('INSERT INTO media (path, original_name, mime, width, height, size, has_alpha) VALUES (?,?,?,?,?,?,?)')
-    ->execute([$path, mb_substr((string)$f['name'], 0, 255), $mime, $info[0], $info[1], $f['size'], $hasAlpha ? 1 : 0]);
+media_add(['path' => $path, 'original_name' => mb_substr((string)$f['name'], 0, 255), 'mime' => $mime,
+    'width' => $info[0], 'height' => $info[1], 'size' => (int)$f['size'], 'has_alpha' => $hasAlpha]);
 
 json_out(['path' => $path, 'width' => $info[0], 'height' => $info[1], 'hasAlpha' => $hasAlpha], 201);

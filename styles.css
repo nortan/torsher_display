@@ -190,7 +190,7 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .frame { position: relative; padding: 26px 34px 28px; border: 2px solid var(--c-frame, var(--frame)); border-radius: 26px; }
 .frame__name { font-family: var(--display); font-size: calc(46px * var(--dish-scale)); font-weight: var(--display-weight); text-transform: uppercase; line-height: 1.02; color: var(--c-name, var(--ink)); }
 .frame__name .chip { margin-left: 12px; transform: translateY(-8px); }
-.frame__desc { margin-top: 10px; font-family: var(--display); font-size: calc(21px * var(--dish-scale)); font-weight: var(--display-weight); text-transform: uppercase; letter-spacing: .02em; line-height: 1.25; color: var(--c-desc, var(--muted)); max-width: 560px; }
+.frame__desc { margin-top: 10px; font-family: var(--display); font-size: calc(21px * var(--dish-scale)); font-weight: var(--display-weight); text-transform: uppercase; letter-spacing: .02em; line-height: 1.25; color: var(--c-desc, var(--muted)); max-width: none; }
 .feat__price { margin-top: 22px; align-self: flex-end; font-size: calc(54px * var(--dish-scale)); color: var(--c-price, var(--ink)); }
 .feat--sm .frame { padding: 18px 24px 20px; border-radius: 22px; }
 .feat--sm .frame__name { font-size: calc(30px * var(--dish-scale)); }
@@ -327,7 +327,6 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .comp--p3t6 .row__name { font-size: calc(26px * var(--dish-scale)); }
 .comp--p3t6 .row__price { font-size: calc(27px * var(--dish-scale)); }
 .comp--p3t6 .row__desc { display: none; }
-.comp--p3t6 .frame__desc { display: none; }
 .comp--p3t6 .feat__price { margin-top: 12px; }
 
 /* 3 : 6 — список сверху, три тарелки внизу рядом */
@@ -340,7 +339,6 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .comp--p3t6-row .frame { padding: 14px 16px 16px; }
 .comp--p3t6-row .frame__name { font-size: calc(24px * var(--dish-scale)); }
 .comp--p3t6-row .feat__price { font-size: calc(32px * var(--dish-scale)); }
-.comp--p3t6-row .frame__desc { display: none; }
 .comp--p3t6-row .frame .chip { display: none; }
 
 /* 1 : 0 — тарелка по центру, рамка под ней по центру */
@@ -400,7 +398,6 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .comp--p4t4 .plate--2 { grid-area: p2; --l: 0px; --r: -220px; --t: -20px; --pos: 30% center; }
 .comp--p4t4 .plate--3 { grid-area: p3; --l: -220px; --r: 0px; --b: -120px; --pos: 70% center; }
 .comp--p4t4 .plate--4 { grid-area: p4; --l: 0px; --r: -220px; --b: -120px; --pos: 30% center; }
-.comp--p4t4 .frame__desc { display: none; }
 .comp--p4t4 .frame__name { font-size: calc(27px * var(--dish-scale)); }
 .comp--p4t4 .feat__price { font-size: calc(34px * var(--dish-scale)); }
 .comp--p4t4 .row { padding: 10px 0; }
@@ -618,3 +615,11 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .n-t > div, .s-title > div { white-space: nowrap; }
 .comp .frame__name { font-size: calc(40px * var(--dish-scale)); }
 .comp .feat--sm .frame__name { font-size: calc(30px * var(--dish-scale)); }
+
+/* Рамки растут под длинный текст: описание видно во всех раскладках, ширина — по содержимому
+   в пределах колонки; если текста слишком много, слайд целиком уменьшается (fitSlide). */
+.feat { min-width: 0; }
+.frame { max-width: 100%; }
+.frame__name, .frame__desc { overflow-wrap: anywhere; }
+.feat--sm .frame__desc { font-size: calc(16px * var(--dish-scale)); line-height: 1.3; }
+.comp--p3t6-row .frame__desc, .comp--p4t4 .frame__desc { font-size: calc(15px * var(--dish-scale)); margin-top: 6px; }

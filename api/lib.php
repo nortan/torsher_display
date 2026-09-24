@@ -106,19 +106,21 @@ function num_or_str(?string $v)
     return is_numeric($v) ? $v + 0 : $v;
 }
 
-function load_data(): array
+function db_load_data(): array
 {
+    ensure_db_schema();
     $pdo = db();
     $site = $pdo->query('SELECT cafe, settings, ticker, version, updated_at FROM site WHERE id = 1')->fetch();
     if (!$site) json_error(503, 'База не инициализирована: откройте api/install.php');
 
-    $dishes = array_map(fn($r) => [
+    $extra = fn($r) => $r['extra'] ?? null ? (json_decode($r['extra'], true) ?: []) : [];
+    $dishes = array_map(fn($r) => $extra($r) + [
         'id' => $r['id'], 'name' => $r['name'], 'category' => $r['category'], 'description' => (string)$r['description'],
         'weight' => $r['weight'], 'price' => num_or_str($r['price']), 'oldPrice' => num_or_str($r['old_price']),
         'tag' => $r['tag'], 'photo' => $r['photo'], 'active' => (bool)$r['active'],
     ], $pdo->query('SELECT * FROM dishes ORDER BY position, name')->fetchAll());
 
-    $events = array_map(fn($r) => [
+    $events = array_map(fn($r) => $extra($r) + [
         'id' => $r['id'], 'title' => $r['title'], 'date' => $r['event_date'], 'time' => $r['time_start'], 'endTime' => $r['time_end'],
         'description' => (string)$r['description'], 'price' => $r['price'], 'tag' => $r['tag'], 'photo' => $r['photo'],
         'highlight' => (bool)$r['highlight'], 'active' => (bool)$r['active'],
@@ -156,14 +158,15 @@ function nullable_price($v): ?string
 }
 
 /* Полная замена данных в одной транзакции: админка всегда присылает целиком весь набор. */
-function save_data(array $d, $objects = null): int
+function db_save_data(array $d, $objects = null): int
 {
     $objects = $objects ?? ($GLOBALS['json_body_objects'] ?? null);
     $obj = fn(string $k) => is_object($objects) && isset($objects->$k) ? $objects->$k : ($d[$k] ?? new stdClass());
-    foreach (['dishes', 'events', 'slides'] as $k) {
-        if (!isset($d[$k]) || !is_array($d[$k])) json_error(422, "Нет раздела $k");
-    }
+    ensure_db_schema();
     $pdo = db();
+    if (!(int)$pdo->query('SELECT COUNT(*) FROM site')->fetchColumn()) {
+        $pdo->exec("INSERT INTO site (id, cafe, settings, ticker, version) VALUES (1, '{}', '{}', '[]', 0)");
+    }
     $pdo->beginTransaction();
     try {
         $pdo->prepare('UPDATE site SET cafe = ?, settings = ?, ticker = ?, version = version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = 1')
@@ -171,30 +174,32 @@ function save_data(array $d, $objects = null): int
         $slideObjects = is_array($obj('slides')) ? array_values($obj('slides')) : [];
 
         $pdo->exec('DELETE FROM dishes');
-        $ins = $pdo->prepare('INSERT INTO dishes (id, position, name, category, description, weight, price, old_price, tag, photo, active) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+        $ins = $pdo->prepare('INSERT INTO dishes (id, position, name, category, description, weight, price, old_price, tag, photo, active, extra) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
         foreach (array_values($d['dishes']) as $i => $x) {
             if (!is_array($x) || str_field($x, 'id', 64) === '') continue;
             $ins->execute([str_field($x, 'id', 64), $i, str_field($x, 'name'), str_field($x, 'category', 128), str_field($x, 'description', 2000),
                 str_field($x, 'weight', 64), nullable_price($x['price'] ?? '') ?? '', nullable_price($x['oldPrice'] ?? null),
-                str_field($x, 'tag', 64), ($x['photo'] ?? null) ? str_field($x, 'photo') : null, ($x['active'] ?? true) !== false ? 1 : 0]);
+                str_field($x, 'tag', 64), ($x['photo'] ?? null) ? str_field($x, 'photo') : null, ($x['active'] ?? true) !== false ? 1 : 0,
+                enc_json((object)extra_fields($x, DISH_COLUMNS))]);   // accent, isNew и будущие поля
         }
 
         $pdo->exec('DELETE FROM events');
-        $ins = $pdo->prepare('INSERT INTO events (id, event_date, time_start, time_end, title, description, price, tag, photo, highlight, active) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+        $ins = $pdo->prepare('INSERT INTO events (id, event_date, time_start, time_end, title, description, price, tag, photo, highlight, active, extra) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
         foreach ($d['events'] as $x) {
             if (!is_array($x) || str_field($x, 'id', 64) === '') continue;
             $date = str_field($x, 'date', 10);
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) continue;
             $ins->execute([str_field($x, 'id', 64), $date, str_field($x, 'time', 5), str_field($x, 'endTime', 5), str_field($x, 'title'),
                 str_field($x, 'description', 2000), str_field($x, 'price', 128), str_field($x, 'tag', 64),
-                ($x['photo'] ?? null) ? str_field($x, 'photo') : null, !empty($x['highlight']) ? 1 : 0, ($x['active'] ?? true) !== false ? 1 : 0]);
+                ($x['photo'] ?? null) ? str_field($x, 'photo') : null, !empty($x['highlight']) ? 1 : 0, ($x['active'] ?? true) !== false ? 1 : 0,
+                enc_json((object)extra_fields($x, EVENT_COLUMNS))]);
         }
 
         $pdo->exec('DELETE FROM slides');
         $ins = $pdo->prepare('INSERT INTO slides (id, position, type, enabled, config) VALUES (?,?,?,?,?)');
         foreach (array_values($d['slides']) as $i => $x) {
             if (!is_array($x) || str_field($x, 'id', 64) === '') continue;
-            $type = in_array($x['type'] ?? '', ['dishes', 'events', 'info', 'announce', 'countdown'], true) ? $x['type'] : 'dishes';
+            $type = in_array($x['type'] ?? '', SLIDE_TYPES, true) ? $x['type'] : 'dishes';
             $cfg = isset($slideObjects[$i]) && is_object($slideObjects[$i]) ? clone $slideObjects[$i] : (object)$x;
             unset($cfg->id, $cfg->type, $cfg->enabled);
             $ins->execute([str_field($x, 'id', 64), $i, $type, ($x['enabled'] ?? true) !== false ? 1 : 0, enc_json($cfg)]);
@@ -212,19 +217,19 @@ function save_data(array $d, $objects = null): int
 
 /* ---------- Настройки сервера (таблица options) и секреты ---------- */
 
-function option_get(string $name, $default = null)
+function db_option_get(string $name, $default = null)
 {
-    db()->exec('CREATE TABLE IF NOT EXISTS options (name VARCHAR(64) NOT NULL PRIMARY KEY, value TEXT NOT NULL)');
+    ensure_db_schema();
     $st = db()->prepare('SELECT value FROM options WHERE name = ?');
     $st->execute([$name]);
     $v = $st->fetchColumn();
     return $v === false ? $default : json_decode($v, true);
 }
 
-function option_set(string $name, $value): void
+function db_option_set(string $name, $value): void
 {
+    ensure_db_schema();
     $pdo = db();
-    $pdo->exec('CREATE TABLE IF NOT EXISTS options (name VARCHAR(64) NOT NULL PRIMARY KEY, value TEXT NOT NULL)');
     $pdo->beginTransaction();
     $pdo->prepare('DELETE FROM options WHERE name = ?')->execute([$name]);
     $pdo->prepare('INSERT INTO options (name, value) VALUES (?, ?)')->execute([$name, enc_json($value)]);
@@ -257,3 +262,22 @@ function secret_decrypt(string $stored): string
     if ($plain === false) throw new RuntimeException('Не удалось расшифровать пароль: app_key изменился — введите пароль заново');
     return $plain;
 }
+
+/* Создаёт недостающие таблицы и колонки (CREATE TABLE IF NOT EXISTS + миграции). Один раз за запрос. */
+function ensure_db_schema(): void
+{
+    static $done = false;
+    if ($done) return;
+    $pdo = db();
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $schema = (string)file_get_contents(ROOT . '/sql/schema.' . ($driver === 'sqlite' ? 'sqlite' : 'mysql') . '.sql');
+    foreach (array_filter(array_map('trim', explode(';', preg_replace('/^--.*$/m', '', $schema)))) as $sql) $pdo->exec($sql);
+    // миграция: колонка extra для полей без своей колонки (accent, isNew…)
+    foreach (['dishes', 'events'] as $t) {
+        try { $pdo->query("SELECT extra FROM $t LIMIT 1"); }
+        catch (PDOException $e) { $pdo->exec("ALTER TABLE $t ADD COLUMN extra TEXT NULL"); }
+    }
+    $done = true;
+}
+
+require __DIR__ . '/storage.php';

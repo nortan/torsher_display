@@ -1,4 +1,4 @@
 # Закрываем служебные файлы API
-<FilesMatch "^(lib\.php|config\.php|config\.sample\.php)$">
+<FilesMatch "^(lib\.php|storage\.php|config\.php|config\.sample\.php)$">
   Require all denied
 </FilesMatch>

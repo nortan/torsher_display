@@ -18,8 +18,9 @@ server {
 # Полный сайт с PHP-бэкендом (сборка tools/build.mjs --server):
 # добавьте в server { } обработку PHP и закройте служебные файлы.
 #
-#    location ~ ^/api/(lib|config|config\.sample)\.php$ { deny all; }
+#    location ~ ^/api/(lib|storage|config|config\.sample)\.php$ { deny all; }
 #    location ^~ /sql/ { deny all; }
+#    location ^~ /data/ { deny all; }       # файловое хранилище (или вынесите data_dir за веб-корень)
 #    location ~ ^/uploads/.*\.(php\d?|phtml|phar)$ { deny all; }
 #    location ~ \.php$ {
 #        include fastcgi_params;

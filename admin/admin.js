@@ -324,7 +324,8 @@
     box.innerHTML = '';
     box.appendChild(h('span', { class: 'navbar-text small me-2', id: 'saveStatus' }));
     if (server.on) {
-      box.appendChild(h('span', { class: 'badge text-bg-success', text: 'Сервер' }));
+      box.appendChild(h('span', { class: 'badge text-bg-success', title: 'Где хранятся данные — меняется в «Публикация → Хранение данных»',
+        text: 'Сервер · ' + (server.storage === 'files' ? 'файлы' : 'БД') }));
       box.appendChild(h('button', { type: 'button', id: 'publishBtn', class: 'btn btn-sm ' + (server.dirty ? 'btn-warning' : 'btn-outline-light'),
         text: server.dirty ? 'Опубликовать на экраны' : 'Опубликовано ✓', disabled: !server.dirty, onclick: publishToServer }));
       box.appendChild(h('div', { class: 'dropdown' },
@@ -361,7 +362,7 @@
     var go = server.localAuth
       ? localLogin(login, pass).then(enterLocalMode)
       : api('auth.php', { method: 'POST', json: { action: 'login', login: login, password: pass } })
-        .then(function (r) { server.csrf = r.csrf; server.user = r.user; return enterServerMode(); });
+        .then(function (r) { server.csrf = r.csrf; server.user = r.user; server.storage = r.storage; return enterServerMode(); });
     go.catch(function (e2) { showLogin(e2.message); });
   });
 
@@ -593,6 +594,28 @@
 
   function addSlide(s) { data.slides.push(s); ui.slideId = s.id; changed(true); sendPreview(); }
 
+  /* «+ Афиша»: период (неделя / две недели) и вид (список, карточки, таймлайн). */
+  function eventsMenu() {
+    var menu = h('ul', { class: 'dropdown-menu shadow' });
+    [['week', 'На неделю'], ['2weeks', 'На две недели']].forEach(function (r, ri) {
+      if (ri) menu.appendChild(h('li', null, h('hr', { class: 'dropdown-divider' })));
+      menu.appendChild(h('li', null, h('h6', { class: 'dropdown-header', text: r[1] })));
+      Object.keys(M.EVENT_STYLES).forEach(function (style) {
+        menu.appendChild(h('li', null, h('a', { class: 'dropdown-item', href: '#', text: M.EVENT_STYLES[style], onclick: function (e) {
+          e.preventDefault();
+          var s = M.newSlide('events');
+          s.range = r[0]; s.style = style;
+          if (r[0] === '2weeks') { s.title = 'Афиша'; s.subtitle = 'Ближайшие две недели'; }
+          s.name = 'Афиша ' + r[1].toLowerCase() + ' · ' + M.EVENT_STYLES[style].toLowerCase();
+          addSlide(s);
+          toast('Добавлен слайд: ' + s.name);
+        } })));
+      });
+    });
+    return h('div', { class: 'dropdown' },
+      h('button', { type: 'button', class: 'btn btn-outline-secondary dropdown-toggle', 'data-bs-toggle': 'dropdown', 'aria-expanded': 'false', text: '+ Афиша' }), menu);
+  }
+
   /* «+ Блюда»: выбор вида слайда из всех раскладок, сгруппированных по составу. */
   function dishLayoutMenu() {
     var groups = [
@@ -626,10 +649,7 @@
 
     var head = pageHead('Экраны', 'Каждый слайд — один экран витрины. Порядок в списке = порядок показа.', [
       dishLayoutMenu(),
-      btn('+ Афиша на неделю', function () { addSlide(M.newSlide('events')); }),
-      btn('+ Афиша на 2 недели', function () {
-        var s = M.newSlide('events'); s.name = 'Афиша на две недели'; s.title = 'Афиша'; s.subtitle = 'Ближайшие две недели'; s.range = '2weeks'; s.style = 'timeline'; addSlide(s);
-      }),
+      eventsMenu(),
       btn('+ Инфо', function () { addSlide(M.newSlide('info')); }),
       btn('+ Объявление', function () { addSlide(M.newSlide('announce')); }),
       btn('+ Обратный отсчёт', function () { addSlide(M.newSlide('countdown')); }),
@@ -762,7 +782,7 @@
       var own = s.sizes[k] != null;
       var holder = { v: own ? s.sizes[k] : defs[k] };
       var fmt = function (v) { return Math.round(v * 100) + '%' + (s.sizes[k] == null ? ' общий' : ''); };
-      var rg = range(holder, 'v', 0.6, 1.6, 0.05, fmt);
+      var rg = range(holder, 'v', 0.6, 2, 0.05, fmt);
       rg.querySelector('input').addEventListener('input', function () { s.sizes[k] = holder.v; rg.querySelector('.badge').textContent = fmt(holder.v); changed(); });
       r.appendChild(field(names[k], h('div', null, rg,
         own ? btn('как в общих', function () { s.sizes[k] = null; changed(true); }, 'btn-link btn-sm p-0') : null)));
@@ -1106,9 +1126,9 @@
         field('Заголовки слайдов', h('div', null, select(f, 'heading', opts, { rerender: true }), sample('heading', 'Блюдо дня'))),
         field('Названия блюд и цены', h('div', null, select(f, 'dish', opts, { rerender: true }), sample('dish', 'Томлёные щёки 1290'))),
         field('Описания и мелкий текст', h('div', null, select(f, 'text', opts, { rerender: true }), sample('text', 'С картофельным пюре и соусом демиглас'))),
-        field('Размер заголовков', range(f, 'headingScale', 0.7, 1.4, 0.05, pct)),
-        field('Размер названий и цен', range(f, 'dishScale', 0.7, 1.4, 0.05, pct)),
-        field('Размер описаний', range(f, 'textScale', 0.7, 1.4, 0.05, pct))),
+        field('Размер заголовков', range(f, 'headingScale', 0.6, 2, 0.05, pct)),
+        field('Размер названий и цен', range(f, 'dishScale', 0.6, 2, 0.05, pct)),
+        field('Размер описаний', range(f, 'textScale', 0.6, 2, 0.05, pct))),
       h('div', { class: 'form-text mt-2', text: 'Это общие значения; у каждого слайда можно задать свой размер. Все шрифты лежат в сборке и работают без интернета. Calibri берётся из системы, иначе — метрически совместимый Carlito.' })));
   }
 
@@ -1254,6 +1274,45 @@
     });
   }
 
+  /* Хранение данных: в базе (MySQL) или в файлах на сервере; переключение переносит все данные. */
+  function storagePanel() {
+    var body = h('div', null, h('div', { class: 'small text-body-secondary', text: 'Проверяю хранилища…' }));
+    var choice = { v: server.storage || 'db' };
+    api('store.php').then(function (st) {
+      choice.v = st.mode;
+      body.innerHTML = '';
+      var opts = [
+        { key: 'db', title: 'В базе данных (MySQL)', text: 'Таблицы users, site, dishes, events, slides, media, options.', check: st.db },
+        { key: 'files', title: 'В файлах на сервере', text: 'JSON-файлы в папке ' + st.files.dir + ' (закрыта от веба). Не нужна база данных.', check: st.files }
+      ];
+      opts.forEach(function (o) {
+        var id = 'st-' + o.key;
+        var inp = h('input', { class: 'form-check-input', type: 'radio', name: 'storage', id: id, value: o.key, checked: st.mode === o.key, disabled: !o.check.ok });
+        inp.addEventListener('change', function () { choice.v = o.key; });
+        body.appendChild(h('div', { class: 'form-check mb-2' }, inp,
+          h('label', { class: 'form-check-label', for: id },
+            h('strong', { text: o.title }), st.mode === o.key ? h('span', { class: 'badge text-bg-success ms-2', text: 'сейчас' }) : null,
+            h('div', { class: 'small text-body-secondary', text: o.check.ok ? o.text : 'Недоступно: ' + o.check.error }))));
+      });
+      body.appendChild(h('div', { class: 'd-flex flex-wrap gap-2 mt-2' },
+        btn('Переключить и перенести данные', function (e) {
+          if (choice.v === st.mode) { toast('Этот режим уже включён'); return; }
+          if (server.dirty) { toast('Сначала опубликуйте или отмените черновик'); return; }
+          var name = choice.v === 'db' ? 'базу данных' : 'файлы';
+          if (!confirm('Перенести все данные (блюда, мероприятия, слайды, пользователей, настройки FTP) в ' + name + ' и переключиться?\n\nСтарое хранилище не удаляется.')) return;
+          var b = e.target; b.disabled = true;
+          api('store.php', { method: 'POST', json: { action: 'switch', mode: choice.v } }).then(function (r) {
+            server.storage = r.to;
+            toast('Данные перенесены: блюд ' + r.dishes + ', слайдов ' + r.slides + ', пользователей ' + r.users);
+            return serverLoad().then(function () { renderNavRight(); render(); sendPreview(); });
+          }).catch(function (err) { toast('Ошибка: ' + err.message); b.disabled = false; });
+        }, 'btn-primary')));
+    }).catch(function (e) { body.innerHTML = ''; body.appendChild(h('div', { class: 'alert alert-danger py-2 small mb-0', text: e.message })); });
+    return card('Хранение данных', h('div', null,
+      h('p', { class: 'mb-3' }, 'Где сервер хранит данные витрины. При переключении всё содержимое переносится в выбранное хранилище; экраны продолжают работать без перерыва.'),
+      body));
+  }
+
   /* FTP: настройки хранятся на сервере, пароль шифруется и в браузер не возвращается. */
   function ftpPanel() {
     var f = { host: '', port: 21, user: '', password: '', dir: '/', ftps: false, passive: true };
@@ -1328,7 +1387,7 @@
 
     var serverCard = server.on
       ? card('Экраны на сервере', h('div', null,
-          h('p', null, 'Данные хранятся в MySQL на сервере, экраны читают их из ', h('code', { text: 'api/data.php' }),
+          h('p', null, 'Данные хранятся на сервере (' + (server.storage === 'files' ? 'в файлах' : 'в базе данных MySQL') + '), экраны читают их из ', h('code', { text: 'api/data.php' }),
             ' и обновляются сами каждые ' + data.settings.refreshInterval + ' с.'),
           h('ul', { class: 'list-unstyled small mb-3' },
             h('li', null, 'Опубликованная ревизия: ', h('strong', { text: String(server.revision) })),
@@ -1365,6 +1424,7 @@
     return h('div', null,
       pageHead('Публикация', 'Экраны работают автономно: либо читают данные с PHP-сервера, либо крутят статическую сборку.'),
       serverCard,
+      server.on ? storagePanel() : null,
       ftpCard,
       card('Статическая сборка (ZIP)', h('div', null,
         h('p', { html: 'Архив содержит плеер, шрифты, библиотеки, фото и данные — всё, что нужно экрану. Распакуйте на любой веб-сервер или откройте <code>index.html</code> прямо с флешки. Инструкция — в <code>SERVER.md</code> внутри архива.' }),
@@ -1434,7 +1494,7 @@
   });
 
   api('auth.php').then(function (r) {
-    server.csrf = r.csrf; server.user = r.user;
+    server.csrf = r.csrf; server.user = r.user; server.storage = r.storage;
     return enterServerMode();
   }).catch(function (e) {
     if (e.status === 401) { server.csrf = e.body && e.body.csrf; showLogin(); return; }
