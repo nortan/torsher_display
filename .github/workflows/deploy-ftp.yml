@@ -1,0 +1,91 @@
+name: Витрина → хостинг по FTP (PHP + MySQL)
+
+# Полный сайт (экран, админка, api) на обычный хостинг по FTP. Запуск: вручную (Actions → Run workflow)
+# и при каждом push в main. Без секретов FTP_USER / FTP_PASSWORD шаги пропускаются.
+#
+# Settings → Secrets and variables → Actions → Secrets (пароли в репозиторий не попадают):
+#   FTP_USER, FTP_PASSWORD     — FTP-аккаунт хостинга
+#   DB_USER, DB_PASSWORD       — пользователь MySQL
+#   DB_NAME                    — имя базы (если не задано — как DB_USER)
+#   ADMIN_LOGIN, ADMIN_PASSWORD — администратор админки (нужны только для первой установки)
+#   APP_KEY (необязательно)    — ключ шифрования пароля FTP в админке; без него выводится из DB_PASSWORD
+# Variables (необязательно, значения по умолчанию — для display.torsher-cafe.ru):
+#   FTP_HOST (display.torsher-cafe.ru), FTP_DIR (/), SITE_URL (https://display.torsher-cafe.ru),
+#   DB_HOST (localhost), FTP_SSL_VERIFY (yes; no — если у FTP сертификат на другое имя)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ftp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_HOST: ${{ vars.FTP_HOST || 'display.torsher-cafe.ru' }}
+      FTP_DIR: ${{ vars.FTP_DIR || '/' }}
+      FTP_SSL_VERIFY: ${{ vars.FTP_SSL_VERIFY || 'yes' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://display.torsher-cafe.ru' }}
+      DB_HOST: ${{ vars.DB_HOST || 'localhost' }}
+      DB_NAME: ${{ secrets.DB_NAME || secrets.DB_USER }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      APP_KEY: ${{ secrets.APP_KEY }}
+      ADMIN_LOGIN: ${{ secrets.ADMIN_LOGIN }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - name: FTP не настроен — пропускаем
+        if: env.FTP_USER == '' || env.FTP_PASSWORD == ''
+        run: echo "Секреты FTP_USER / FTP_PASSWORD не заданы — выгрузка на хостинг пропущена."
+
+      - uses: actions/checkout@v4
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+      - uses: actions/setup-node@v4
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        with:
+          node-version: 22
+
+      - name: Сборка и config.php
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        run: |
+          test -n "$DB_USER" && test -n "$DB_PASSWORD" || { echo "::error::Не заданы секреты DB_USER / DB_PASSWORD"; exit 1; }
+          sudo apt-get install -y -qq lftp > /dev/null
+          node tools/build.mjs --server
+          tools/ftp-config.php 1 > dist/api/config.php
+          php -l dist/api/config.php
+
+      - name: Выгрузка по FTP
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        run: tools/ftp-upload.sh dist "$FTP_DIR"
+
+      - name: Первичная установка (если ещё не установлено)
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        run: |
+          out=$(curl -sS --max-time 60 "$SITE_URL/api/install.php" \
+            --data-urlencode "login=$ADMIN_LOGIN" --data-urlencode "password=$ADMIN_PASSWORD" --data-urlencode "storage=db" | tr -d '\n')
+          msg=$(printf '%s' "$out" | grep -o 'class="alert[^"]*">[^<]*' | sed 's/.*">//' || true)
+          echo "Ответ установщика: ${msg:-нет сообщения}"
+          case "$msg" in
+            Готово*|"Витрина уже установлена"*) ;;
+            *) printf '%s' "$out" | head -c 600; echo; echo "::error::Установка не выполнена (проверьте DB_*, ADMIN_* и SITE_URL / FTP_DIR)"; exit 1 ;;
+          esac
+
+      - name: Закрываем установщик
+        if: always() && env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        run: |
+          test -d dist/api || exit 0
+          tools/ftp-config.php 0 > dist/api/config.php
+          mkdir -p cfg/api && cp dist/api/config.php cfg/api/config.php
+          tools/ftp-upload.sh cfg "$FTP_DIR"
+
+      - name: Проверка
+        if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/api/data.php")
+          echo "api/data.php → HTTP $code"
+          test "$code" = 200

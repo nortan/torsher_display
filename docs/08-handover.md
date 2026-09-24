@@ -11,7 +11,7 @@
 2. В новом репозитории:
    - Settings → Pages → Source: **GitHub Actions**; адрес сайта сменится на `https://<новый-владелец>.github.io/<репо>/`;
    - Settings → Secrets → Actions: при необходимости заново задайте `DEPLOY_TARGET`, `DEPLOY_SSH_KEY`
-     и `DEPLOY_KNOWN_HOSTS` (секреты при передаче не копируются).
+     и `DEPLOY_KNOWN_HOSTS`, а для `deploy-ftp.yml` — `FTP_*`, `DB_*`, `ADMIN_*` (секреты при передаче не копируются).
 3. В админке (Публикация → «Публикация в Git») поменяйте владельца, репозиторий и токен. Значения
    по умолчанию (`nortan` / `torsher_display`) зашиты в `admin/admin.js` (`renderPublish`), их можно исправить там.
 
