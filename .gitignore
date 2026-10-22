@@ -10,3 +10,6 @@ uploads/*
 data/*
 !data/.htaccess
 !data/.gitkeep
+
+# экспорт данных из админки, сохранённый рядом с проектом — не часть сборки
+/data.json

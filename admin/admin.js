@@ -21,7 +21,7 @@
   var data = null;                       // текущие данные витрины
   var media = {};                        // локальный режим: path → dataURL (IndexedDB)
   var server = { on: false, csrf: '', user: null, revision: 0, updatedAt: '', dirty: false };
-  var ui = { tab: 'slides', slideId: null, dishFilter: '', dishPhoto: 'all', showPast: false };
+  var ui = { tab: 'slides', slideId: null, dishFilter: '', dishPhoto: 'all', showPast: false, displayId: '' };
 
   /* ---------- DOM-хелперы ---------- */
 
@@ -187,6 +187,11 @@
     d.dishes = d.dishes || [];
     d.events = d.events || [];
     d.slides = d.slides || [];
+    d.displays = d.displays || [];
+    d.displays.forEach(function (p) {
+      p.slides = Array.isArray(p.slides) ? p.slides : [];
+      if (!M.ORIENTATIONS[p.orientation]) p.orientation = 'vertical';
+    });
     // поля-объекты: пустой {} мог прийти как [] (PHP) — приводим к объекту
     var obj = function (v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
     d.cafe = obj(d.cafe);
@@ -420,18 +425,45 @@
     if (!previewReady || !data) return;
     var mode = document.getElementById('previewMode').value;
     var slideId = mode === 'slide' ? (ui.slideId || (data.slides[0] && data.slides[0].id)) : null;
-    frame.contentWindow.postMessage({ type: 'torsher:data', data: resolvedData(), slideId: slideId, ignoreSchedule: mode === 'show' }, '*');
+    frame.contentWindow.postMessage({ type: 'torsher:data', data: resolvedData(), slideId: slideId, ignoreSchedule: mode === 'show', displayId: ui.displayId || null }, '*');
   }
   function replay() { frame.contentWindow.postMessage({ type: 'torsher:replay' }, '*'); }
 
+  /* Размер холста предпросмотра: вертикальный дисплей или без дисплея — 1080×1920,
+     горизонтальный — 1920×1080 (iframe растягивается, app.js сам ставит класс landscape). */
+  function previewSize() {
+    var d = (data.displays || []).filter(function (x) { return x.id === ui.displayId; })[0];
+    return d && d.orientation === 'horizontal' ? [1920, 1080] : [1080, 1920];
+  }
   function scalePreview() {
     var box = document.getElementById('previewScreen');
-    var k = Math.min(box.clientWidth / 1080, box.clientHeight / 1920);
-    frame.style.transform = 'translate(' + ((box.clientWidth - 1080 * k) / 2) + 'px,' + ((box.clientHeight - 1920 * k) / 2) + 'px) scale(' + k + ')';
+    var sz = previewSize();
+    frame.style.width = sz[0] + 'px';
+    frame.style.height = sz[1] + 'px';
+    var k = Math.min(box.clientWidth / sz[0], box.clientHeight / sz[1]);
+    frame.style.transform = 'translate(' + ((box.clientWidth - sz[0] * k) / 2) + 'px,' + ((box.clientHeight - sz[1] * k) / 2) + 'px) scale(' + k + ')';
+    var note = document.getElementById('previewNote');
+    if (note) note.textContent = 'Экран ' + sz[0] + '×' + sz[1] + (sz[0] > sz[1] ? ' (горизонтальный)' : ' (вертикальный)') + ', масштаб уменьшен.';
   }
 
+  /* Список дисплеев в шапке предпросмотра: выбор управляет ?display и ориентацией iframe. */
+  function fillPreviewDisplays() {
+    var sel = document.getElementById('previewDisplay');
+    if (!sel) return;
+    sel.innerHTML = '';
+    sel.appendChild(h('option', { value: '', text: 'Все слайды · вертикально' }));
+    (data.displays || []).forEach(function (d) {
+      sel.appendChild(h('option', { value: d.id, text: (d.name || 'Дисплей') + ' · ' + (d.orientation === 'horizontal' ? 'горизонтально' : 'вертикально') }));
+    });
+    sel.value = ui.displayId || '';
+  }
   window.addEventListener('message', function (e) {
-    if (e.data && e.data.type === 'torsher:ready') { previewReady = true; sendPreview(); }
+    if (e.data && e.data.type === 'torsher:ready') { previewReady = true; fillPreviewDisplays(); sendPreview(); }
+  });
+  document.getElementById('previewDisplay').addEventListener('change', function (e) {
+    ui.displayId = e.target.value;
+    scalePreview();
+    sendPreview();
   });
   document.getElementById('previewMode').addEventListener('change', sendPreview);
   document.getElementById('replay').addEventListener('click', replay);
@@ -552,7 +584,7 @@
     var main = document.getElementById('main');
     var scroll = window.scrollY;
     main.innerHTML = '';
-    var pages = { slides: renderSlides, dishes: renderDishes, events: renderEvents, design: renderDesign, publish: renderPublish };
+    var pages = { slides: renderSlides, displays: renderDisplays, dishes: renderDishes, events: renderEvents, design: renderDesign, publish: renderPublish };
     main.appendChild(pages[ui.tab]());
     window.scrollTo(0, scroll);
     Array.prototype.forEach.call(document.querySelectorAll('#nav .nav-link'), function (b) {
@@ -972,6 +1004,67 @@
 
     body.appendChild(sec('Появление информации', true, animationEditor(s.animation, true, s)));
     return card('Настройки слайда', body, btn('↻ Повторить анимацию', replay, 'btn-outline-secondary btn-sm'));
+  }
+
+  /* ===== Дисплеи =====
+     Физический экран: имя, ориентация и своя программа — упорядоченный список id слайдов.
+     На экране плеер открывается с ?display=<id> и крутит только выбранные слайды. */
+
+  function renderDisplays() {
+    var byId = {};
+    data.slides.forEach(function (s) { byId[s.id] = s; });
+
+    var cards = (data.displays || []).map(function (p, pi) {
+      // набор: текущий порядок p.slides + ещё не выбранные слайды в конец — для удобства
+      var chosen = (p.slides || []).filter(function (id) { return byId[id]; });
+      var rest = data.slides.filter(function (s) { return chosen.indexOf(s.id) === -1; }).map(function (s) { return s.id; });
+      var order = chosen.concat(rest);
+
+      var rows = order.map(function (id) {
+        var s = byId[id], on = chosen.indexOf(id) !== -1;
+        var ci = chosen.indexOf(id);
+        var cb = h('input', { class: 'form-check-input m-0', type: 'checkbox', checked: on, title: 'В программе дисплея' });
+        cb.addEventListener('change', function () {
+          if (cb.checked) p.slides.push(id);
+          else p.slides = p.slides.filter(function (x) { return x !== id; });
+          changed(true);
+        });
+        return h('div', { class: 'list-group-item d-flex align-items-center gap-2' + (on ? '' : ' is-off') },
+          cb,
+          h('span', { class: 'flex-grow-1 min-w-0 text-truncate' + (s.enabled === false ? ' text-body-secondary' : ''), text: (s.name || s.title || 'Без названия') }),
+          on ? h('div', { class: 'btn-group btn-group-sm' },
+            btn('↑', function () { var j = p.slides.indexOf(id); if (j > 0) { p.slides.splice(j, 1); p.slides.splice(j - 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Раньше', disabled: ci === 0 }),
+            btn('↓', function () { var j = p.slides.indexOf(id); if (j < p.slides.length - 1) { p.slides.splice(j, 1); p.slides.splice(j + 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Позже', disabled: ci === chosen.length - 1 })) : null);
+      });
+
+      var url = location.origin + location.pathname.replace(/admin\/?$/, '') + '?display=' + encodeURIComponent(p.id);
+      return card(null, h('div', null,
+        h('div', { class: 'row g-3 mb-3' },
+          field('Название', input(p, 'name')),
+          field('Ориентация', select(p, 'orientation', M.ORIENTATIONS, { rerender: true })),
+          h('div', { class: 'col-12' },
+            h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Адрес экрана' }),
+            h('div', { class: 'input-group input-group-sm' },
+              h('input', { class: 'form-control', readonly: true, value: url }),
+              btn('Копировать', function () { navigator.clipboard && navigator.clipboard.writeText(url).then(function () { toast('Ссылка скопирована'); }); }, 'btn-outline-secondary')))),
+        h('div', { class: 'form-label small fw-semibold text-body-secondary', text: 'Программа: ' + chosen.length + ' из ' + data.slides.length + ' слайдов' }),
+        h('div', { class: 'list-group list-group-flush border rounded' }, rows.length ? rows : h('div', { class: 'list-group-item text-body-secondary', text: 'Слайдов нет — добавьте во вкладке «Экраны».' })),
+        h('div', { class: 'd-flex gap-2 mt-3' },
+          btn('Предпросмотр', function () { ui.displayId = p.id; fillPreviewDisplays(); scalePreview(); sendPreview(); }, 'btn-outline-primary btn-sm'),
+          btn('✕ Удалить', function () {
+            if (!confirm('Удалить дисплей «' + (p.name || 'Дисплей') + '»? Слайды останутся в общем списке.')) return;
+            data.displays.splice(pi, 1);
+            if (ui.displayId === p.id) { ui.displayId = ''; fillPreviewDisplays(); scalePreview(); }
+            changed(true);
+          }, 'btn-outline-danger btn-sm'))));
+    });
+
+    return h('div', null,
+      pageHead('Дисплеи', 'Физические экраны витрины. У каждого — своя программа слайдов и ориентация; адрес экрана открывается на устройстве.', [
+        btn('+ Дисплей', function () { data.displays.push(M.newDisplay()); changed(true); }, 'btn-primary')
+      ]),
+      data.displays.length ? cards : card('Дисплеев пока нет', h('p', { class: 'text-body-secondary mb-0' },
+        'Без дисплея экран показывает все слайды вертикально (как раньше). Создайте дисплей, чтобы задать ему свою программу и горизонтальную ориентацию.')));
   }
 
   /* ===== Блюда ===== */
@@ -1470,6 +1563,7 @@
     document.getElementById('login').hidden = true;
     document.getElementById('app').hidden = false;
     renderNavRight();
+    fillPreviewDisplays();
     render();
     scalePreview();
     sendPreview();

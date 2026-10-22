@@ -17,6 +17,7 @@
       <div class="collapse navbar-collapse" id="topnav">
         <ul class="navbar-nav me-auto" id="nav">
           <li class="nav-item"><a class="nav-link active" href="#" data-tab="slides">Экраны</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="displays">Дисплеи</a></li>
           <li class="nav-item"><a class="nav-link" href="#" data-tab="dishes">Блюда</a></li>
           <li class="nav-item"><a class="nav-link" href="#" data-tab="events">Мероприятия</a></li>
           <li class="nav-item"><a class="nav-link" href="#" data-tab="design">Анимация и оформление</a></li>
@@ -36,6 +37,9 @@
         <div class="preview card shadow-sm">
           <div class="card-header d-flex align-items-center gap-2">
             <strong class="me-auto">Предпросмотр</strong>
+            <select class="form-select form-select-sm w-auto" id="previewDisplay" title="Какой дисплей показывать в предпросмотре">
+              <option value="">Все слайды · вертикально</option>
+            </select>
             <select class="form-select form-select-sm w-auto" id="previewMode">
               <option value="slide">Выбранный слайд</option>
               <option value="show">Вся программа</option>
@@ -46,7 +50,7 @@
           <div class="preview__screen" id="previewScreen">
             <iframe id="previewFrame" src="../index.html?preview=1" title="Предпросмотр витрины"></iframe>
           </div>
-          <div class="card-footer small text-body-secondary">Экран 1080×1920 (вертикальный FullHD), масштаб уменьшен.</div>
+          <div class="card-footer small text-body-secondary" id="previewNote">Экран 1080×1920 (вертикальный), масштаб уменьшен.</div>
         </div>
       </aside>
     </div>
