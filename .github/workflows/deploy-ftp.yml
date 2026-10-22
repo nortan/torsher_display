@@ -63,17 +63,24 @@ jobs:
         if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
         run: tools/ftp-upload.sh dist "$FTP_DIR"
 
-      - name: Первичная установка (если ещё не установлено)
+      - name: Обновление контента на сервере
         if: env.FTP_USER != '' && env.FTP_PASSWORD != ''
         run: |
+          # Первичная установка создаёт БД и администратора; дальше данные обновляются
+          # из content/data.json через api/update.php — так деплой не затирает контент.
           out=$(curl -sS --max-time 60 "$SITE_URL/api/install.php" \
             --data-urlencode "login=$ADMIN_LOGIN" --data-urlencode "password=$ADMIN_PASSWORD" --data-urlencode "storage=db" | tr -d '\n')
           msg=$(printf '%s' "$out" | grep -o 'class="alert[^"]*">[^<]*' | sed 's/.*">//' || true)
-          echo "Ответ установщика: ${msg:-нет сообщения}"
+          echo "Установщик: ${msg:-нет сообщения}"
           case "$msg" in
-            Готово*|"Витрина уже установлена"*) ;;
+            Готово*|*"Витрина уже установлена"*) ;;
             *) printf '%s' "$out" | head -c 600; echo; echo "::error::Установка не выполнена (проверьте DB_*, ADMIN_* и SITE_URL / FTP_DIR)"; exit 1 ;;
           esac
+          # Вход и обновление контента: заодно проверяем, что бэкенд жив
+          csrf=$(curl -sS -c /tmp/ck.txt -b /tmp/ck.txt "$SITE_URL/api/auth.php" -d '{"action":"login","login":"'"$ADMIN_LOGIN"'","password":"'"$ADMIN_PASSWORD"'"}' -H 'Content-Type: application/json' | php -r 'echo json_decode(stream_get_contents(STDIN))->csrf ?? "";')
+          test -n "$csrf" || { echo "::error::Не удалось войти в админку (ADMIN_LOGIN/ADMIN_PASSWORD)"; exit 1; }
+          curl -sS -c /tmp/ck.txt -b /tmp/ck.txt -X POST "$SITE_URL/api/update.php" -H "X-CSRF-Token: $csrf" -H 'Content-Type: application/json' -d '{}' | tee /dev/stderr | grep -q '"ok":true' \
+            && echo "Контент обновлён из content/data.json" || { echo "::error::api/update.php вернул ошибку"; exit 1; }
 
       - name: Закрываем установщик
         if: always() && env.FTP_USER != '' && env.FTP_PASSWORD != ''

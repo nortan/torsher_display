@@ -114,6 +114,7 @@
 | `GET api/data.php` | публично | Весь документ (как `data.json`, плюс `revision`, `updatedAt`) |
 | `GET api/data.php?revision=1` | публично | `{ revision }` |
 | `PUT api/data.php` | вход + `X-CSRF-Token` | `{ ok, revision }` |
+| `POST api/update.php` | вход + `X-CSRF-Token` | `{ ok, revision }` — записывает `content/data.json` в хранилище |
 | `GET api/auth.php` | — | `{ user, csrf }` или 401 с `{ csrf }` |
 | `POST api/auth.php` `{action:"login", login, password}` | — | `{ user, csrf }` |
 | `POST api/auth.php` `{action:"logout"}` / `{action:"password", current, next}` | вход + CSRF | `{ ok }` |

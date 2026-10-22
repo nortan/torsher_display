@@ -1,8 +1,8 @@
 {
   "version": 2,
   "cafe": {
-    "name": "Торшер",
-    "tagline": "кафе · кухня весь день",
+    "name": "Кафе \"Торшер\"",
+    "tagline": "кафе · кухня весь день · десерты",
     "logo": "assets/img/logo.svg"
   },
   "settings": {
@@ -15,7 +15,7 @@
       "clock": true,
       "date": true
     },
-    "tickerEnabled": true,
+    "tickerEnabled": false,
     "progressEnabled": true,
     "accentStyle": "pill",
     "accentAnim": "pulse",
@@ -67,6 +67,12 @@
     ],
     "colors": {},
     "bgGradient": true,
+    "bg": {
+      "color1": "lime",
+      "color2": "orange",
+      "speed": 1,
+      "intensity": 1
+    },
     "fonts": {
       "heading": "Nunito",
       "dish": "Montserrat",
@@ -98,6 +104,7 @@
     },
     "currency": "",
     "refreshInterval": 60,
+    "autoRefreshMinutes": 30,
     "tickerSpeed": 80,
     "dailyReloadAt": "04:00"
   },
@@ -109,466 +116,886 @@
   ],
   "dishes": [
     {
-      "id": "dish-01",
-      "name": "Омлет с креветками",
-      "category": "Завтраки",
-      "description": "Томаты, соус биск, микрозелень",
-      "weight": "250 г",
-      "price": 540,
-      "oldPrice": null,
-      "tag": "хит",
-      "photo": "assets/dishes/omelette.webp",
-      "active": true,
       "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-02",
-      "name": "Каре ягнёнка",
-      "category": "Горячее",
-      "description": "Печёный перец и кукуруза гриль",
-      "weight": "350 г",
-      "price": 2590,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/lamb.webp",
-      "active": true,
-      "accent": true,
-      "isNew": false
-    },
-    {
-      "id": "dish-03",
-      "name": "Огуречный салат",
-      "category": "Салаты",
-      "description": "Перепелиные яйца, щучья икра",
-      "weight": "240 г",
-      "price": 640,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/salad-eggs.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-04",
-      "name": "Салат с тунцом",
-      "category": "Салаты",
-      "description": "Тунец medium, микс салата, кунжут",
-      "weight": "320 г",
-      "price": 990,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/salad-tuna.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-05",
-      "name": "Мидии в сливочном соусе",
-      "category": "Горячие закуски",
-      "description": "Соус с песто, чесночные гренки",
-      "weight": "400 г",
-      "price": 1390,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/mussels.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-06",
-      "name": "Филе кальмара",
-      "category": "Горячие закуски",
-      "description": "С печёным рамиро",
-      "weight": "205 г",
-      "price": 740,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/squid.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-07",
-      "name": "Пельмени домашние",
-      "category": "Горячее",
-      "description": "Лепим вручную, со сметаной",
-      "weight": "200 г",
-      "price": 740,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/pelmeni.webp",
-      "active": true,
-      "accent": false,
-      "isNew": true
-    },
-    {
-      "id": "dish-08",
-      "name": "Томлёные щёки",
-      "category": "Горячее",
-      "description": "Картофельное пюре, соус демигляс",
-      "weight": "290 г",
-      "price": 1290,
-      "oldPrice": null,
-      "tag": "хит",
-      "photo": "assets/dishes/cheeks.webp",
-      "active": true,
-      "accent": true,
-      "isNew": false
-    },
-    {
-      "id": "dish-09",
-      "name": "Шашлык из свинины",
-      "category": "Мангал",
-      "description": "Маринованный лук, соус",
-      "weight": "200 г",
-      "price": 590,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/shashlik.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-10",
-      "name": "Сёмга на углях",
-      "category": "Мангал",
-      "description": "Стейк с лимоном и оливками",
-      "weight": "200 г",
-      "price": 1840,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/salmon.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-11",
-      "name": "Овощи гриль",
-      "category": "Мангал",
-      "description": "Баклажан, кабачок, перец, шампиньоны",
-      "weight": "300 г",
-      "price": 440,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/grill-veg.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-12",
-      "name": "Брокколи терияки",
-      "category": "Гарниры",
-      "description": "С кунжутом",
-      "weight": "180 г",
-      "price": 430,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/broccoli.webp",
-      "active": true,
-      "accent": false,
-      "isNew": true
-    },
-    {
-      "id": "dish-13",
-      "name": "Паста с морепродуктами",
-      "category": "Паста",
-      "description": "Мидии, креветки, сливочный соус",
-      "weight": "410 г",
-      "price": 1390,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/pasta.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-14",
-      "name": "Бургер классический",
-      "category": "Бургеры",
-      "description": "Говядина, чеддер, маринованный огурец",
-      "weight": "350 г",
-      "price": 790,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/burger.webp",
-      "active": true,
-      "accent": true,
-      "isNew": false
-    },
-    {
-      "id": "dish-15",
-      "name": "Пицца «Охотничья»",
-      "category": "Пицца",
-      "description": "Охотничьи колбаски, томаты, руккола",
-      "weight": "570 г",
-      "price": 1040,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-16",
-      "name": "Десерт «Калинник»",
-      "category": "Десерты",
-      "description": "Калина и черносмородиновое суфле",
-      "weight": "120 г",
-      "price": 450,
-      "oldPrice": null,
-      "tag": "новинка",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": true
-    },
-    {
-      "id": "dish-17",
-      "name": "Медовик",
-      "category": "Десерты",
-      "description": "С сотовым мёдом",
-      "weight": "180 г",
-      "price": 590,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-18",
-      "name": "Яблочный штрудель",
-      "category": "Десерты",
-      "description": "С карамельным соусом",
-      "weight": "190 г",
-      "price": 590,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/strudel.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-19",
-      "name": "Мороженое с ягодами",
-      "category": "Десерты",
-      "description": "Желейные шарики, сироп",
-      "weight": "150 г",
-      "price": 440,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-20",
-      "name": "Окрошка на квасе",
-      "category": "Супы",
-      "description": "Сезонное предложение",
-      "weight": "350 г",
-      "price": 540,
-      "oldPrice": 620,
-      "tag": "",
-      "photo": "assets/dishes/okroshka.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-21",
-      "name": "Солянка сборная",
-      "category": "Супы",
-      "description": "Копчёности, маслины, лимон",
-      "weight": "300 г",
-      "price": 530,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/solyanka.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-22",
-      "name": "Борщ с чесночной булочкой",
-      "category": "Супы",
-      "description": "Со сметаной и зеленью",
-      "weight": "350 г",
-      "price": 530,
-      "oldPrice": null,
-      "tag": "хит",
-      "photo": "assets/dishes/borsch.webp",
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-23",
-      "name": "Куриный бульон с лапшой",
-      "category": "Супы",
+      "isNew": false,
+      "id": "dish-msvrekh40",
+      "name": "Брусника - клюква - морожка",
+      "category": "Лимонады",
       "description": "",
-      "weight": "300 г",
-      "price": 430,
-      "oldPrice": null,
+      "weight": "350",
+      "price": 0,
+      "oldPrice": 450,
       "tag": "",
       "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
+      "active": true
     },
     {
-      "id": "dish-24",
-      "name": "Уха с муксуном",
-      "category": "Супы",
+      "accent": false,
+      "isNew": false,
+      "id": "dish-o2j6hpezy",
+      "name": "Малина - маракуйя - манго",
+      "category": "Лимонады",
       "description": "",
-      "weight": "400 г",
-      "price": 830,
-      "oldPrice": null,
-      "tag": "хит",
-      "photo": null,
-      "active": true,
-      "accent": true,
-      "isNew": false
-    },
-    {
-      "id": "dish-25",
-      "name": "Ризотто с телятиной",
-      "category": "Горячее",
-      "description": "Пармезан, зелёный горошек",
-      "weight": "300 г",
-      "price": 890,
-      "oldPrice": null,
-      "tag": "",
-      "photo": "assets/dishes/risotto.webp",
-      "active": true,
-      "accent": false,
-      "isNew": true
-    },
-    {
-      "id": "dish-26",
-      "name": "Цезарь с курицей",
-      "category": "Салаты",
-      "description": "Романо, пармезан, соус цезарь",
-      "weight": "250 г",
-      "price": 620,
+      "weight": "350",
+      "price": 400,
       "oldPrice": null,
       "tag": "",
       "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
+      "active": true
     },
     {
-      "id": "dish-27",
-      "name": "Греческий салат",
-      "category": "Салаты",
+      "accent": false,
+      "isNew": false,
+      "id": "dish-t7wb8gegf",
+      "name": "Черника - смородина - мята",
+      "category": "Лимонады",
       "description": "",
-      "weight": "260 г",
-      "price": 640,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-28",
-      "name": "Картофель фри",
-      "category": "Гарниры",
-      "description": "",
-      "weight": "150 г",
-      "price": 330,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-29",
-      "name": "Картофельное пюре",
-      "category": "Гарниры",
-      "description": "",
-      "weight": "200 г",
-      "price": 330,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-30",
-      "name": "Морс из ягод",
-      "category": "Напитки",
-      "description": "",
-      "weight": "300 мл",
-      "price": 200,
-      "oldPrice": null,
-      "tag": "",
-      "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
-    },
-    {
-      "id": "dish-31",
-      "name": "Лимонад облепиховый",
-      "category": "Напитки",
-      "description": "",
-      "weight": "400 мл",
+      "weight": "350",
       "price": 350,
       "oldPrice": null,
       "tag": "",
       "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
+      "active": true
     },
     {
-      "id": "dish-32",
-      "name": "Капучино",
-      "category": "Напитки",
+      "accent": false,
+      "isNew": false,
+      "id": "dish-r770sme33",
+      "name": "Вишня - малина - гранат",
+      "category": "Лимонады",
       "description": "",
-      "weight": "300 мл",
+      "weight": "350",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ax7q78htp",
+      "name": "Апельсиновый нектар - ягоды",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-86w1l6hdm",
+      "name": "Малина - вишня",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 450,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-002rwfgtk",
+      "name": "Смородина - вишня - малина на кокосовом молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-78bm8hgb7",
+      "name": "Смородина-вишня-малина на молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-6rp2exfs1",
+      "name": "Голубика - банан на кокосовом молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-yecoikfa7",
+      "name": "Голубика - банан на молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-wgm4z245c",
+      "name": "Ежевика - банан на кокосовом молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-8lz7nm3z8",
+      "name": "Ежевика - банан на молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-93g8fd3vc",
+      "name": "Клубника - банан на кокосовом молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-skj7zb3r1",
+      "name": "Клубника - банан на молоке",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-zu7am6op8",
+      "name": "Молочный коктель",
+      "category": "Смузи",
+      "description": "",
+      "weight": "370",
       "price": 250,
       "oldPrice": null,
       "tag": "",
       "photo": null,
-      "active": true,
-      "accent": false,
-      "isNew": false
+      "active": true
     },
     {
-      "id": "dish-33",
-      "name": "Наполеон",
-      "category": "Десерты",
+      "accent": false,
+      "isNew": false,
+      "id": "dish-h5y47p1te",
+      "name": "Какао",
+      "category": "Не кофе",
       "description": "",
-      "weight": "160 г",
-      "price": 530,
+      "weight": "200",
+      "price": 250,
       "oldPrice": null,
       "tag": "",
       "photo": null,
-      "active": true,
+      "active": true
+    },
+    {
       "accent": false,
-      "isNew": false
+      "isNew": false,
+      "id": "dish-rg2p5jtqs",
+      "name": "приготовить напиток на альтернативном молоке",
+      "category": "Кофе",
+      "description": "",
+      "weight": "",
+      "price": 50,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-m53eips7o",
+      "name": "Раф авторский арахисовый/малиновый пломбир/ миндаль-фисташка/тоффи0попкорн/халва",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-kx5ptjeqz",
+      "name": "Раф",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 310,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-hpr4vmxf6",
+      "name": "Раф",
+      "category": "Кофе",
+      "description": "",
+      "weight": "180",
+      "price": 220,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-myvf3wl9u",
+      "name": "Американо",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 250,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ac6v7x8yx",
+      "name": "Американо",
+      "category": "Кофе",
+      "description": "",
+      "weight": "200",
+      "price": 180,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-isuhqosni",
+      "name": "Латте пряная тыква / синнабон",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 330,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-fl2h9xiw9",
+      "name": "Латте",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 270,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-56fbno0rj",
+      "name": "Капучино",
+      "category": "Кофе",
+      "description": "",
+      "weight": "180",
+      "price": 200,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-a9l3cmefb",
+      "name": "Капучино",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 260,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/34f3cf656182e45ff5eb.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-evhx0f5vt",
+      "name": "Моккачино",
+      "category": "Кофе",
+      "description": "",
+      "weight": "200",
+      "price": 250,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-f9uz7nrmn",
+      "name": "Эспрессо-тоник",
+      "category": "Кофе",
+      "description": "",
+      "weight": "370",
+      "price": 300,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-rz2c7hg9k",
+      "name": "Глясе",
+      "category": "Кофе",
+      "description": "",
+      "weight": "180",
+      "price": 250,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-29uksb576",
+      "name": "Бамбл вишневый",
+      "category": "Кофе",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ilu0kft9g",
+      "name": "Флэт Уайт",
+      "category": "Кофе",
+      "description": "",
+      "weight": "180",
+      "price": 220,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-zyikqmhc7",
+      "name": "Бамбл апельсиновый",
+      "category": "Кофе",
+      "description": "",
+      "weight": "370",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-kwssro24p",
+      "name": "Эспрессо",
+      "category": "Кофе",
+      "description": "",
+      "weight": "36",
+      "price": 150,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-u3k1evw5x",
+      "name": "Айс латте",
+      "category": "Кофе",
+      "description": "",
+      "weight": "360",
+      "price": 280,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-hgfodt12y",
+      "name": "Бельгийские сладкие с вареньем",
+      "category": "Вафли сладкие",
+      "description": "бельгийская вафля, мороженое ванильное, варенье в асс.",
+      "weight": "",
+      "price": 290,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ngeqaojne",
+      "name": "Бельгийская вафля двойная сладкая с ягодами и мороженным",
+      "category": "Вафли сладкие",
+      "description": "бельгийские вафли 2 шт., мороженое ванильное, банан, годы сезонные, соус шоколадный/ягодный/карамельный",
+      "weight": "",
+      "price": 390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/897fe80290c0829b11c1.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-j38n3le5n",
+      "name": "Гонконгская вафля сладкая с ягодами и мороженным",
+      "category": "Вафли сладкие",
+      "description": "вафля гонконгская с начинкой из шоколада, мороженое ванильное, банан, ягоды сезонные, соус шоколадный/карамельный/ягодный",
+      "weight": "",
+      "price": 390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/b22fd4a2245bc62556dc.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-04dikje0k",
+      "name": "Бельгийская вафля с курицей и запеченным перцем",
+      "category": "Вафли сытные",
+      "description": "бельгийская вафля, сыр творожный,курица варено-копченая, перец болгарский запеченный, салат листовой, микрозелень гороха, маслины",
+      "weight": "",
+      "price": 390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/c95183111aa58a69b0fa.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-v5vvta0t5",
+      "name": "Бельгийская вафля с креветками и запеченным перцем",
+      "category": "Вафли сытные",
+      "description": "бельгийская вафля, сыр творожный, креветки отварные, перец болгарский запеченный,шпинат, микрозелень гороха, оливки",
+      "weight": "",
+      "price": 530,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/7f79924e40b90d18a3e4.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-gdfn9vk7k",
+      "name": "Бельгийская вафля с форелью и яйцом",
+      "category": "Вафли сытные",
+      "description": "бельгийская вафля, творожный сыр, яйцо отварное, форель слабосоленая, перец болгарский запечённый, руккола, микрозелень гороха, кунжут",
+      "weight": "",
+      "price": 490,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/b425164a756de3f4dcab.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-y2fbz1gzq",
+      "name": "Бельгийская вафля двойная с форелью и творожным сыром",
+      "category": "Вафли сытные",
+      "description": "вафли бельгийские - 2 шт., сыр творожный, форель слабосоленая, авокадо/гуакамоле, огурец, шпинат, микрозелень гороха, кунжут",
+      "weight": "",
+      "price": 520,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/3c8dddc8c0b83ab812f4.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-evlgoio79",
+      "name": "Гонконгская сытная вафля с курицей и овощами",
+      "category": "Вафли сытные",
+      "description": "вафля гонконгская с начинкой из сыра Тильзитер, курица варено-копченая, помидор, огурец, соус Тар-тар, салат листовой",
+      "weight": "",
+      "price": 430,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/61f10760e1827a97c8f1.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-q75ovpq1h",
+      "name": "Сытный завтрак на вафле",
+      "category": "Завтраки",
+      "description": "вафля гонконгская с начинкой из сыра Тильзитер, скрэмбл из двух яиц, курица варено-копченая помидор,огурец, соус Тар-тар, салат листовой",
+      "weight": "",
+      "price": 490,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/ae79caad7fef00dc3f28.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-qqvav579q",
+      "name": "Скрэмбл с креветками",
+      "category": "Завтраки",
+      "description": "взбитый омлет из двух яиц на сметане/глазунья из двух яиц,креветки су-вид, сыр творожные, микс салатов,огурец, помидор, хлеб, соус Бальзамико, кунжут",
+      "weight": "",
+      "price": 490,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/c27f7a4f32b4422a771f.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-fogdan6oj",
+      "name": "Скрэмбл с форелью",
+      "category": "Завтраки",
+      "description": "взбитый омлет из двух яиц на сметане/глазунья из двух яиц,форель слабосоленая, сыр творожный, микс салатов, огурец, помидор,хлеб, соус Бальзамико, кунжут",
+      "weight": "",
+      "price": 510,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/ac8a0c922540da5c9c05.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-w1e7zi5r4",
+      "name": "Скрэмбл  с копченой курочкой",
+      "category": "Завтраки",
+      "description": "взбитый омлет из двух яиц на сметане/глазунья из двух яиц, курица варпно-копченая, микс салатов, огурец, помидор, хлеб, соус Бальзамико, сыр творожный,семечки тыквенные",
+      "weight": "",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-j7vdpweec",
+      "name": "Скрэмбл/ глазунья/ яйца в мешочек с ветчиной",
+      "category": "Завтраки",
+      "description": "взбитый омлет из двух яиц на сметане/глазунья из двух яиц, свинина варено-копченая, микс салатов, огурец, помидор,хлеб, соус Бальзамико, сыр творожный, семечки тыквенные",
+      "weight": "",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-if0jrwb5e",
+      "name": "Блинчики с форелью и творожным сыром",
+      "category": "Завтраки",
+      "description": "блинчики - 2 шт., форель слабосоленая, сыр творожный, кунжут",
+      "weight": "",
+      "price": 350,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-qp0163ahx",
+      "name": "Блинчики с мясом и сметаной",
+      "category": "Завтраки",
+      "description": "блинчики домашние, фарш свино-говяжий, лук, сметана",
+      "weight": "",
+      "price": 300,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/b08606cfa444524d6165.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-v2qbuw38q",
+      "name": "Блинчики с топпингами",
+      "category": "Завтраки",
+      "description": "блинчики домашние, варенье в асс./сметана/сгущенное молоко",
+      "weight": "",
+      "price": 200,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/665d032404bda475ebed.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-hzdc20tqc",
+      "name": "Овсяная каша на воде",
+      "category": "Завтраки",
+      "description": "каша овсяная Геркулес, вода питьевая, сахар, сезонные ягоды",
+      "weight": "",
+      "price": 220,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-4kd2ctxc8",
+      "name": "Овсяна каша на молоке",
+      "category": "Завтраки",
+      "description": "каша овсяная Геркулес, молоко коровье 3,2%, масло сливочное 82,5%, сахар, ягоды сезонные",
+      "weight": "",
+      "price": 270,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/ac5d0e52b29aaa4c7584.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-npksn4oh9",
+      "name": "Сырники с топпингом",
+      "category": "Завтраки",
+      "description": "сырники творожные (творог МЖД 5%), сметана/варенье в асс./сгущённое молоко",
+      "weight": "",
+      "price": 300,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/1a60c8059d0112dab1c2.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ke4dw6n8m",
+      "name": "Азиатский салат с курицей",
+      "category": "Салаты",
+      "description": "курица варено-копченая, пекинская капуста,огурец, болгарский перец, морковь, арахис,азиатский соус (соевый соус,кунжутное масло, винный уксус, сахар)",
+      "weight": "",
+      "price": 400,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/1d4fea8bccedaeae4811.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-p375srzyb",
+      "name": "Сэндвич с ветчиной и сыром",
+      "category": "Сэндвичи",
+      "description": "хлеб тостовый, свинина варено-копченая, помидор, сыр чизбургер, бургер-соус, шпинат",
+      "weight": "",
+      "price": 340,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-sazdf33h2",
+      "name": "Сэндвич с копченой курицей",
+      "category": "Сэндвичи",
+      "description": "хлеб тостовый, курица варено-копчена, бургер-соус, сыр сливочный, помидор, огурец маринованный, салат листовой",
+      "weight": "",
+      "price": 390,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/10/0f673b9aa149155aa4df.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-j5wy5n1de",
+      "name": "Сэндвич с форелью",
+      "category": "Сэндвичи",
+      "description": "хлеб тостовый, форель слабосоленая, сыр творожный,авокадо, салат листовой, огурец, микро зелень гороха",
+      "weight": "",
+      "price": 430,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-pja1iojml",
+      "name": "Цезарь - сэндвич",
+      "category": "Сэндвичи",
+      "description": "хлеб тостовый, курица варено-копченая, соус Цезарь, салат Айсберг, помидор, сыр сливочный",
+      "weight": "",
+      "price": 370,
+      "oldPrice": null,
+      "tag": "",
+      "photo": null,
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-qrieadd6y",
+      "name": "Чечевичный суп с беконом",
+      "category": "Супы",
+      "description": "чечевица, сливки 10%, лук, морковь, бекон",
+      "weight": "",
+      "price": 420,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/09/3c25645a58c5f0dc63af.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-doww1gg1i",
+      "name": "Салат с креветками и киноа",
+      "category": "Салаты",
+      "description": "креветки отварные, киноа, бобы эдамаме, помидоры, огурцы, руккола, шпинат, гуакамоле, соус на основе кунжутного масла",
+      "weight": "",
+      "price": 520,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/09/83ab5d298a04e89483e9.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-xv1wai6jj",
+      "name": "Зелёный салат с форелью и киноа",
+      "category": "Салаты",
+      "description": "форель слабосоленая, киноа, бобы эдамаме, помидоры, огурцы, шпинат, руккола, гуакамоле, соус на основе кунжутного масла",
+      "weight": "",
+      "price": 540,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/09/1c356dff64fd47d76c8f.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-ue5iqbqca",
+      "name": "крем - суп грибной",
+      "category": "Супы",
+      "description": "шампиньоны, сливки 10%, сыр сливочный, лук, соль, специи",
+      "weight": "",
+      "price": 420,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/09/dd89bf5802f8239d013c.webp",
+      "active": true
+    },
+    {
+      "accent": false,
+      "isNew": false,
+      "id": "dish-2qyarhjrj",
+      "name": "Азиатский салат с креветками",
+      "category": "Салаты",
+      "description": "креветки отварные, пекинская капуста, огурец, болгарский перец, морковь, арахис, азиатский соус ( соевый соус, кунжутное масло, винный уксус, сахар)",
+      "weight": "",
+      "price": 450,
+      "oldPrice": null,
+      "tag": "",
+      "photo": "uploads/2026/09/633e5369ce4691ab48b5.webp",
+      "active": true
     }
   ],
   "events": [
@@ -691,13 +1118,13 @@
     },
     {
       "id": "ev-43",
-      "title": "Гастроужин «Мангал»",
-      "date": "2026-10-08",
-      "time": "19:00",
+      "title": "Хэллоуин",
+      "date": "2026-10-31",
+      "time": "14:00",
       "endTime": "",
-      "description": "Сет из пяти блюд от шефа",
-      "price": "700 ₽",
-      "tag": "Ужин",
+      "description": "",
+      "price": "",
+      "tag": "",
       "photo": null,
       "highlight": false,
       "active": true
@@ -705,10 +1132,7 @@
   ],
   "slides": [
     {
-      "id": "slide-01",
-      "type": "dishes",
       "name": "1 : 2 · тарелка внизу в край",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -731,8 +1155,62 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 70,
+          "scale": 1.24,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "rise",
         "title": "chars",
@@ -748,22 +1226,23 @@
         "priceLoop": "shine",
         "priceDur": 0.6
       },
-      "title": "Блюдо дня",
+      "title": "Завтраки",
       "subtitle": "",
       "layout": "p1t2-bottom",
       "photoDishes": [
-        "dish-14"
+        "dish-fogdan6oj"
       ],
       "textDishes": [
-        "dish-28",
-        "dish-29"
-      ]
+        "dish-v2qbuw38q",
+        "dish-v5vvta0t5"
+      ],
+      "bg": {},
+      "id": "slide-uutx4angb",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-02",
-      "type": "dishes",
       "name": "Текст · 8–10 позиций списком",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -787,7 +1266,35 @@
       },
       "colors": {},
       "photoPos": [],
-      "elements": {},
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "list": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "rise",
         "title": "chars",
@@ -803,28 +1310,29 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "Меню",
+      "title": "Вафли и скрэмблы",
       "subtitle": "Основные позиции",
       "layout": "text-10",
       "photoDishes": [],
       "textDishes": [
-        "dish-28",
-        "dish-29",
-        "dish-02",
-        "dish-07",
-        "dish-08",
-        "dish-25",
-        "dish-05",
-        "dish-06",
-        "dish-16",
-        "dish-17"
-      ]
+        "dish-j38n3le5n",
+        "dish-04dikje0k",
+        "dish-v5vvta0t5",
+        "dish-gdfn9vk7k",
+        "dish-y2fbz1gzq",
+        "dish-evlgoio79",
+        "dish-q75ovpq1h",
+        "dish-qqvav579q",
+        "dish-fogdan6oj",
+        "dish-w1e7zi5r4"
+      ],
+      "bg": {},
+      "id": "slide-pfe4i7ngb",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-03",
-      "type": "dishes",
       "name": "2 : 4 · зигзаг",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -847,8 +1355,96 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1.12,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 130,
+          "y": 0,
+          "scale": 1.4,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-2": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "slide",
         "title": "words",
@@ -864,25 +1460,26 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "Рекомендует шеф",
+      "title": "Рекомендуем",
       "subtitle": "",
       "layout": "p2t4",
       "photoDishes": [
-        "dish-12",
-        "dish-02"
+        "dish-q75ovpq1h",
+        "dish-04dikje0k"
       ],
       "textDishes": [
-        "dish-23",
-        "dish-24",
-        "dish-28",
-        "dish-29"
-      ]
+        "dish-fl2h9xiw9",
+        "dish-56fbno0rj",
+        "dish-evhx0f5vt",
+        "dish-m53eips7o"
+      ],
+      "bg": {},
+      "id": "slide-wgjf04ngb",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-04",
-      "type": "dishes",
       "name": "1 : 2 · тарелка справа в край",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -905,8 +1502,87 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": -310,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "cascade",
         "title": "chars",
@@ -922,22 +1598,23 @@
         "priceLoop": "glow",
         "priceDur": 0.6
       },
-      "title": "Горячее",
+      "title": "Крем-суп",
       "subtitle": "",
-      "layout": "p1t2-side",
+      "layout": "hero",
       "photoDishes": [
-        "dish-07"
+        "dish-ue5iqbqca"
       ],
       "textDishes": [
-        "dish-16",
-        "dish-17"
-      ]
+        "dish-pja1iojml",
+        "dish-isuhqosni"
+      ],
+      "bg": {},
+      "id": "slide-xz1zwsngb",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-05",
-      "type": "dishes",
       "name": "3 : 6 · зигзаг",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -960,8 +1637,130 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "zoom",
         "title": "words",
@@ -981,24 +1780,25 @@
       "subtitle": "",
       "layout": "p3t6",
       "photoDishes": [
-        "dish-08",
-        "dish-25",
-        "dish-05"
+        "dish-gdfn9vk7k",
+        "dish-y2fbz1gzq",
+        "dish-evlgoio79"
       ],
       "textDishes": [
-        "dish-19",
-        "dish-33",
-        "dish-30",
-        "dish-31",
-        "dish-32",
-        "dish-15"
-      ]
+        "dish-ilu0kft9g",
+        "dish-zyikqmhc7",
+        "dish-kwssro24p",
+        "dish-u3k1evw5x",
+        "dish-r770sme33",
+        "dish-t7wb8gegf"
+      ],
+      "bg": {},
+      "id": "slide-b40xmmngb",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-06",
-      "type": "dishes",
       "name": "Текст · 8–10 позиций по категориям",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1022,7 +1822,35 @@
       },
       "colors": {},
       "photoPos": [],
-      "elements": {},
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "list": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "slide",
         "title": "words",
@@ -1043,78 +1871,24 @@
       "layout": "text-groups",
       "photoDishes": [],
       "textDishes": [
-        "dish-03",
-        "dish-04",
-        "dish-26",
-        "dish-27",
-        "dish-20",
-        "dish-21",
-        "dish-22",
-        "dish-23",
-        "dish-24",
-        "dish-14"
-      ]
-    },
-    {
-      "id": "slide-07",
-      "type": "dishes",
-      "name": "1 : 2 · тарелка сверху, афишный",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "blur",
-        "title": "lines",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "roll",
-        "photoLoop": "sway",
-        "photoDur": 1.3,
-        "name": "blur",
-        "nameDur": 0.6,
-        "priceIn": "flip",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Сезонное",
-      "subtitle": "",
-      "layout": "p1t2-top",
-      "photoDishes": [
-        "dish-06"
+        "dish-pja1iojml",
+        "dish-isuhqosni",
+        "dish-doww1gg1i",
+        "dish-m53eips7o",
+        "dish-fogdan6oj",
+        "dish-evhx0f5vt",
+        "dish-qqvav579q",
+        "dish-q75ovpq1h",
+        "dish-v5vvta0t5",
+        "dish-ue5iqbqca"
       ],
-      "textDishes": [
-        "dish-30",
-        "dish-31"
-      ]
+      "bg": {},
+      "id": "slide-jkp0ztngb",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-08",
-      "type": "dishes",
       "name": "2 : 4 · по диагонали",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -1137,8 +1911,87 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "flip",
         "title": "lines",
@@ -1158,21 +2011,22 @@
       "subtitle": "",
       "layout": "p2t4-bottom",
       "photoDishes": [
-        "dish-18",
-        "dish-01"
+        "dish-qqvav579q",
+        "dish-fogdan6oj"
       ],
       "textDishes": [
-        "dish-32",
-        "dish-15",
-        "dish-26",
-        "dish-27"
-      ]
+        "dish-w1e7zi5r4",
+        "dish-if0jrwb5e",
+        "dish-hzdc20tqc",
+        "dish-j7vdpweec"
+      ],
+      "bg": {},
+      "id": "slide-jo4qmdngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-09",
-      "type": "dishes",
       "name": "1 : 0 · одно блюдо крупно",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1195,8 +2049,53 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": -520,
+          "scale": 1.22,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "zoom",
         "title": "words",
@@ -1212,19 +2111,20 @@
         "priceLoop": "shine",
         "priceDur": 0.6
       },
-      "title": "Блюдо недели",
+      "title": "Блинчики",
       "subtitle": "",
       "layout": "hero",
       "photoDishes": [
-        "dish-09"
+        "dish-qp0163ahx"
       ],
-      "textDishes": []
+      "textDishes": [],
+      "bg": {},
+      "id": "slide-bf47frngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-10",
-      "type": "dishes",
       "name": "1 : 2 · тарелка внизу в край",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1247,8 +2147,62 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "typewriter",
         "title": "chars",
@@ -1268,18 +2222,19 @@
       "subtitle": "",
       "layout": "p1t2-bottom",
       "photoDishes": [
-        "dish-10"
+        "dish-v2qbuw38q"
       ],
       "textDishes": [
-        "dish-23",
-        "dish-24"
-      ]
+        "dish-rg2p5jtqs",
+        "dish-m53eips7o"
+      ],
+      "bg": {},
+      "id": "slide-n8szlqngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-11",
-      "type": "dishes",
       "name": "3 : 6 · три тарелки внизу",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1302,8 +2257,112 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "rise",
         "title": "words",
@@ -1323,24 +2382,25 @@
       "subtitle": "",
       "layout": "p3t6-row",
       "photoDishes": [
-        "dish-11",
-        "dish-13",
-        "dish-03"
+        "dish-evlgoio79",
+        "dish-npksn4oh9",
+        "dish-a9l3cmefb"
       ],
       "textDishes": [
-        "dish-28",
-        "dish-29",
-        "dish-16",
-        "dish-17",
-        "dish-19",
-        "dish-33"
-      ]
+        "dish-hpr4vmxf6",
+        "dish-u3k1evw5x",
+        "dish-myvf3wl9u",
+        "dish-r770sme33",
+        "dish-isuhqosni",
+        "dish-fogdan6oj"
+      ],
+      "bg": {},
+      "id": "slide-tafmtsngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-12",
-      "type": "dishes",
       "name": "1 : 8 · две колонки текста + тарелка",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1359,12 +2419,66 @@
       },
       "sizes": {
         "title": null,
-        "dish": null,
+        "dish": 1.7,
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "fade",
         "title": "lines",
@@ -1380,28 +2494,29 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "Кухня",
-      "subtitle": "Всё меню на одном экране",
+      "title": "Напитки",
+      "subtitle": "",
       "layout": "p1t8-2col",
       "photoDishes": [
-        "dish-04"
+        "dish-o2j6hpezy"
       ],
       "textDishes": [
-        "dish-30",
-        "dish-31",
-        "dish-32",
-        "dish-15",
-        "dish-26",
-        "dish-27",
-        "dish-23",
-        "dish-24"
-      ]
+        "dish-78bm8hgb7",
+        "dish-yecoikfa7",
+        "dish-8lz7nm3z8",
+        "dish-skj7zb3r1",
+        "dish-zu7am6op8",
+        "dish-h5y47p1te",
+        "dish-rg2p5jtqs",
+        "dish-kx5ptjeqz"
+      ],
+      "bg": {},
+      "id": "slide-b5byhrngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-13",
-      "type": "dishes",
       "name": "1 : 4 · тарелка слева в край",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -1420,12 +2535,75 @@
       },
       "sizes": {
         "title": null,
-        "dish": null,
+        "dish": 1.7,
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "list": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "slide",
         "title": "chars",
@@ -1441,24 +2619,29 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "Рыба и мясо",
+      "title": "Кофе",
       "subtitle": "",
-      "layout": "p1t4",
+      "layout": "text-8",
       "photoDishes": [
-        "dish-20"
+        "dish-r770sme33"
       ],
       "textDishes": [
-        "dish-28",
-        "dish-29",
-        "dish-16",
-        "dish-17"
-      ]
+        "dish-myvf3wl9u",
+        "dish-a9l3cmefb",
+        "dish-rz2c7hg9k",
+        "dish-ilu0kft9g",
+        "dish-zyikqmhc7",
+        "dish-kwssro24p",
+        "dish-isuhqosni",
+        "dish-f9uz7nrmn"
+      ],
+      "bg": {},
+      "id": "slide-7oxbasngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-14",
-      "type": "dishes",
       "name": "2 : 4 · зигзаг",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1481,8 +2664,96 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": -160,
+          "scale": 1.1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": -100,
+          "y": 0,
+          "scale": 1.22,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-2": {
+          "visible": false,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "cascade",
         "title": "words",
@@ -1498,25 +2769,26 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "К столу",
+      "title": "Салаты + напитки",
       "subtitle": "",
       "layout": "p2t4",
       "photoDishes": [
-        "dish-21",
-        "dish-22"
+        "dish-ke4dw6n8m",
+        "dish-doww1gg1i"
       ],
       "textDishes": [
-        "dish-19",
-        "dish-33",
-        "dish-30",
-        "dish-31"
-      ]
+        "dish-ax7q78htp",
+        "dish-86w1l6hdm",
+        "dish-002rwfgtk",
+        "dish-78bm8hgb7"
+      ],
+      "bg": {},
+      "id": "slide-fdv3e1ngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-15",
-      "type": "dishes",
       "name": "1 : 6 · тарелка справа, список слева",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1539,8 +2811,62 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "fade",
         "title": "words",
@@ -1556,26 +2882,27 @@
         "priceLoop": "none",
         "priceDur": 0.6
       },
-      "title": "Весь день",
+      "title": "Всегда есть",
       "subtitle": "",
       "layout": "p1t6",
       "photoDishes": [
-        "dish-14"
+        "dish-xv1wai6jj"
       ],
       "textDishes": [
-        "dish-32",
-        "dish-15",
-        "dish-26",
-        "dish-27",
-        "dish-23",
-        "dish-24"
-      ]
+        "dish-wgm4z245c",
+        "dish-8lz7nm3z8",
+        "dish-zu7am6op8",
+        "dish-p375srzyb",
+        "dish-j5wy5n1de",
+        "dish-pja1iojml"
+      ],
+      "bg": {},
+      "id": "slide-jkci5vngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-16",
-      "type": "dishes",
       "name": "Текст · 6–8 позиций крупно",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1599,7 +2926,35 @@
       },
       "colors": {},
       "photoPos": [],
-      "elements": {},
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "list": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "typewriter",
         "title": "chars",
@@ -1620,21 +2975,22 @@
       "layout": "text-8",
       "photoDishes": [],
       "textDishes": [
-        "dish-02",
-        "dish-07",
-        "dish-08",
-        "dish-25",
-        "dish-05",
-        "dish-06",
-        "dish-16",
-        "dish-17"
-      ]
+        "dish-evlgoio79",
+        "dish-q75ovpq1h",
+        "dish-qqvav579q",
+        "dish-fogdan6oj",
+        "dish-w1e7zi5r4",
+        "dish-if0jrwb5e",
+        "dish-qp0163ahx",
+        "dish-v2qbuw38q"
+      ],
+      "bg": {},
+      "id": "slide-2mw9wdngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-17",
-      "type": "dishes",
       "name": "1 : 2 · тарелка справа в край",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1657,8 +3013,62 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "zoom",
         "title": "chars",
@@ -1678,18 +3088,19 @@
       "subtitle": "",
       "layout": "p1t2-side",
       "photoDishes": [
-        "dish-12"
+        "dish-ue5iqbqca"
       ],
       "textDishes": [
-        "dish-32",
-        "dish-15"
-      ]
+        "dish-doww1gg1i",
+        "dish-m53eips7o"
+      ],
+      "bg": {},
+      "id": "slide-iry4x1ngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-18",
-      "type": "dishes",
       "name": "4 : 4 · тарелки по углам",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1708,17 +3119,146 @@
       },
       "sizes": {
         "title": null,
-        "dish": null,
+        "dish": 1.8,
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1.76,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 600,
+          "y": 470,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-4": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-4": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "blur",
         "title": "words",
         "order": "sequence",
-        "speed": 1,
+        "speed": 1.8,
         "stagger": 0.08,
         "photoIn": "rise",
         "photoLoop": "float",
@@ -1733,23 +3273,24 @@
       "subtitle": "",
       "layout": "p4t4",
       "photoDishes": [
-        "dish-02",
-        "dish-07",
-        "dish-08",
-        "dish-25"
+        "dish-6rp2exfs1",
+        "dish-yecoikfa7",
+        "dish-93g8fd3vc",
+        "dish-skj7zb3r1"
       ],
       "textDishes": [
-        "dish-26",
-        "dish-27",
-        "dish-23",
-        "dish-24"
-      ]
+        "dish-ac6v7x8yx",
+        "dish-isuhqosni",
+        "dish-fl2h9xiw9",
+        "dish-56fbno0rj"
+      ],
+      "bg": {},
+      "id": "slide-innnxsngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-19",
-      "type": "dishes",
       "name": "Текст · главное блюдо в рамке + 8",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1773,7 +3314,44 @@
       },
       "colors": {},
       "photoPos": [],
-      "elements": {},
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "list": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "zoom",
         "title": "words",
@@ -1794,22 +3372,23 @@
       "layout": "text-feature",
       "photoDishes": [],
       "textDishes": [
-        "dish-11",
-        "dish-30",
-        "dish-31",
-        "dish-32",
-        "dish-13",
-        "dish-15",
-        "dish-03",
-        "dish-04",
-        "dish-26"
-      ]
+        "dish-kx5ptjeqz",
+        "dish-hpr4vmxf6",
+        "dish-myvf3wl9u",
+        "dish-ac6v7x8yx",
+        "dish-isuhqosni",
+        "dish-fl2h9xiw9",
+        "dish-56fbno0rj",
+        "dish-a9l3cmefb",
+        "dish-evhx0f5vt"
+      ],
+      "bg": {},
+      "id": "slide-pazoxhngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-20",
-      "type": "dishes",
       "name": "3 : 6 · зигзаг",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -1832,8 +3411,130 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "flip",
         "title": "lines",
@@ -1853,76 +3554,25 @@
       "subtitle": "",
       "layout": "p3t6",
       "photoDishes": [
-        "dish-05",
-        "dish-06",
-        "dish-18"
+        "dish-qrieadd6y",
+        "dish-ue5iqbqca",
+        "dish-sazdf33h2"
       ],
       "textDishes": [
-        "dish-15",
-        "dish-26",
-        "dish-27",
-        "dish-23",
-        "dish-24",
-        "dish-28"
-      ]
-    },
-    {
-      "id": "slide-21",
-      "type": "dishes",
-      "name": "1 : 0 · одно блюдо, тарелка по центру",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": true,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "zoom",
-        "title": "words",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "spin",
-        "photoLoop": "breathe",
-        "photoDur": 1.3,
-        "name": "wave",
-        "nameDur": 0.6,
-        "priceIn": "stamp",
-        "priceLoop": "shine",
-        "priceDur": 0.6
-      },
-      "title": "Шеф рекомендует",
-      "subtitle": "",
-      "layout": "p1-center",
-      "photoDishes": [
-        "dish-01"
+        "dish-t7wb8gegf",
+        "dish-h5y47p1te",
+        "dish-ax7q78htp",
+        "dish-86w1l6hdm",
+        "dish-002rwfgtk",
+        "dish-78bm8hgb7"
       ],
-      "textDishes": []
+      "bg": {},
+      "id": "slide-zhp6uengc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-22",
-      "type": "dishes",
       "name": "2 : 0 · два блюда по диагонали",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -1945,8 +3595,78 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "slide",
         "title": "chars",
@@ -1966,16 +3686,17 @@
       "subtitle": "",
       "layout": "p2",
       "photoDishes": [
-        "dish-09",
-        "dish-10"
+        "dish-j38n3le5n",
+        "dish-04dikje0k"
       ],
-      "textDishes": []
+      "textDishes": [],
+      "bg": {},
+      "id": "slide-blmzddngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-23",
-      "type": "dishes",
       "name": "3 : 0 · три блюда зигзагом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -1998,8 +3719,103 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "rise",
         "title": "words",
@@ -2019,17 +3835,18 @@
       "subtitle": "",
       "layout": "p3",
       "photoDishes": [
-        "dish-11",
-        "dish-13",
-        "dish-03"
+        "dish-v5vvta0t5",
+        "dish-gdfn9vk7k",
+        "dish-y2fbz1gzq"
       ],
-      "textDishes": []
+      "textDishes": [],
+      "bg": {},
+      "id": "slide-jbkcjgngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-24",
-      "type": "dishes",
       "name": "1 : 1 · тарелка внизу + одно текстом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -2052,8 +3869,62 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "cascade",
         "title": "chars",
@@ -2073,17 +3944,18 @@
       "subtitle": "",
       "layout": "p1t1",
       "photoDishes": [
-        "dish-04"
+        "dish-evlgoio79"
       ],
       "textDishes": [
-        "dish-29"
-      ]
+        "dish-wgm4z245c"
+      ],
+      "bg": {},
+      "id": "slide-o4i1bnngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-25",
-      "type": "dishes",
       "name": "2 : 1 · по диагонали + одно текстом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "right",
       "bgGradient": null,
@@ -2106,8 +3978,87 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "fade",
         "title": "lines",
@@ -2127,18 +4078,17 @@
       "subtitle": "",
       "layout": "p2t1",
       "photoDishes": [
-        "dish-20",
-        "dish-21"
+        "dish-q75ovpq1h",
+        "dish-qqvav579q"
       ],
-      "textDishes": [
-        "dish-16"
-      ]
+      "textDishes": [],
+      "bg": {},
+      "id": "slide-p3jy1cngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-26",
-      "type": "dishes",
       "name": "3 : 1 · зигзаг + одно текстом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -2161,8 +4111,112 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "zoom",
         "title": "words",
@@ -2182,74 +4236,20 @@
       "subtitle": "",
       "layout": "p3t1",
       "photoDishes": [
-        "dish-22",
-        "dish-14",
-        "dish-12"
+        "dish-fogdan6oj",
+        "dish-qp0163ahx",
+        "dish-v2qbuw38q"
       ],
       "textDishes": [
-        "dish-17"
-      ]
-    },
-    {
-      "id": "slide-27",
-      "type": "dishes",
-      "name": "1 : 2 · тарелка по центру",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "right",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "slide",
-        "title": "chars",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "flip",
-        "photoLoop": "breathe",
-        "photoDur": 1.3,
-        "name": "scramble",
-        "nameDur": 0.6,
-        "priceIn": "stamp",
-        "priceLoop": "glow",
-        "priceDur": 0.6
-      },
-      "title": "С огня",
-      "subtitle": "",
-      "layout": "p1t2-center",
-      "photoDishes": [
-        "dish-02"
+        "dish-zu7am6op8"
       ],
-      "textDishes": [
-        "dish-19",
-        "dish-33"
-      ]
+      "bg": {},
+      "id": "slide-gfdqzmngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-28",
-      "type": "dishes",
       "name": "2 : 2 · зигзаг + два текстом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -2272,8 +4272,96 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": -250,
+          "scale": 1.16,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 65,
+          "y": 35,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "flip",
         "title": "lines",
@@ -2289,23 +4377,23 @@
         "priceLoop": "swing",
         "priceDur": 0.6
       },
-      "title": "Сытный обед",
+      "title": "Легкий завтрак",
       "subtitle": "",
       "layout": "p2t2",
       "photoDishes": [
-        "dish-07",
-        "dish-08"
+        "dish-npksn4oh9",
+        "dish-a9l3cmefb"
       ],
       "textDishes": [
-        "dish-30",
-        "dish-31"
-      ]
+        "dish-pja1iojml"
+      ],
+      "bg": {},
+      "id": "slide-m6hbb5ngc",
+      "type": "dishes",
+      "enabled": true
     },
     {
-      "id": "slide-29",
-      "type": "dishes",
       "name": "3 : 2 · зигзаг + два текстом",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -2328,8 +4416,112 @@
         "text": null
       },
       "colors": {},
-      "photoPos": [],
-      "elements": {},
+      "photoPos": [
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "rotate": 0,
+          "flip": false
+        }
+      ],
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-2": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "feat-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "plate-3": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "txt-1": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
+      },
       "animation": {
         "preset": "blur",
         "title": "words",
@@ -2349,355 +4541,21 @@
       "subtitle": "",
       "layout": "p3t2",
       "photoDishes": [
-        "dish-25",
-        "dish-05",
-        "dish-06"
+        "dish-o2j6hpezy",
+        "dish-r770sme33",
+        "dish-ke4dw6n8m"
       ],
       "textDishes": [
-        "dish-32",
-        "dish-15"
-      ]
+        "dish-w1e7zi5r4",
+        "dish-if0jrwb5e"
+      ],
+      "bg": {},
+      "id": "slide-vjiqvjngc",
+      "type": "dishes",
+      "enabled": false
     },
     {
-      "id": "slide-30",
-      "type": "events",
-      "name": "Афиша на неделю",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "rise",
-        "title": "words",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Афиша недели",
-      "subtitle": "",
-      "range": "week",
-      "start": "today",
-      "max": 7,
-      "style": "list",
-      "show": {
-        "photo": true,
-        "description": true,
-        "price": true,
-        "tag": true
-      },
-      "emptyText": "Скоро анонсируем новые события"
-    },
-    {
-      "id": "slide-31",
-      "type": "events",
-      "name": "Афиша на неделю · карточки",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "zoom",
-        "title": "chars",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "На этой неделе",
-      "subtitle": "",
-      "range": "week",
-      "start": "today",
-      "max": 5,
-      "style": "cards",
-      "show": {
-        "photo": true,
-        "description": true,
-        "price": true,
-        "tag": true
-      },
-      "emptyText": "Скоро анонсируем новые события"
-    },
-    {
-      "id": "slide-32",
-      "type": "countdown",
-      "name": "Обратный отсчёт",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "zoom",
-        "title": "words",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "zoom",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Сегодня",
-      "subtitle": "",
-      "eventMode": "today",
-      "eventId": "",
-      "photo": null,
-      "label": "До начала",
-      "startedText": "Уже началось!"
-    },
-    {
-      "id": "slide-33",
-      "type": "events",
-      "name": "Афиша на две недели",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "cascade",
-        "title": "chars",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Афиша",
-      "subtitle": "Ближайшие две недели",
-      "range": "2weeks",
-      "start": "today",
-      "max": 7,
-      "style": "timeline",
-      "show": {
-        "photo": true,
-        "description": true,
-        "price": true,
-        "tag": true
-      },
-      "emptyText": "Скоро анонсируем новые события"
-    },
-    {
-      "id": "slide-34",
-      "type": "events",
-      "name": "Афиша на две недели · список",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "flip",
-        "title": "lines",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Скоро",
-      "subtitle": "Две недели событий",
-      "range": "2weeks",
-      "start": "monday",
-      "max": 7,
-      "style": "list",
-      "show": {
-        "photo": false,
-        "description": true,
-        "price": true,
-        "tag": true
-      },
-      "emptyText": "Скоро анонсируем новые события"
-    },
-    {
-      "id": "slide-35",
-      "type": "announce",
-      "name": "Объявление",
-      "enabled": true,
-      "showTitle": true,
-      "titleAlign": "left",
-      "bgGradient": null,
-      "duration": null,
-      "accent": null,
-      "schedule": {
-        "days": [],
-        "from": "",
-        "to": "",
-        "dateFrom": "",
-        "dateTo": ""
-      },
-      "nearest": {
-        "enabled": false,
-        "count": 2
-      },
-      "sizes": {
-        "title": null,
-        "dish": null,
-        "text": null
-      },
-      "colors": {},
-      "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "rise",
-        "title": "words",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
-      },
-      "title": "Объявление",
-      "subtitle": "Важно",
-      "text": "С 1 октября мы открываемся\nв 8:00 — завтраки\nподаём весь день",
-      "note": "Ждём вас!",
-      "photo": "assets/dishes/omelette.webp",
-      "variant": "photo-top"
-    },
-    {
-      "id": "slide-36",
-      "type": "info",
       "name": "Информация",
-      "enabled": true,
       "showTitle": true,
       "titleAlign": "left",
       "bgGradient": null,
@@ -2711,8 +4569,8 @@
         "dateTo": ""
       },
       "nearest": {
-        "enabled": true,
-        "count": 3
+        "enabled": false,
+        "count": 2
       },
       "sizes": {
         "title": null,
@@ -2721,42 +4579,48 @@
       },
       "colors": {},
       "photoPos": [],
-      "elements": {},
-      "animation": {
-        "preset": "fade",
-        "title": "words",
-        "order": "sequence",
-        "speed": 1,
-        "stagger": 0.08,
-        "photoIn": "rise",
-        "photoLoop": "kenburns",
-        "photoDur": 1.3,
-        "name": "none",
-        "nameDur": 0.6,
-        "priceIn": "pop",
-        "priceLoop": "none",
-        "priceDur": 0.6
+      "elements": {
+        "head": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "info": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        },
+        "near": {
+          "visible": true,
+          "effect": "",
+          "duration": null,
+          "delay": null,
+          "x": 0,
+          "y": 0,
+          "size": 100
+        }
       },
+      "animation": null,
       "title": "Мы рядом",
-      "subtitle": "Заходите, мы всегда рады",
+      "subtitle": "",
       "lines": [
         {
           "label": "Часы работы",
-          "value": "Пн–Пт 7:30–22:00\nСб–Вс 9:00–22:00"
-        },
-        {
-          "label": "Wi-Fi",
-          "value": "Torsher_Guest · coffee2026"
-        },
-        {
-          "label": "Доставка",
-          "value": "Яндекс Еда"
-        },
-        {
-          "label": "Соцсети",
-          "value": "@torsher.cafe"
+          "value": "Ежедневно 8:00–22:00"
         }
-      ]
+      ],
+      "bg": {},
+      "id": "slide-ov4bajv16",
+      "type": "info",
+      "enabled": false
     }
   ],
   "displays": []

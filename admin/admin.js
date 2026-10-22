@@ -1549,12 +1549,21 @@
         h('div', { class: 'd-flex flex-wrap gap-2' },
           btn('Экспорт data.json', function () { download(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'data.json'); }),
           btn('Импорт data.json', function () { importInput.click(); }), importInput,
-          server.on ? null : btn('Сбросить к версии из репозитория', function () {
+          server.on ? btn('Обновить контент из репозитория', function () {
+            if (!confirm('Заменить все данные на сервере (блюда, мероприятия, слайды, дисплеи) версией из content/data.json?\n\nТекущие данные на экранах будут перезаписаны.')) return;
+            var b = document.activeElement; if (b) b.disabled = true;
+            api('update.php', { method: 'POST', json: {} }).then(function (r) {
+              toast('Контент обновлён: ревизия ' + r.revision + ' — экраны подтянут его сами');
+              server.dirty = false; localStorage.removeItem(DRAFT_KEY);
+              serverLoad().then(function () { renderNavRight(); render(); sendPreview(); });
+            }).catch(function (e) { toast('Ошибка: ' + e.message); }).then(function () { if (b) b.disabled = false; });
+          }, 'btn-outline-primary')
+          : btn('Сбросить к версии из репозитория', function () {
             if (!confirm('Заменить локальные изменения данными из content/data.json?')) return;
             loadFromRepo().then(function (d) { data = normalize(d); ui.slideId = null; changed(true); sendPreview(); toast('Загружено из репозитория'); })
               .catch(function (e) { toast('Ошибка: ' + e.message); });
           }, 'btn-outline-danger')),
-        h('div', { class: 'form-text mt-2', text: server.on ? 'Импорт заменит черновик; на экраны данные попадут после «Опубликовать на экраны».' : 'Экспортированный data.json можно положить в content/ репозитория.' }))));
+        h('div', { class: 'form-text mt-2', text: server.on ? '«Обновить контент из репозитория» записывает content/data.json на сервер сразу — минуя черновик. Импорт файла заполняет черновик; на экраны данные попадут после «Опубликовать на экраны».' : 'Экспортированный data.json можно положить в content/ репозитория.' }))));
   }
 
   /* ---------- Старт ---------- */
