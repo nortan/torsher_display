@@ -273,6 +273,12 @@
     return { id: uid('dish'), name: 'Новое блюдо', category: '', description: '', weight: '', price: 0, oldPrice: null, tag: '', accent: false, isNew: false, photo: null, active: true };
   }
 
+  /* Дисплей: физический экран витрины. Своя программа — упорядоченный список id слайдов. */
+  var ORIENTATIONS = { vertical: 'Вертикальный (1080×1920)', horizontal: 'Горизонтальный (1920×1080)' };
+  function newDisplay() {
+    return { id: uid('disp'), name: 'Новый дисплей', orientation: 'vertical', slides: [] };
+  }
+
   function newEvent() {
     var d = new Date(); d.setDate(d.getDate() + 1);
     return { id: uid('ev'), title: 'Новое мероприятие', date: dateKey(d), time: '19:00', endTime: '', description: '', price: 'Вход свободный', tag: '', photo: null, highlight: false, active: true };
@@ -505,7 +511,7 @@
     ACCENT_STYLES: ACCENT_STYLES, ACCENT_ANIMS: ACCENT_ANIMS, NEW_ANIMS: NEW_ANIMS, normalizeAnimation: normalizeAnimation,
     TRANSITIONS: TRANSITIONS, THEMES: THEMES, ANNOUNCE_STYLES: ANNOUNCE_STYLES, FONTS: FONTS, defaultFonts: defaultFonts, TEXT_ROLES: TEXT_ROLES, defaultPalette: defaultPalette, resolveColor: resolveColor, defaultHeader: defaultHeader, defaultPhotoPos: defaultPhotoPos, fillSlide: fillSlide, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
     uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
-    newDish: newDish, newEvent: newEvent, newSlide: newSlide, generateSlides: generateSlides,
+    newDish: newDish, newEvent: newEvent, newSlide: newSlide, newDisplay: newDisplay, ORIENTATIONS: ORIENTATIONS, generateSlides: generateSlides,
     dateKey: dateKey, parseDate: parseDate, addDays: addDays, minutes: minutes,
     isScheduled: isScheduled, upcoming: upcoming, eventsForSlide: eventsForSlide,
     nearestEvents: nearestEvents, countdownEvent: countdownEvent, eventStart: eventStart, COUNTDOWN_MODES: COUNTDOWN_MODES, formatEventDate: formatEventDate

@@ -69,6 +69,7 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
   overflow: hidden;
   transform-origin: 0 0;
 }
+/* Горизонтальный дисплей: размеры ставит app.js (1920×1080), класс — для переопределений ниже. */
 
 /* ---------- Шапка ---------- */
 .topbar {
@@ -646,3 +647,161 @@ body.hide-cursor, body.hide-cursor * { cursor: none !important; }
 .price-glow { position: absolute; inset: 0; display: flex; gap: inherit; align-items: inherit; color: transparent !important; pointer-events: none; opacity: 0; will-change: opacity; }
 .price-glow * { color: transparent !important; }
 .progress__bar { will-change: transform; }
+
+/* ==================================================================
+   Горизонтальный дисплей (.canvas.landscape, холст 1920×1080).
+   Тот же DOM и те же слайды: меняются только пропорции — ряды и колонки
+   перестраиваются под широкий экран, тарелки вылетают по бокам, а не вниз.
+   Размеры по-прежнему в пикселях холста; коэффициент ~0,6 к вертикали.
+   ================================================================== */
+
+.landscape .topbar { height: 96px; }
+.landscape .brand__logo { width: 44px; height: 44px; }
+.landscape .brand__name { font-size: 27px; }
+.landscape .brand__tagline { font-size: 15px; margin-top: 5px; }
+.landscape .clock__time { font-size: 30px; }
+.landscape .clock__date { font-size: 15px; margin-top: 5px; }
+.landscape .ticker { height: 64px; margin-top: 14px; }
+.landscape .ticker__item { font-size: 19px; padding: 0 24px; }
+
+.landscape .slide__fit { padding: 40px 64px 34px; gap: 24px; }
+.landscape .s-kicker { font-size: calc(15px * var(--text-scale)); }
+.landscape .s-title { font-size: calc(62px * var(--title-scale)); }
+
+.landscape .row { padding: 11px 0; }
+.landscape .row__name { font-size: calc(21px * var(--dish-scale)); }
+.landscape .row__price { font-size: calc(22px * var(--dish-scale)); }
+.landscape .row__desc { font-size: calc(15px * var(--text-scale)); max-width: 480px; }
+.landscape .row__w { font-size: calc(13px * var(--text-scale)); }
+.landscape .list--lg .row { padding: 15px 0; }
+.landscape .list--lg .row__name { font-size: calc(26px * var(--dish-scale)); }
+.landscape .list--lg .row__price { font-size: calc(27px * var(--dish-scale)); }
+.landscape .list--lg .row__desc { font-size: calc(17px * var(--text-scale)); }
+.landscape .list--sm .row { padding: 8px 0; }
+.landscape .list--sm .row__name { font-size: calc(18px * var(--dish-scale)); }
+.landscape .list--sm .row__price { font-size: calc(19px * var(--dish-scale)); }
+.landscape .list--sm .row__desc { font-size: calc(13px * var(--text-scale)); }
+.landscape .list--sm .row__w { font-size: calc(12px * var(--text-scale)); }
+.landscape .list--2col { column-gap: 40px; }
+.landscape .list--2col .row__name { font-size: calc(19px * var(--dish-scale)); }
+.landscape .list--2col .row__price { font-size: calc(20px * var(--dish-scale)); }
+.landscape .list--2col .row__desc { font-size: calc(14px * var(--text-scale)); }
+.landscape .groups { gap: 20px; }
+.landscape .group__head { font-size: calc(16px * var(--text-scale)); }
+
+.landscape .frame { padding: 18px 24px 20px; border-radius: 20px; }
+.landscape .frame__name { font-size: calc(32px * var(--dish-scale)); }
+.landscape .frame__desc { font-size: calc(15px * var(--dish-scale)); margin-top: 7px; }
+.landscape .feat__price { font-size: calc(38px * var(--dish-scale)); margin-top: 14px; }
+.landscape .feat--sm .frame { padding: 13px 17px 14px; border-radius: 16px; }
+.landscape .feat--sm .frame__name { font-size: calc(22px * var(--dish-scale)); }
+.landscape .feat--sm .frame__desc { font-size: calc(12px * var(--dish-scale)); }
+.landscape .feat--sm .feat__price { font-size: calc(28px * var(--dish-scale)); margin-top: 11px; }
+.landscape .frame .new-badge { width: 60px; height: 60px; top: -26px; right: -22px; font-size: 14px; }
+.landscape .feat--sm .frame .new-badge { width: 48px; height: 48px; top: -20px; right: -16px; font-size: 12px; }
+
+/* Композиции: та же сетка, но широкая — тарелки выходят по бокам, тексты плотнее. */
+.landscape .comp { gap: 18px 36px; }
+.landscape .comp .frame__name { font-size: calc(28px * var(--dish-scale)); }
+.landscape .comp .feat--sm .frame__name { font-size: calc(21px * var(--dish-scale)); }
+.landscape .comp .feat__price { font-size: calc(34px * var(--dish-scale)); }
+.landscape .comp .feat--sm .feat__price { font-size: calc(26px * var(--dish-scale)); }
+
+.landscape .comp--hero .plate--1 { --l: -140px; --r: -140px; --t: -60px; --b: -160px; }
+.landscape .comp--p1t2-bottom .plate--1 { --l: -20px; --r: -420px; --t: 0px; --b: -150px; --pos: 75% bottom; }
+.landscape .comp--p1t2-side .plate--1 { --l: -100px; --r: -360px; --t: 20px; --b: 20px; }
+.landscape .comp--p1t2-top .plate--1 { --l: -160px; --r: -160px; --t: -40px; --b: -10px; }
+.landscape .comp--p1t4 .plate--1 { --l: -380px; --r: -30px; --t: 30px; --b: 30px; }
+.landscape .comp--p1t6 .plate--1 { --l: -40px; --r: -400px; --t: 40px; --b: 40px; }
+.landscape .comp--p2t4 .plate--1 { --l: -30px; --r: -320px; --t: -10px; --b: -10px; }
+.landscape .comp--p2t4 .plate--2 { --l: -320px; --r: -30px; --t: -10px; --b: -10px; }
+.landscape .comp--p2t4-bottom .plate--1 { --l: -20px; --r: -240px; --t: -10px; --b: -10px; }
+.landscape .comp--p2t4-bottom .plate--2 { --l: -240px; --r: -20px; --t: -10px; --b: -10px; }
+.landscape .comp--p1t8-2col .plate--1 { --l: 500px; --r: -240px; --t: -180px; --b: -140px; }
+.landscape .comp--p3t6 .plate--1 { --l: -15px; --r: -280px; --t: -10px; --b: -10px; }
+.landscape .comp--p3t6 .plate--2 { --l: -280px; --r: -15px; --t: -10px; --b: -10px; }
+.landscape .comp--p3t6 .plate--3 { --l: -15px; --r: -280px; --t: -10px; --b: -20px; }
+.landscape .comp--p3t6-row .plate--1 { --l: -140px; --r: -40px; --b: -160px; }
+.landscape .comp--p3t6-row .plate--2 { --l: -60px; --r: -60px; --t: -20px; --b: -60px; }
+.landscape .comp--p3t6-row .plate--3 { --l: -40px; --r: -140px; --b: -160px; }
+.landscape .comp--p3t6-row .frame { padding: 11px 13px 12px; }
+.landscape .comp--p3t6-row .frame__name { font-size: calc(18px * var(--dish-scale)); }
+.landscape .comp--p3t6-row .feat__price { font-size: calc(24px * var(--dish-scale)); }
+.landscape .comp--p1-center .plate--1 { --l: -160px; --r: -160px; --t: -30px; --b: 0px; }
+.landscape .comp--p2 .plate--1 { --l: -180px; --t: -30px; --b: -20px; }
+.landscape .comp--p2 .plate--2 { --r: -180px; --t: -20px; --b: -30px; }
+.landscape .comp--p3 .plate--1 { --l: -160px; --t: -30px; --b: -30px; }
+.landscape .comp--p3 .plate--2 { --r: -160px; --t: -30px; --b: -30px; }
+.landscape .comp--p3 .plate--3 { --l: -160px; --t: -30px; --b: -40px; }
+.landscape .comp--p1t1 .plate--1 { --l: -260px; --r: -460px; --t: -30px; --b: -180px; --pos: 62% 35%; }
+.landscape .comp--p1t2-center .plate--1 { --l: -140px; --r: -140px; --t: -20px; --b: -10px; }
+.landscape .comp--p2t1 .plate--1 { --l: -160px; --t: -40px; --b: -30px; }
+.landscape .comp--p2t1 .plate--2 { --r: -160px; --t: -30px; --b: -40px; }
+.landscape .comp--p4t4 .plate--1 { --l: -220px; --t: -10px; }
+.landscape .comp--p4t4 .plate--2 { --r: -220px; --t: -10px; }
+.landscape .comp--p4t4 .plate--3 { --l: -220px; --b: -140px; }
+.landscape .comp--p4t4 .plate--4 { --r: -220px; --b: -140px; }
+.landscape .comp--p4t4 .frame__name { font-size: calc(20px * var(--dish-scale)); }
+.landscape .comp--p4t4 .feat__price { font-size: calc(26px * var(--dish-scale)); }
+.landscape .comp--p4t4 .row, .landscape .comp--p3t6 .row { padding: 7px 0; }
+
+/* Афиша: ряд уже — дата компактнее, фото меньше. */
+.landscape .ev { grid-template-columns: 96px 1fr auto; gap: 24px; padding: 14px 0; }
+.landscape .ev__day { font-size: calc(42px * var(--dish-scale)); }
+.landscape .ev__month { font-size: calc(14px * var(--text-scale)); margin-top: 5px; }
+.landscape .ev__wd { font-size: calc(15px * var(--text-scale)); }
+.landscape .ev__time { font-size: calc(20px * var(--dish-scale)); }
+.landscape .ev__tag { font-size: calc(13px * var(--text-scale)); }
+.landscape .ev__title { font-size: calc(26px * var(--dish-scale)); margin-top: 5px; }
+.landscape .ev__desc { font-size: calc(16px * var(--text-scale)); margin-top: 5px; }
+.landscape .ev__price { font-size: calc(16px * var(--text-scale)); margin-top: 5px; }
+.landscape .ev__photo { width: 96px; height: 96px; border-radius: 16px; }
+.landscape .events--dense .ev { padding: 9px 0; }
+.landscape .events--dense .ev__day { font-size: calc(34px * var(--dish-scale)); }
+.landscape .events--dense .ev__title { font-size: calc(21px * var(--dish-scale)); }
+.landscape .events--dense .ev__time { font-size: calc(17px * var(--dish-scale)); }
+.landscape .events--dense .ev__photo { width: 78px; height: 78px; }
+.landscape .events--cards { grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.landscape .events--cards .ev { padding: 18px; gap: 9px; }
+.landscape .events--cards .ev__day { font-size: calc(30px * var(--dish-scale)); }
+.landscape .events--cards .ev__photo { height: 130px; }
+.landscape .events--cards .ev:first-child .ev__photo { height: 190px; }
+.landscape .events--cards .ev__title { font-size: calc(20px * var(--dish-scale)); }
+.landscape .events--timeline { padding-left: 34px; }
+.landscape .events--timeline .ev { grid-template-columns: 104px 1fr auto; padding: 9px 0; }
+.landscape .events--timeline .ev::before { left: -34px; top: 18px; width: 17px; height: 17px; }
+.landscape .events--timeline::before { left: 8px; top: 12px; bottom: 12px; }
+.landscape .week-head { font-size: 15px; margin: 8px 0 1px; }
+.landscape .events-empty { font-size: 28px; padding: 30px 0; }
+
+/* Обратный отсчёт: фото уже, цифры плотнее. */
+.landscape .cd { gap: 22px; }
+.landscape .cd__photo { height: 300px; }
+.landscape .cd__name { font-size: calc(44px * var(--dish-scale)); }
+.landscape .cd__time { font-size: calc(26px * var(--text-scale)); }
+.landscape .cd__timer { padding: 18px 22px 20px; border-radius: 22px; }
+.landscape .cd__label { font-size: calc(16px * var(--text-scale)); }
+.landscape .cd__digits { font-size: calc(30px * var(--dish-scale)); margin-top: 10px; gap: 15px; }
+.landscape .cd__u { padding: 12px 6px 9px; border-radius: 16px; }
+.landscape .cd__u b { font-size: calc(62px * var(--dish-scale)); }
+.landscape .cd__u i { font-size: calc(14px * var(--text-scale)); margin-top: 5px; }
+.landscape .cd__timer.is-started .cd__digits { font-size: calc(46px * var(--dish-scale)); }
+.landscape .cd__empty { font-size: 24px; }
+
+/* Объявление. */
+.landscape .ann { gap: 22px; }
+.landscape .ann__text { font-size: calc(38px * var(--dish-scale)); }
+.landscape .ann__note { font-size: calc(18px * var(--text-scale)); padding: 10px 20px; }
+.landscape .ann--photo-top .ann__text { font-size: calc(30px * var(--dish-scale)); }
+.landscape .ann__photo { aspect-ratio: 16 / 9; max-height: 420px; }
+
+/* Инфо и «Скоро у нас». */
+.landscape .info-grid { gap: 0 40px; }
+.landscape .info-card { padding: 18px 0; }
+.landscape .info-card__label { font-size: calc(14px * var(--text-scale)); }
+.landscape .info-card__value { font-size: calc(24px * var(--dish-scale)); margin-top: 8px; }
+.landscape .near { padding: 18px 24px; }
+.landscape .near__label { font-size: 14px; }
+.landscape .near__when { min-width: 240px; font-size: calc(18px * var(--dish-scale)); }
+.landscape .near__title { font-size: calc(19px * var(--text-scale)); }
+.landscape .near__item { margin-top: 9px; }

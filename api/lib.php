@@ -110,7 +110,7 @@ function db_load_data(): array
 {
     ensure_db_schema();
     $pdo = db();
-    $site = $pdo->query('SELECT cafe, settings, ticker, version, updated_at FROM site WHERE id = 1')->fetch();
+    $site = $pdo->query('SELECT cafe, settings, ticker, displays, version, updated_at FROM site WHERE id = 1')->fetch();
     if (!$site) json_error(503, 'База не инициализирована: откройте api/install.php');
 
     $extra = fn($r) => $r['extra'] ?? null ? (json_decode($r['extra'], true) ?: []) : [];
@@ -138,6 +138,7 @@ function db_load_data(): array
         'cafe' => json_decode($site['cafe']) ?: new stdClass(),
         'settings' => json_decode($site['settings']) ?: new stdClass(),
         'ticker' => json_decode($site['ticker'], true) ?: [],
+        'displays' => json_decode($site['displays'] ?? '[]', true) ?: [],
         'dishes' => $dishes,
         'events' => $events,
         'slides' => $slides,
@@ -165,12 +166,13 @@ function db_save_data(array $d, $objects = null): int
     ensure_db_schema();
     $pdo = db();
     if (!(int)$pdo->query('SELECT COUNT(*) FROM site')->fetchColumn()) {
-        $pdo->exec("INSERT INTO site (id, cafe, settings, ticker, version) VALUES (1, '{}', '{}', '[]', 0)");
+        $pdo->exec("INSERT INTO site (id, cafe, settings, ticker, displays, version) VALUES (1, '{}', '{}', '[]', '[]', 0)");
     }
     $pdo->beginTransaction();
     try {
-        $pdo->prepare('UPDATE site SET cafe = ?, settings = ?, ticker = ?, version = version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = 1')
-            ->execute([enc_json($obj('cafe')), enc_json($obj('settings')), enc_json(array_values($d['ticker'] ?? []))]);
+        $pdo->prepare('UPDATE site SET cafe = ?, settings = ?, ticker = ?, displays = ?, version = version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = 1')
+            ->execute([enc_json($obj('cafe')), enc_json($obj('settings')), enc_json(array_values($d['ticker'] ?? [])),
+                enc_json(array_values(array_filter(array_map('norm_display', $d['displays'] ?? []))))]);
         $slideObjects = is_array($obj('slides')) ? array_values($obj('slides')) : [];
 
         $pdo->exec('DELETE FROM dishes');
@@ -277,6 +279,9 @@ function ensure_db_schema(): void
         try { $pdo->query("SELECT extra FROM $t LIMIT 1"); }
         catch (PDOException $e) { $pdo->exec("ALTER TABLE $t ADD COLUMN extra TEXT NULL"); }
     }
+    // миграция: реестр дисплеев (JSON: имя, ориентация, программа слайдов)
+    try { $pdo->query('SELECT displays FROM site LIMIT 1'); }
+    catch (PDOException $e) { $pdo->exec("ALTER TABLE site ADD COLUMN displays TEXT NULL"); }
     $done = true;
 }
 

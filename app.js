@@ -15,6 +15,8 @@
   var W = 1080, H = 1920;
   var params = new URLSearchParams(location.search);
   var PREVIEW = params.get('preview') === '1';
+  // Какой дисплей показывать: id из data.displays. Пусто — старый режим: все слайды, вертикаль.
+  var DISPLAY_ID = params.get('display') || '';
   // Источник данных: PHP-бэкенд (api/data.php), а если его нет (статическая сборка) — content/data.json.
   var DATA_SOURCES = params.get('src') ? [params.get('src')] : ['api/data.php', 'content/data.json'];
   var CACHE_KEY = 'torsher-display-data';
@@ -33,8 +35,8 @@
   var state = {
     data: null, dataText: '', renderKey: '', tickerKey: '',
     swiper: null, slideCtx: null, activeEl: null, tickerTween: null, build: null,
-    preview: { slideId: null, ignoreSchedule: false },
-    slideMeta: []
+    preview: { slideId: null, ignoreSchedule: false, displayId: null },
+    display: null, landscape: false, slideMeta: []
   };
 
   /* ---------- Утилиты ---------- */
@@ -79,7 +81,7 @@
     return (0.299 * r + 0.587 * g + 0.114 * b) > 150;
   }
 
-  /* ---------- Холст 1080×1920 под фактический вьюпорт ---------- */
+  /* ---------- Холст 1080×1920 (или 1920×1080 у горизонтального дисплея) ---------- */
 
   function layoutCanvas() {
     var vw = window.innerWidth, vh = window.innerHeight;
@@ -89,8 +91,27 @@
       k = Math.min(vw / W, vh / H); h = H;
       x = (vw - W * k) / 2; y = (vh - H * k) / 2;
     }
+    els.canvas.style.width = W + 'px';
     els.canvas.style.height = h + 'px';
     els.canvas.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + k + ')';
+  }
+
+  /* Текущий дисплей из данных: ?display=<id>, в предпросмотре — выбор из админки.
+     Определяет ориентацию холста и набор слайдов (программу). */
+  function applyDisplay() {
+    var id = PREVIEW ? (state.preview.displayId || '') : DISPLAY_ID;
+    var disp = null;
+    var list = (state.data && state.data.displays) || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) { disp = list[i]; break; }
+    state.display = disp;
+    var land = !!disp && disp.orientation === 'horizontal';
+    if (land !== state.landscape) {
+      state.landscape = land;
+      W = land ? 1920 : 1080; H = land ? 1080 : 1920;
+      els.canvas.classList.toggle('landscape', land);
+    }
+    layoutCanvas();
+    return disp;
   }
 
   /* Если контент слайда не влез — аккуратно уменьшаем его целиком. */
@@ -747,6 +768,13 @@
     if (PREVIEW && state.preview.slideId) {
       return (state.data.slides || []).filter(function (s) { return s.id === state.preview.slideId; });
     }
+    // Программа дисплея: свой упорядоченный набор id. Если дисплей не найден — все слайды, как раньше.
+    var program = state.display && state.display.slides;
+    if (program && program.length) {
+      var byId = {};
+      all.forEach(function (s) { byId[s.id] = s; });
+      all = program.map(function (id) { return byId[id]; }).filter(Boolean);
+    }
     return all.filter(function (s) {
       if (s.type === 'countdown' && !M.countdownEvent(state.data.events, s, now)) return false; // нет мероприятия — не показываем
       return (PREVIEW && state.preview.ignoreSchedule) || M.isScheduled(s, now);
@@ -854,6 +882,7 @@
     var saved = false;
     if (save) { try { localStorage.setItem(CACHE_KEY, text); saved = localStorage.getItem(CACHE_KEY) === text; } catch (e) { /* нет хранилища */ } }
     if (syncAutoRefresh(saved)) return;
+    applyDisplay();
     applyBrand();
     refreshSlides(true);
     buildTicker(true);
@@ -942,6 +971,7 @@
       if (m.type === 'torsher:data') {
         state.preview.slideId = m.slideId || null;
         state.preview.ignoreSchedule = !!m.ignoreSchedule;
+        state.preview.displayId = m.displayId || null;
         state.dataText = '';
         applyData(JSON.stringify(m.data), false);
       } else if (m.type === 'torsher:replay') {

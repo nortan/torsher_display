@@ -38,7 +38,8 @@ function install(string $login, string $password, string $mode): string
     $raw = (string)@file_get_contents(ROOT . '/content/data.json');
     $seed = json_decode($raw, true) ?: [];
     save_data(['cafe' => $seed['cafe'] ?? [], 'settings' => $seed['settings'] ?? [], 'ticker' => $seed['ticker'] ?? [],
-        'dishes' => $seed['dishes'] ?? [], 'events' => $seed['events'] ?? [], 'slides' => $seed['slides'] ?? []], json_decode($raw));
+        'dishes' => $seed['dishes'] ?? [], 'events' => $seed['events'] ?? [], 'slides' => $seed['slides'] ?? [],
+        'displays' => $seed['displays'] ?? []], json_decode($raw));
     user_create($login, password_hash($password, PASSWORD_DEFAULT));
     try { storage_set_mode($mode); } catch (Throwable $e) { if ($mode === 'files') throw $e; } // для MySQL папка data/ не обязательна
 

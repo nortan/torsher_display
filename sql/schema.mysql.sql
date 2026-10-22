@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS site (
   cafe       TEXT     NOT NULL,
   settings   TEXT     NOT NULL,
   ticker     TEXT     NOT NULL,
+  displays   TEXT     NULL,
   version    INT UNSIGNED NOT NULL DEFAULT 1,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

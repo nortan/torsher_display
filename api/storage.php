@@ -111,6 +111,21 @@ function norm_event(array $x): ?array
     ]);
 }
 
+/* Дисплей: id, имя, ориентация и программа — упорядоченный список id слайдов. */
+const DISPLAY_ORIENTATIONS = ['vertical', 'horizontal'];
+function norm_display($x): ?array
+{
+    if (!is_array($x) || str_field($x, 'id', 64) === '') return null;
+    $slides = $x['slides'] ?? [];
+    if (!is_array($slides)) $slides = [];
+    return [
+        'id' => str_field($x, 'id', 64),
+        'name' => str_field($x, 'name', 128),
+        'orientation' => in_array($x['orientation'] ?? '', DISPLAY_ORIENTATIONS, true) ? $x['orientation'] : 'vertical',
+        'slides' => array_values(array_filter(array_map(fn($id) => is_scalar($id) ? str_field(['v' => $id], 'v', 64) : '', $slides))),
+    ];
+}
+
 /* ---------- Единый интерфейс ---------- */
 
 function load_data(): array
@@ -267,6 +282,7 @@ function files_save_data(array $d, $objects = null): int
         'dishes' => array_values(array_filter(array_map(fn($x) => is_array($x) ? norm_dish($x) : null, $d['dishes']))),
         'events' => array_values(array_filter(array_map(fn($x) => is_array($x) ? norm_event($x) : null, $d['events']))),
         'slides' => $slides,
+        'displays' => array_values(array_filter(array_map('norm_display', $d['displays'] ?? []))),
     ]);
     return $rev;
 }
