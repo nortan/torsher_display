@@ -1,5 +1,5 @@
 /*
- * Плеер рекламной витрины (вертикальный FullHD 1080×1920).
+ * Плеер рекламной витрины (логический холст 1080×1920; физический дисплей может быть 2K или 4K).
  * Swiper 14 переключает слайды, GSAP 3.15 анимирует содержимое активного слайда и бегущую строку.
  * Данные: content/data.json (или window.__TORSHER_DATA__ из content/data.js при запуске с диска).
  * В режиме ?preview=1 данные приходят из админки через postMessage.
@@ -12,7 +12,7 @@
   gsap.registerPlugin.apply(gsap, [window.SplitText, window.CustomEase, window.ScrambleTextPlugin].filter(Boolean));
   CustomEase.create('soft', 'M0,0 C0.16,0.84 0.3,1 1,1');
 
-  var W = 1080, H = 1920;
+  var W = 1080, H = 1920, R = 1;
   var params = new URLSearchParams(location.search);
   var PREVIEW = params.get('preview') === '1';
   // Какой дисплей показывать: id из data.displays. Пусто — старый режим: все слайды, вертикаль.
@@ -26,7 +26,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
-    canvas: $('canvas'), topbar: $('topbar'), brand: $('brand'), clock: $('clock'), logo: $('logo'), name: $('cafeName'), tagline: $('cafeTagline'),
+    canvas: $('canvas'), canvasContent: $('canvasContent'), topbar: $('topbar'), brand: $('brand'), clock: $('clock'), logo: $('logo'), name: $('cafeName'), tagline: $('cafeTagline'),
     time: $('clockTime'), date: $('clockDate'), stage: $('stage'), slides: $('slides'),
     progressWrap: $('progressWrap'), progress: $('progress'),
     ticker: $('ticker'), tickerTrack: $('tickerTrack'), status: $('status')
@@ -81,35 +81,38 @@
     return (0.299 * r + 0.587 * g + 0.114 * b) > 150;
   }
 
-  /* ---------- Холст 1080×1920 (или 1920×1080 у горизонтального дисплея) ---------- */
+  /* ---------- Логический холст 1080×1920 (или 1920×1080 у горизонтального дисплея) ---------- */
 
   function layoutCanvas() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var k = vw / W, h = vh / k, x = 0, y = 0;
+    var pw = W * R, ph = H * R;
+    var k = vw / pw, h = vh / k / R, x = 0, y = 0;
     // Небольшое расхождение пропорций (±10%) — тянем холст по высоте, раскладка на flex это поглощает.
     if (h < H * 0.9 || h > H * 1.12) {
-      k = Math.min(vw / W, vh / H); h = H;
-      x = (vw - W * k) / 2; y = (vh - H * k) / 2;
+      k = Math.min(vw / pw, vh / ph); h = H;
+      x = (vw - pw * k) / 2; y = (vh - ph * k) / 2;
     }
-    els.canvas.style.width = W + 'px';
-    els.canvas.style.height = h + 'px';
+    els.canvas.style.width = pw + 'px';
+    els.canvas.style.height = (h * R) + 'px';
+    els.canvasContent.style.width = W + 'px';
+    els.canvasContent.style.height = h + 'px';
+    els.canvasContent.style.transform = 'scale(' + R + ')';
     els.canvas.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + k + ')';
   }
 
   /* Текущий дисплей из данных: ?display=<id>, в предпросмотре — выбор из админки.
-     Определяет ориентацию холста и набор слайдов (программу). */
+     Определяет ориентацию, разрешение холста и набор слайдов (программу). */
   function applyDisplay() {
     var id = PREVIEW ? (state.preview.displayId || '') : DISPLAY_ID;
     var disp = null;
     var list = (state.data && state.data.displays) || [];
     for (var i = 0; i < list.length; i++) if (list[i].id === id) { disp = list[i]; break; }
     state.display = disp;
-    var land = !!disp && disp.orientation === 'horizontal';
-    if (land !== state.landscape) {
-      state.landscape = land;
-      W = land ? 1920 : 1080; H = land ? 1080 : 1920;
-      els.canvas.classList.toggle('landscape', land);
-    }
+    var size = M.displaySize(disp);
+    var land = size.logicalWidth > size.logicalHeight;
+    state.landscape = land;
+    W = size.logicalWidth; H = size.logicalHeight; R = size.scale;
+    els.canvas.classList.toggle('landscape', land);
     layoutCanvas();
     return disp;
   }

@@ -138,7 +138,7 @@ function db_load_data(): array
         'cafe' => json_decode($site['cafe']) ?: new stdClass(),
         'settings' => json_decode($site['settings']) ?: new stdClass(),
         'ticker' => json_decode($site['ticker'], true) ?: [],
-        'displays' => json_decode($site['displays'] ?? '[]', true) ?: [],
+        'displays' => array_values(array_filter(array_map('norm_display', json_decode($site['displays'] ?? '[]', true) ?: []))),
         'dishes' => $dishes,
         'events' => $events,
         'slides' => $slides,

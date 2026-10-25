@@ -274,9 +274,29 @@
   }
 
   /* Дисплей: физический экран витрины. Своя программа — упорядоченный список id слайдов. */
+  var DISPLAY_RESOLUTIONS = {
+    1920: { label: '2K (1920)', scale: 1 },
+    3840: { label: '4K (3840)', scale: 2 }
+  };
   var ORIENTATIONS = { vertical: 'Вертикальный (1080×1920)', horizontal: 'Горизонтальный (1920×1080)' };
+  function displaySize(display) {
+    var horizontal = display && display.orientation === 'horizontal';
+    var resolutionValue = display && display.resolution;
+    if (resolutionValue === '2k') resolutionValue = 1920;
+    if (resolutionValue === '4k') resolutionValue = 3840;
+    var resolution = DISPLAY_RESOLUTIONS[resolutionValue] || DISPLAY_RESOLUTIONS[1920];
+    var logicalWidth = horizontal ? 1920 : 1080;
+    var logicalHeight = horizontal ? 1080 : 1920;
+    return {
+      width: logicalWidth * resolution.scale,
+      height: logicalHeight * resolution.scale,
+      logicalWidth: logicalWidth,
+      logicalHeight: logicalHeight,
+      scale: resolution.scale
+    };
+  }
   function newDisplay() {
-    return { id: uid('disp'), name: 'Новый дисплей', orientation: 'vertical', slides: [] };
+    return { id: uid('disp'), name: 'Новый дисплей', orientation: 'vertical', resolution: 1920, slides: [] };
   }
 
   function newEvent() {
@@ -511,7 +531,7 @@
     ACCENT_STYLES: ACCENT_STYLES, ACCENT_ANIMS: ACCENT_ANIMS, NEW_ANIMS: NEW_ANIMS, normalizeAnimation: normalizeAnimation,
     TRANSITIONS: TRANSITIONS, THEMES: THEMES, ANNOUNCE_STYLES: ANNOUNCE_STYLES, FONTS: FONTS, defaultFonts: defaultFonts, TEXT_ROLES: TEXT_ROLES, defaultPalette: defaultPalette, resolveColor: resolveColor, defaultHeader: defaultHeader, defaultPhotoPos: defaultPhotoPos, fillSlide: fillSlide, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
     uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
-    newDish: newDish, newEvent: newEvent, newSlide: newSlide, newDisplay: newDisplay, ORIENTATIONS: ORIENTATIONS, generateSlides: generateSlides,
+    newDish: newDish, newEvent: newEvent, newSlide: newSlide, newDisplay: newDisplay, ORIENTATIONS: ORIENTATIONS, DISPLAY_RESOLUTIONS: DISPLAY_RESOLUTIONS, displaySize: displaySize, generateSlides: generateSlides,
     dateKey: dateKey, parseDate: parseDate, addDays: addDays, minutes: minutes,
     isScheduled: isScheduled, upcoming: upcoming, eventsForSlide: eventsForSlide,
     nearestEvents: nearestEvents, countdownEvent: countdownEvent, eventStart: eventStart, COUNTDOWN_MODES: COUNTDOWN_MODES, formatEventDate: formatEventDate

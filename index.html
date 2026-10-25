@@ -25,34 +25,37 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="theme-light">
-  <!-- Холст 1080×1920 (вертикальный FullHD); у горизонтального дисплея — 1920×1080.
-       Размер и масштаб под фактический вьюпорт выставляет app.js. -->
+  <!-- Логический холст 1080×1920 (вертикальный) или 1920×1080 (горизонтальный).
+       Дисплей 2K показывает его в базовом размере, 4K — в физическом размере 2160×3840
+       или 3840×2160; масштаб под фактический вьюпорт выставляет app.js. -->
   <div class="canvas" id="canvas">
-    <header class="topbar" id="topbar">
-      <div class="brand" id="brand">
-        <img class="brand__logo" id="logo" alt="">
-        <div>
-          <div class="brand__name" id="cafeName"></div>
-          <div class="brand__tagline" id="cafeTagline"></div>
+    <div class="canvas__content" id="canvasContent">
+      <header class="topbar" id="topbar">
+        <div class="brand" id="brand">
+          <img class="brand__logo" id="logo" alt="">
+          <div>
+            <div class="brand__name" id="cafeName"></div>
+            <div class="brand__tagline" id="cafeTagline"></div>
+          </div>
         </div>
-      </div>
-      <div class="clock" id="clock">
-        <div class="clock__time" id="clockTime">--:--</div>
-        <div class="clock__date" id="clockDate"></div>
-      </div>
-    </header>
+        <div class="clock" id="clock">
+          <div class="clock__time" id="clockTime">--:--</div>
+          <div class="clock__date" id="clockDate"></div>
+        </div>
+      </header>
 
-    <main class="swiper stage" id="stage">
-      <div class="swiper-wrapper" id="slides"></div>
-    </main>
+      <main class="swiper stage" id="stage">
+        <div class="swiper-wrapper" id="slides"></div>
+      </main>
 
-    <div class="progress" id="progressWrap"><div class="progress__bar" id="progress"></div></div>
+      <div class="progress" id="progressWrap"><div class="progress__bar" id="progress"></div></div>
 
-    <footer class="ticker" id="ticker">
-      <div class="ticker__track" id="tickerTrack"></div>
-    </footer>
+      <footer class="ticker" id="ticker">
+        <div class="ticker__track" id="tickerTrack"></div>
+      </footer>
 
-    <div class="status" id="status" hidden></div>
+      <div class="status" id="status" hidden></div>
+    </div>
   </div>
 
   <script src="vendor/gsap/gsap.min.js"></script>

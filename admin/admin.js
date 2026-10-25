@@ -191,6 +191,9 @@
     d.displays.forEach(function (p) {
       p.slides = Array.isArray(p.slides) ? p.slides : [];
       if (!M.ORIENTATIONS[p.orientation]) p.orientation = 'vertical';
+      if (p.resolution === '2k') p.resolution = 1920;
+      if (p.resolution === '4k') p.resolution = 3840;
+      if (!M.DISPLAY_RESOLUTIONS[p.resolution]) p.resolution = 1920;
     });
     // поля-объекты: пустой {} мог прийти как [] (PHP) — приводим к объекту
     var obj = function (v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
@@ -423,6 +426,7 @@
 
   function sendPreview() {
     if (!previewReady || !data) return;
+    scalePreview();
     var mode = document.getElementById('previewMode').value;
     var slideId = mode === 'slide' ? (ui.slideId || (data.slides[0] && data.slides[0].id)) : null;
     frame.contentWindow.postMessage({ type: 'torsher:data', data: resolvedData(), slideId: slideId, ignoreSchedule: mode === 'show', displayId: ui.displayId || null }, '*');
@@ -430,10 +434,11 @@
   function replay() { frame.contentWindow.postMessage({ type: 'torsher:replay' }, '*'); }
 
   /* Размер холста предпросмотра: вертикальный дисплей или без дисплея — 1080×1920,
-     горизонтальный — 1920×1080 (iframe растягивается, app.js сам ставит класс landscape). */
+     горизонтальный — 1920×1080; для 4K эти размеры удваиваются. */
   function previewSize() {
     var d = (data.displays || []).filter(function (x) { return x.id === ui.displayId; })[0];
-    return d && d.orientation === 'horizontal' ? [1920, 1080] : [1080, 1920];
+    var size = M.displaySize(d);
+    return [size.width, size.height];
   }
   function scalePreview() {
     var box = document.getElementById('previewScreen');
@@ -453,7 +458,8 @@
     sel.innerHTML = '';
     sel.appendChild(h('option', { value: '', text: 'Все слайды · вертикально' }));
     (data.displays || []).forEach(function (d) {
-      sel.appendChild(h('option', { value: d.id, text: (d.name || 'Дисплей') + ' · ' + (d.orientation === 'horizontal' ? 'горизонтально' : 'вертикально') }));
+      var size = M.displaySize(d);
+      sel.appendChild(h('option', { value: d.id, text: (d.name || 'Дисплей') + ' · ' + (d.orientation === 'horizontal' ? 'горизонтально' : 'вертикально') + ' · ' + size.width + '×' + size.height }));
     });
     sel.value = ui.displayId || '';
   }
@@ -875,7 +881,7 @@
       h('div', { class: 'table-responsive' }, h('table', { class: 'table table-sm align-middle mb-1' },
         h('thead', { class: 'table-light' }, h('tr', null, ['Элемент', 'Показ', 'Эффект GSAP', 'Длит., с', 'Задержка, с', 'X, px', 'Y, px', 'Размер, %', ''].map(function (t) { return h('th', { class: 'small', text: t }); }))),
         h('tbody', null, rows))),
-      h('div', { class: 'form-text', text: 'Эффект «как на слайде» — элемент появляется в общей последовательности (раздел «Появление информации»). Свой эффект запускается отдельно: длительность и задержка от начала показа слайда. X/Y — сдвиг от штатного места в пикселях экрана 1080×1920 (минус — влево/вверх), «Размер» — масштаб элемента в процентах.' })));
+      h('div', { class: 'form-text', text: 'Эффект «как на слайде» — элемент появляется в общей последовательности (раздел «Появление информации»). Свой эффект запускается отдельно: длительность и задержка от начала показа слайда. X/Y — сдвиг от штатного места в пикселях логического холста 1080×1920 (минус — влево/вверх), «Размер» — масштаб элемента в процентах.' })));
   }
 
   function slideEditor(s) {
@@ -1042,6 +1048,7 @@
         h('div', { class: 'row g-3 mb-3' },
           field('Название', input(p, 'name')),
           field('Ориентация', select(p, 'orientation', M.ORIENTATIONS, { rerender: true })),
+          field('Разрешение', select(p, 'resolution', M.DISPLAY_RESOLUTIONS, { number: true, rerender: true })),
           h('div', { class: 'col-12' },
             h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Адрес экрана' }),
             h('div', { class: 'input-group input-group-sm' },

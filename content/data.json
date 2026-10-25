@@ -4623,5 +4623,41 @@
       "enabled": false
     }
   ],
-  "displays": []
+  "displays": [
+    {
+      "id": "disp-main",
+      "name": "Основной дисплей",
+      "orientation": "vertical",
+      "resolution": 1920,
+      "slides": [
+        "slide-uutx4angb",
+        "slide-pfe4i7ngb",
+        "slide-wgjf04ngb",
+        "slide-xz1zwsngb",
+        "slide-b40xmmngb",
+        "slide-jkp0ztngb",
+        "slide-jo4qmdngc",
+        "slide-bf47frngc",
+        "slide-n8szlqngc",
+        "slide-tafmtsngc",
+        "slide-b5byhrngc",
+        "slide-7oxbasngc",
+        "slide-fdv3e1ngc",
+        "slide-jkci5vngc",
+        "slide-2mw9wdngc",
+        "slide-iry4x1ngc",
+        "slide-innnxsngc",
+        "slide-pazoxhngc",
+        "slide-zhp6uengc",
+        "slide-blmzddngc",
+        "slide-jbkcjgngc",
+        "slide-o4i1bnngc",
+        "slide-p3jy1cngc",
+        "slide-gfdqzmngc",
+        "slide-m6hbb5ngc",
+        "slide-vjiqvjngc",
+        "slide-ov4bajv16"
+      ]
+    }
+  ]
 }

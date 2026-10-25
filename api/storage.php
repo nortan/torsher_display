@@ -111,17 +111,23 @@ function norm_event(array $x): ?array
     ]);
 }
 
-/* Дисплей: id, имя, ориентация и программа — упорядоченный список id слайдов. */
+/* Дисплей: id, имя, ориентация, разрешение и программа — упорядоченный список id слайдов. */
 const DISPLAY_ORIENTATIONS = ['vertical', 'horizontal'];
+const DISPLAY_RESOLUTIONS = [1920, 3840];
 function norm_display($x): ?array
 {
     if (!is_array($x) || str_field($x, 'id', 64) === '') return null;
     $slides = $x['slides'] ?? [];
     if (!is_array($slides)) $slides = [];
+    $resolution = $x['resolution'] ?? 1920;
+    if ($resolution === '2k') $resolution = 1920;
+    if ($resolution === '4k') $resolution = 3840;
+    $resolution = is_numeric($resolution) ? (int)$resolution : 0;
     return [
         'id' => str_field($x, 'id', 64),
         'name' => str_field($x, 'name', 128),
         'orientation' => in_array($x['orientation'] ?? '', DISPLAY_ORIENTATIONS, true) ? $x['orientation'] : 'vertical',
+        'resolution' => in_array($resolution, DISPLAY_RESOLUTIONS, true) ? $resolution : 1920,
         'slides' => array_values(array_filter(array_map(fn($id) => is_scalar($id) ? str_field(['v' => $id], 'v', 64) : '', $slides))),
     ];
 }
@@ -251,7 +257,10 @@ function files_load_data(): array
 {
     $doc = files_read('site', null, false);
     if (!$doc) json_error(503, 'Данные не инициализированы: откройте api/install.php');
-    return (array)$doc;
+    $doc = (array)$doc;
+    $displays = is_array($doc['displays'] ?? null) ? $doc['displays'] : [];
+    $doc['displays'] = array_values(array_filter(array_map(fn($x) => norm_display(is_object($x) ? (array)$x : $x), $displays)));
+    return $doc;
 }
 
 function files_save_data(array $d, $objects = null): int
