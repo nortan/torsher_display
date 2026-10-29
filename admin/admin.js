@@ -75,6 +75,7 @@
       if (type === 'number') val = val === '' ? (opts.nullable ? null : 0) : Number(val);
       obj[key] = val;
       changed(opts.rerender);
+      if (opts.onChange) opts.onChange(val);
     });
     return el;
   }
@@ -89,12 +90,16 @@
     opts = opts || {};
     var el = h('select', { class: 'form-select' + (opts.sm ? ' form-select-sm' : '') });
     if (opts.empty != null) el.appendChild(h('option', { value: '', text: opts.empty }));
-    Object.keys(options).forEach(function (k) { el.appendChild(h('option', { value: k, text: options[k] })); });
+    Object.keys(options).forEach(function (k) {
+      var o = options[k];
+      el.appendChild(h('option', { value: k, text: o && typeof o === 'object' && o.label != null ? o.label : o }));
+    });
     el.value = obj[key] == null ? '' : String(obj[key]);
     el.addEventListener('change', function () {
       var v = el.value;
       obj[key] = v === '' ? '' : (opts.number ? Number(v) : v);
       changed(opts.rerender);
+      if (opts.onChange) opts.onChange(v);
     });
     return el;
   }
@@ -194,6 +199,11 @@
       if (p.resolution === '2k') p.resolution = 1920;
       if (p.resolution === '4k') p.resolution = 3840;
       if (!M.DISPLAY_RESOLUTIONS[p.resolution]) p.resolution = 1920;
+      p.settings = p.settings && typeof p.settings === 'object' && !Array.isArray(p.settings) ? p.settings : null;
+      if (p.settings && p.settings.animation) p.settings.animation = M.normalizeAnimation(p.settings.animation);
+      p.cafe = p.cafe && typeof p.cafe === 'object' && !Array.isArray(p.cafe) ? p.cafe : null;
+      p.ticker = Array.isArray(p.ticker) ? p.ticker : null;
+      p.slideEnabled = p.slideEnabled && typeof p.slideEnabled === 'object' && !Array.isArray(p.slideEnabled) ? p.slideEnabled : {};
     });
     // поля-объекты: пустой {} мог прийти как [] (PHP) — приводим к объекту
     var obj = function (v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
@@ -319,7 +329,7 @@
       server.revision = r.revision; server.dirty = false; server.updatedAt = new Date().toISOString();
       localStorage.removeItem(DRAFT_KEY);
       renderNavRight(); setStatus('Опубликовано · ревизия ' + r.revision);
-      toast('Опубликовано: экраны обновятся в течение ' + data.settings.refreshInterval + ' с');
+      toast('Опубликовано: экраны обновятся после очередной проверки данных');
       if (ui.tab === 'publish') render();
     }).catch(function (e) {
       if (e.status === 401) { toast('Сессия истекла — войдите снова'); showLogin(); }
@@ -421,6 +431,9 @@
     function fix(o) { if (o && o.photo && media[o.photo]) o.photo = media[o.photo]; }
     d.dishes.forEach(fix); d.events.forEach(fix); d.slides.forEach(fix);
     if (d.cafe.logo && media[d.cafe.logo]) d.cafe.logo = media[d.cafe.logo];
+    (d.displays || []).forEach(function (p) {
+      if (p.cafe && p.cafe.logo && media[p.cafe.logo]) p.cafe.logo = media[p.cafe.logo];
+    });
     return d;
   }
 
@@ -443,6 +456,17 @@
   function scalePreview() {
     var box = document.getElementById('previewScreen');
     var sz = previewSize();
+    var wide = sz[0] > sz[1];
+    var card = box.closest('.preview');
+    if (card) card.classList.toggle('preview--wide', wide);
+    // Горизонтальный экран не растягиваем на всю высоту колонки — рамка повторяет его пропорции.
+    if (wide) {
+      box.style.height = Math.round((box.clientWidth || 760) * sz[1] / sz[0]) + 'px';
+      box.style.minHeight = '0';
+    } else {
+      box.style.height = '';
+      box.style.minHeight = '';
+    }
     frame.style.width = sz[0] + 'px';
     frame.style.height = sz[1] + 'px';
     var k = Math.min(box.clientWidth / sz[0], box.clientHeight / sz[1]);
@@ -454,7 +478,7 @@
   /* Список дисплеев в шапке предпросмотра: выбор управляет ?display и ориентацией iframe. */
   function fillPreviewDisplays() {
     var sel = document.getElementById('previewDisplay');
-    if (!sel) return;
+    if (!sel || !data) return;
     sel.innerHTML = '';
     sel.appendChild(h('option', { value: '', text: 'Все слайды · вертикально' }));
     (data.displays || []).forEach(function (d) {
@@ -467,9 +491,7 @@
     if (e.data && e.data.type === 'torsher:ready') { previewReady = true; fillPreviewDisplays(); sendPreview(); }
   });
   document.getElementById('previewDisplay').addEventListener('change', function (e) {
-    ui.displayId = e.target.value;
-    scalePreview();
-    sendPreview();
+    setDisplay(e.target.value);
   });
   document.getElementById('previewMode').addEventListener('change', sendPreview);
   document.getElementById('replay').addEventListener('click', replay);
@@ -630,7 +652,122 @@
     return parts.join(' · ');
   }
 
-  function addSlide(s) { data.slides.push(s); ui.slideId = s.id; changed(true); sendPreview(); }
+  /* Обновляет значок расписания в списке без перерисовки всего редактора. */
+  function refreshScheduleBadge(s) {
+    var t = scheduleSummary(s), badges = document.querySelectorAll('[data-schedule-for]');
+    for (var i = 0; i < badges.length; i++) {
+      if (badges[i].getAttribute('data-schedule-for') !== s.id) continue;
+      badges[i].textContent = t ? '⏰ ' + t : '';
+      badges[i].style.display = t ? '' : 'none';
+      return;
+    }
+  }
+
+  /* Бегунок «С–По»: часы показа слайда. Пустые from/to — все сутки. */
+  function timeRange(sc, s) {
+    var from = M.minutes(sc.from), to = M.minutes(sc.to);
+    if (from == null) from = 0;
+    if (to == null) to = 24 * 60;
+    var fmt = function (m) {
+      var h = Math.floor(m / 60), mm = m % 60;
+      return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
+    };
+    var fromVal = h('b', { text: fmt(from) });
+    var toVal = h('b', { text: fmt(to) });
+    var status = h('div', { class: 'time-range__status' });
+    var fill = h('div', { class: 'time-range__fill' });
+    var fromInput = h('input', { type: 'range', min: 0, max: 24 * 60, step: 15, value: from, class: 'time-range__input time-range__input--from', 'aria-label': 'С, время начала' });
+    var toInput = h('input', { type: 'range', min: 0, max: 24 * 60, step: 15, value: to, class: 'time-range__input time-range__input--to', 'aria-label': 'По, время окончания' });
+
+    function update(change) {
+      var a = Math.max(0, Math.min(24 * 60, Number(fromInput.value)));
+      var b = Math.max(0, Math.min(24 * 60, Number(toInput.value)));
+      fromVal.textContent = fmt(a);
+      toVal.textContent = fmt(b);
+      fromInput.setAttribute('aria-valuetext', fmt(a));
+      toInput.setAttribute('aria-valuetext', fmt(b));
+      var pa = a / (24 * 60) * 100, pb = b / (24 * 60) * 100;
+      if (a === 0 && b === 24 * 60) {
+        fill.style.left = '0';
+        fill.style.width = '100%';
+        fill.style.background = '';
+        status.textContent = 'Все сутки';
+      } else if (a === b) {
+        fill.style.left = pa + '%';
+        fill.style.width = '0';
+        fill.style.background = '';
+        status.textContent = 'Интервал пуст — слайд не показывается';
+      } else if (a < b) {
+        fill.style.left = pa + '%';
+        fill.style.width = (pb - pa) + '%';
+        fill.style.background = '';
+        status.textContent = 'Показ с ' + fmt(a) + ' до ' + fmt(b);
+      } else {
+        fill.style.left = '0';
+        fill.style.width = '100%';
+        fill.style.background = 'linear-gradient(to right, #5b6b12 0 ' + pb + '%, transparent ' + pb + '% ' + pa + '%, #5b6b12 ' + pa + '% 100%)';
+        status.textContent = 'Показ с ' + fmt(a) + ' до ' + fmt(b) + ' — через полночь';
+      }
+      // Правый бегунок сверху, чтобы его можно было схватить при пересечении.
+      fromInput.style.zIndex = a > b ? 3 : 2;
+      toInput.style.zIndex = a > b ? 2 : 3;
+      if (change) {
+        sc.from = a === 0 ? '' : fmt(a);
+        sc.to = b === 24 * 60 ? '' : fmt(b);
+        refreshScheduleBadge(s);
+        changed();
+      }
+    }
+    fromInput.addEventListener('input', function () { update(true); });
+    toInput.addEventListener('input', function () { update(true); });
+    update(false);
+
+    return h('div', { class: 'time-range' },
+      h('div', { class: 'time-range__head' },
+        h('span', null, 'С ', fromVal),
+        h('span', null, 'По ', toVal)),
+      h('div', { class: 'time-range__slider' },
+        h('div', { class: 'time-range__inner' }, h('div', { class: 'time-range__track' }), fill),
+        fromInput, toInput),
+      h('div', { class: 'time-range__ticks' },
+        ['00:00', '06:00', '12:00', '18:00', '24:00'].map(function (t) { return h('span', { text: t }); })),
+      status);
+  }
+
+  /* Дисплей, выбранный в «Экранах» для настройки. null — общий список без дисплея. */
+  function currentDisplay() {
+    return (data.displays || []).filter(function (d) { return d.id === ui.displayId; })[0] || null;
+  }
+  /* Набор экранов дисплея. Пустая программа показывается как «все слайды» — так же, как в плеере. */
+  function slidesOfDisplay(p) {
+    if (!p) return data.slides.slice();
+    var byId = {};
+    data.slides.forEach(function (s) { byId[s.id] = s; });
+    var ids = p.slides && p.slides.length ? p.slides : data.slides.map(function (s) { return s.id; });
+    return ids.map(function (id) { return byId[id]; }).filter(Boolean);
+  }
+  /* Пустая программа означает «все слайды». Перед изменением набора фиксируем его явно. */
+  function ensureDisplayProgram(p) {
+    if (p && (!p.slides || !p.slides.length)) p.slides = data.slides.map(function (s) { return s.id; });
+  }
+  /* Видимость слайда на дисплее: его переключатель, иначе общий s.enabled. */
+  function isSlideEnabled(p, s) {
+    var map = p && p.slideEnabled;
+    if (map && Object.prototype.hasOwnProperty.call(map, s.id)) return map[s.id] !== false;
+    return s.enabled !== false;
+  }
+
+  function addSlide(s) {
+    var p = currentDisplay();
+    var programEmpty = p && (!p.slides || !p.slides.length);
+    data.slides.push(s);
+    if (p) {
+      if (programEmpty) p.slides = data.slides.map(function (x) { return x.id; });
+      else p.slides.push(s.id);
+    }
+    ui.slideId = s.id;
+    changed(true); sendPreview();
+  }
 
   /* «+ Афиша»: период (неделя / две недели) и вид (список, карточки, таймлайн). */
   function eventsMenu() {
@@ -681,11 +818,63 @@
       h('button', { type: 'button', class: 'btn btn-outline-secondary dropdown-toggle', 'data-bs-toggle': 'dropdown', 'aria-expanded': 'false', text: '+ Блюда' }), menu);
   }
 
-  function renderSlides() {
-    var sel = data.slides.filter(function (s) { return s.id === ui.slideId; })[0];
-    if (!sel && data.slides.length) { sel = data.slides[0]; ui.slideId = sel.id; }
+  /* Выбор дисплея в «Экранах»: список и порядок слайдов принадлежат выбранному дисплею. */
+  function displayPicker(mode) {
+    var design = mode === 'design';
+    var p = currentDisplay();
+    var sl = h('select', { class: 'form-select form-select-sm w-auto', id: 'screenDisplay' });
+    sl.appendChild(h('option', { value: '', text: design ? 'Общие настройки (без дисплея)' : 'Все экраны · без дисплея' }));
+    (data.displays || []).forEach(function (d) {
+      var size = M.displaySize(d);
+      sl.appendChild(h('option', { value: d.id, text: (d.name || 'Дисплей') + ' · ' +
+        (d.orientation === 'horizontal' ? 'горизонтально' : 'вертикально') + ' · ' + size.width + '×' + size.height }));
+    });
+    sl.value = ui.displayId || '';
+    sl.addEventListener('change', function () { setDisplay(sl.value); });
+    var hint;
+    if (design) {
+      hint = !data.displays.length
+        ? 'Дисплеев пока нет — настройки общие.'
+        : p
+          ? 'Настройки ниже сохраняются и применяются только к этому дисплею.'
+          : 'Общие настройки: новый дисплей копирует их, у существующих могут быть свои.';
+    } else {
+      hint = !data.displays.length
+        ? 'Дисплеев пока нет — создайте во вкладке «Дисплеи».'
+        : p
+          ? (p.slides && p.slides.length
+            ? 'Показаны экраны этого дисплея. Порядок в списке = порядок показа.'
+            : 'Программа не задана — показываются все экраны; любое изменение закрепит набор.')
+          : 'Общий список всех экранов. Выберите дисплей, чтобы настроить его набор.';
+    }
+    return h('div', { class: 'card shadow-sm mb-3' }, h('div', { class: 'card-body py-2 d-flex flex-wrap align-items-center gap-2' },
+      h('label', { class: 'form-label small fw-semibold text-body-secondary mb-0', for: 'screenDisplay', text: 'Дисплей для настройки' }),
+      sl,
+      h('div', { class: 'form-text mb-0' }, hint)));
+  }
 
-    var head = pageHead('Экраны', 'Каждый слайд — один экран витрины. Порядок в списке = порядок показа.', [
+  /* Переключение дисплея: список в «Экранах»/«Оформлении», выбор в шапке предпросмотра и формат кадра. */
+  function setDisplay(id) {
+    ui.displayId = id || '';
+    var first = slidesOfDisplay(currentDisplay())[0];
+    ui.slideId = first ? first.id : null;
+    fillPreviewDisplays();
+    if (ui.tab === 'slides' || ui.tab === 'design') render();
+    scalePreview();
+    sendPreview();
+  }
+
+  function renderSlides() {
+    var p = currentDisplay();
+    var viewSettings = activeSettings();
+    var listSlides = slidesOfDisplay(p);
+    var sel = listSlides.filter(function (s) { return s.id === ui.slideId; })[0];
+    if (!sel && listSlides.length) { sel = listSlides[0]; ui.slideId = sel.id; }
+    if (!listSlides.length) ui.slideId = null;
+
+    var head = pageHead('Экраны', p
+      ? 'Экраны дисплея «' + (p.name || 'Дисплей') + '». Порядок в списке = порядок показа на этом экране.'
+      : 'Каждый слайд — один экран витрины. Порядок в списке = порядок показа.', [
       dishLayoutMenu(),
       eventsMenu(),
       btn('+ Инфо', function () { addSlide(M.newSlide('info')); }),
@@ -695,11 +884,20 @@
     ]);
 
     var list = h('div', { class: 'list-group slides' });
-    data.slides.forEach(function (s, i) {
+    listSlides.forEach(function (s, i) {
       var sched = scheduleSummary(s);
-      var cb = h('input', { class: 'form-check-input m-0', type: 'checkbox', title: 'Показывать', checked: s.enabled !== false, onclick: function (e) { e.stopPropagation(); } });
-      cb.addEventListener('change', function () { s.enabled = cb.checked; changed(true); });
-      list.appendChild(h('div', { class: 'list-group-item list-group-item-action slide-item d-flex align-items-center gap-3' + (s.id === ui.slideId ? ' active' : '') + (s.enabled === false ? ' is-off' : ''),
+      var shown = isSlideEnabled(p, s);
+      var cb = h('input', { class: 'form-check-input m-0', type: 'checkbox', title: p ? 'Показывать на этом дисплее' : 'Показывать по умолчанию на всех дисплеях', checked: shown, onclick: function (e) { e.stopPropagation(); } });
+      cb.addEventListener('change', function () {
+        if (p) {
+          p.slideEnabled = p.slideEnabled || {};
+          p.slideEnabled[s.id] = cb.checked;
+        } else {
+          s.enabled = cb.checked;
+        }
+        changed(true);
+      });
+      list.appendChild(h('div', { class: 'list-group-item list-group-item-action slide-item d-flex align-items-center gap-3' + (s.id === ui.slideId ? ' active' : '') + (shown ? '' : ' is-off'),
         onclick: function () { ui.slideId = s.id; render(); sendPreview(); } },
         h('span', { class: 'slide-num rounded-circle bg-body-secondary d-grid align-items-center justify-content-center small fw-bold', text: String(i + 1) }),
         cb,
@@ -708,34 +906,100 @@
             h('span', { class: 'badge rounded-pill text-bg-light border', text: { dishes: 'блюда', events: 'афиша', info: 'инфо', announce: 'объявление', countdown: 'отсчёт' }[s.type] || s.type }), ' ',
             s.nearest && s.nearest.enabled ? h('span', { class: 'badge rounded-pill text-bg-warning', text: 'ближайшее' }) : null, ' ',
             s.showTitle === false ? h('span', { class: 'badge rounded-pill text-bg-light border', text: 'без заголовка' }) : null, ' ',
-            sched ? h('span', { class: 'badge rounded-pill text-bg-info', text: '⏰ ' + sched }) : null),
-          h('div', { class: 'small text-body-secondary text-truncate', text: slideSummary(s) + ' · ' + (s.duration || data.settings.slideDuration) + ' с · ' +
-            M.ANIMATION_PRESETS[(s.animation && s.animation.preset) || data.settings.animation.preset] })),
+            h('span', { class: 'badge rounded-pill text-bg-info', 'data-schedule-for': s.id, style: sched ? null : 'display:none', text: sched ? '⏰ ' + sched : '' })),
+          h('div', { class: 'small text-body-secondary text-truncate', text: slideSummary(s) + ' · ' + (s.duration || viewSettings.slideDuration) + ' с · ' +
+            M.ANIMATION_PRESETS[(s.animation && s.animation.preset) || viewSettings.animation.preset] })),
         h('div', { class: 'btn-group btn-group-sm', onclick: function (e) { e.stopPropagation(); } },
-          btn('↑', function () { move(i, -1); }, 'btn-outline-secondary', { title: 'Выше', disabled: i === 0 }),
-          btn('↓', function () { move(i, 1); }, 'btn-outline-secondary', { title: 'Ниже', disabled: i === data.slides.length - 1 }),
-          btn('⧉', function () {
-            var c = M.clone(s); c.id = M.uid('slide'); c.name = (s.name || '') + ' (копия)'; data.slides.splice(i + 1, 0, c); ui.slideId = c.id; changed(true);
-          }, 'btn-outline-secondary', { title: 'Дублировать' }),
-          btn('✕', function () {
-            if (!confirm('Удалить слайд «' + (s.name || s.title) + '»?')) return;
-            data.slides.splice(i, 1); ui.slideId = null; changed(true);
-          }, 'btn-outline-danger', { title: 'Удалить' }))));
+          btn('↑', function () { moveSlide(s, -1); }, 'btn-outline-secondary', { title: 'Выше', disabled: i === 0 }),
+          btn('↓', function () { moveSlide(s, 1); }, 'btn-outline-secondary', { title: 'Ниже', disabled: i === listSlides.length - 1 }),
+          btn('⧉', function () { duplicateSlide(s); }, 'btn-outline-secondary', { title: 'Дублировать' }),
+          btn('✕', function () { removeSlide(s); }, 'btn-outline-danger', { title: p ? 'Убрать из дисплея' : 'Удалить' }))));
     });
-    if (!data.slides.length) list.appendChild(h('div', { class: 'list-group-item text-body-secondary', text: 'Слайдов пока нет — добавьте вручную или сгенерируйте комбинации.' }));
+    if (!listSlides.length) list.appendChild(h('div', { class: 'list-group-item text-body-secondary', text: p
+      ? 'У дисплея пока нет экранов — добавьте их кнопками выше.'
+      : 'Слайдов пока нет — добавьте вручную или сгенерируйте комбинации.' }));
     setTimeout(function () { var el = list.querySelector('.active'); if (el) list.scrollTop = el.offsetTop - list.clientHeight / 2; }, 0);
 
-    return h('div', null, head, h('div', { class: 'card shadow-sm mb-3' }, list), sel ? slideEditor(sel) : null);
+    return h('div', null, displayPicker('screens'), head, h('div', { class: 'card shadow-sm mb-3' }, list), sel ? slideEditor(sel) : null);
   }
 
-  function move(i, d) { var s = data.slides.splice(i, 1)[0]; data.slides.splice(i + d, 0, s); changed(true); }
+  function moveSlide(s, d) {
+    var p = currentDisplay();
+    if (p) {
+      ensureDisplayProgram(p);
+      var j = p.slides.indexOf(s.id);
+      if (j < 0 || j + d < 0 || j + d >= p.slides.length) return;
+      p.slides.splice(j, 1);
+      p.slides.splice(j + d, 0, s.id);
+    } else {
+      var i = data.slides.indexOf(s);
+      if (i < 0 || i + d < 0 || i + d >= data.slides.length) return;
+      data.slides.splice(i, 1);
+      data.slides.splice(i + d, 0, s);
+    }
+    changed(true);
+  }
+
+  /* ✕ в «Экранах»: у выбранного дисплея — убрать из набора, в общем списке — удалить совсем. */
+  function removeSlide(s) {
+    var p = currentDisplay();
+    if (p) {
+      if (p.slides && p.slides.length === 1) { toast('Нельзя убрать последний экран дисплея — сначала добавьте другой.'); return; }
+      if ((!p.slides || !p.slides.length) && data.slides.length <= 1) { toast('Нельзя оставить дисплей без экранов.'); return; }
+      if (!confirm('Убрать слайд «' + (s.name || s.title) + '» из дисплея «' + (p.name || 'Дисплей') + '»?\nСам слайд останется в общем списке.')) return;
+      ensureDisplayProgram(p);
+      p.slides = p.slides.filter(function (id) { return id !== s.id; });
+      if (p.slideEnabled) delete p.slideEnabled[s.id];
+      ui.slideId = null;
+      changed(true); sendPreview();
+      return;
+    }
+    var sole = (data.displays || []).filter(function (d) { return d.slides && d.slides.length === 1 && d.slides[0] === s.id; })[0];
+    if (sole) { toast('Слайд — единственный экран дисплея «' + (sole.name || 'Дисплей') + '». Сначала добавьте другой экран.'); return; }
+    var used = (data.displays || []).filter(function (d) { return (d.slides || []).indexOf(s.id) !== -1; }).length;
+    if (!confirm('Удалить слайд «' + (s.name || s.title) + '»?' + (used ? '\nОн входит в программу дисплеев: ' + used + '. Слайд будет удалён у всех.' : ''))) return;
+    data.slides = data.slides.filter(function (x) { return x !== s; });
+    (data.displays || []).forEach(function (d) {
+      if (d.slides) d.slides = d.slides.filter(function (id) { return id !== s.id; });
+      if (d.slideEnabled) delete d.slideEnabled[s.id];
+    });
+    ui.slideId = null;
+    changed(true); sendPreview();
+  }
+
+  function duplicateSlide(s) {
+    var p = currentDisplay();
+    var c = M.clone(s);
+    c.id = M.uid('slide');
+    c.name = (s.name || '') + ' (копия)';
+    data.slides.splice(data.slides.indexOf(s) + 1, 0, c);
+    if (p && p.slides && p.slides.length) {
+      var j = p.slides.indexOf(s.id);
+      if (j !== -1) p.slides.splice(j + 1, 0, c.id);
+    }
+    ui.slideId = c.id;
+    changed(true); sendPreview();
+  }
 
   function generate() {
     if (!data.dishes.length) { toast('Сначала добавьте блюда'); return; }
     var photoCount = data.dishes.filter(function (d) { return d.photo && d.active !== false; }).length;
-    var replace = data.slides.length ? confirm('Заменить текущие слайды сгенерированным набором?\n\nОК — заменить, Отмена — добавить в конец.') : true;
+    var p = currentDisplay();
+    var current = p ? slidesOfDisplay(p) : data.slides;
+    var replace = current.length
+      ? confirm((p ? 'Заменить экраны дисплея «' + (p.name || 'Дисплей') + '»' : 'Заменить текущие слайды') + ' сгенерированным набором?\n\nОК — заменить, Отмена — добавить в конец.')
+      : true;
     var gen = M.generateSlides(data);
-    data.slides = replace ? gen : data.slides.concat(gen);
+    if (p) {
+      if (!replace && (!p.slides || !p.slides.length)) ensureDisplayProgram(p);
+      data.slides = data.slides.concat(gen);
+      p.slides = replace ? gen.map(function (s) { return s.id; }) : (p.slides || []).concat(gen.map(function (s) { return s.id; }));
+      if (replace) p.slideEnabled = {};
+    } else {
+      data.slides = replace ? gen : data.slides.concat(gen);
+      // Общий набор заменён: программы дисплеев больше не ссылаются на старые слайды.
+      if (replace) (data.displays || []).forEach(function (d) { d.slides = []; d.slideEnabled = {}; });
+    }
     ui.slideId = gen[0] && gen[0].id;
     changed(true); sendPreview();
     toast('Сгенерировано слайдов: ' + gen.length + (photoCount ? '' : ' (без фото — только текстовые)'));
@@ -774,7 +1038,7 @@
       var holder = { v: !owner.animation };
       var sw = checkbox(holder, 'v', 'Как в общих настройках');
       sw.querySelector('input').addEventListener('change', function () {
-        owner.animation = holder.v ? null : M.normalizeAnimation(M.clone(data.settings.animation));
+        owner.animation = holder.v ? null : M.normalizeAnimation(M.clone(activeSettings().animation));
         changed(true);
       });
       box.appendChild(sw);
@@ -812,7 +1076,7 @@
   /* Размер текста на слайде: свой или как в общих настройках «Шрифты». */
   function sizesEditor(s) {
     s.sizes = s.sizes || { title: null, dish: null, text: null };
-    var fonts = Object.assign(M.defaultFonts(), data.settings.fonts || {});
+    var fonts = Object.assign(M.defaultFonts(), activeSettings().fonts || {});
     var defs = { title: fonts.headingScale, dish: fonts.dishScale, text: fonts.textScale };
     var names = { title: 'Заголовок', dish: 'Названия блюд и цены', text: 'Описания' };
     var r = row();
@@ -886,7 +1150,7 @@
 
   function slideEditor(s) {
     var body = h('div');
-    var accent = h('input', { type: 'color', class: 'form-control form-control-color', value: s.accent || data.settings.accent });
+    var accent = h('input', { type: 'color', class: 'form-control form-control-color', value: s.accent || activeSettings().accent });
     accent.addEventListener('input', function () { s.accent = accent.value; changed(); });
 
     body.appendChild(row(
@@ -897,11 +1161,11 @@
         select(s, 'titleAlign', M.TITLE_ALIGNS, { sm: true }))),
       field('Фон слайда', (function () {
         var holder = { v: s.bgGradient == null ? '' : (s.bgGradient ? 'on' : 'off') };
-        var el = select(holder, 'v', { on: 'Анимированный градиент', off: 'Без градиента' }, { empty: 'Как в общих настройках (' + (data.settings.bgGradient !== false ? 'градиент' : 'без градиента') + ')' });
+        var el = select(holder, 'v', { on: 'Анимированный градиент', off: 'Без градиента' }, { empty: 'Как в общих настройках (' + (activeSettings().bgGradient !== false ? 'градиент' : 'без градиента') + ')' });
         el.addEventListener('change', function () { s.bgGradient = holder.v === '' ? null : holder.v === 'on'; changed(); });
         return el;
       })()),
-      field('Длительность, с', input(s, 'duration', { type: 'number', min: 3, max: 120, nullable: true, placeholder: 'по умолчанию ' + data.settings.slideDuration })),
+      field('Длительность, с', input(s, 'duration', { type: 'number', min: 3, max: 120, nullable: true, placeholder: 'по умолчанию ' + activeSettings().slideDuration })),
       field('Акцентный цвет', h('div', { class: 'd-flex gap-2' }, accent, btn('Общий', function () { s.accent = null; changed(true); }, 'btn-outline-secondary btn-sm')))
     ));
 
@@ -996,6 +1260,7 @@
         var arr = s.schedule.days.filter(function (x) { return x !== n; });
         if (cb.checked) arr.push(n);
         s.schedule.days = arr.sort();
+        refreshScheduleBadge(s);
         changed();
       });
       days.appendChild(cb);
@@ -1003,10 +1268,11 @@
     });
     body.appendChild(sec('Когда показывать слайд', false, h('div', null,
       field('Дни недели (не выбрано — каждый день)', days),
-      h('div', { class: 'row g-3 row-cols-2 row-cols-md-4 mt-1' },
-        field('С (время)', input(s.schedule, 'from', { type: 'time' })), field('До (время)', input(s.schedule, 'to', { type: 'time' })),
-        field('С даты', input(s.schedule, 'dateFrom', { type: 'date' })), field('По дату', input(s.schedule, 'dateTo', { type: 'date' }))),
-      h('div', { class: 'form-text', text: 'Например, завтраки — будни с 8:00 до 12:00. Интервал через полночь тоже работает (22:00–02:00).' }))));
+      h('div', { class: 'row g-3 mt-1' },
+        h('div', { class: 'col-12' }, field('Время показа', timeRange(s.schedule, s))),
+        h('div', { class: 'col-md-6' }, field('С даты', input(s.schedule, 'dateFrom', { type: 'date', onChange: function () { refreshScheduleBadge(s); } }))),
+        h('div', { class: 'col-md-6' }, field('По дату', input(s.schedule, 'dateTo', { type: 'date', onChange: function () { refreshScheduleBadge(s); } })))),
+      h('div', { class: 'form-text', text: 'Бегунок «С–По» задаёт часы показа; по умолчанию — все сутки. Если «По» левее «С», показ идёт через полночь (например, 22:00–02:00).' }))));
 
     body.appendChild(sec('Появление информации', true, animationEditor(s.animation, true, s)));
     return card('Настройки слайда', body, btn('↻ Повторить анимацию', replay, 'btn-outline-secondary btn-sm'));
@@ -1016,62 +1282,87 @@
      Физический экран: имя, ориентация и своя программа — упорядоченный список id слайдов.
      На экране плеер открывается с ?display=<id> и крутит только выбранные слайды. */
 
+  function refreshPreviewForDisplay(p) {
+    fillPreviewDisplays();
+    if (p.id === ui.displayId) { scalePreview(); sendPreview(); }
+  }
+
   function renderDisplays() {
     var byId = {};
     data.slides.forEach(function (s) { byId[s.id] = s; });
 
     var cards = (data.displays || []).map(function (p, pi) {
-      // набор: текущий порядок p.slides + ещё не выбранные слайды в конец — для удобства
-      var chosen = (p.slides || []).filter(function (id) { return byId[id]; });
+      // Набор: явная программа дисплея; пустая — все слайды, как в плеере.
+      var explicit = (p.slides || []).filter(function (id) { return byId[id]; });
+      var chosen = explicit.length ? explicit : data.slides.map(function (s) { return s.id; });
       var rest = data.slides.filter(function (s) { return chosen.indexOf(s.id) === -1; }).map(function (s) { return s.id; });
       var order = chosen.concat(rest);
 
       var rows = order.map(function (id) {
         var s = byId[id], on = chosen.indexOf(id) !== -1;
+        var shown = isSlideEnabled(p, s);
         var ci = chosen.indexOf(id);
         var cb = h('input', { class: 'form-check-input m-0', type: 'checkbox', checked: on, title: 'В программе дисплея' });
         cb.addEventListener('change', function () {
-          if (cb.checked) p.slides.push(id);
-          else p.slides = p.slides.filter(function (x) { return x !== id; });
+          if (!cb.checked) {
+            if (data.slides.length <= 1) { cb.checked = true; toast('Нельзя оставить дисплей без экранов.'); return; }
+            ensureDisplayProgram(p);
+            if (p.slides.length <= 1) { cb.checked = true; toast('Нельзя оставить дисплей без экранов.'); return; }
+            p.slides = p.slides.filter(function (x) { return x !== id; });
+          } else {
+            ensureDisplayProgram(p);
+            if (p.slides.indexOf(id) === -1) p.slides.push(id);
+          }
           changed(true);
         });
         return h('div', { class: 'list-group-item d-flex align-items-center gap-2' + (on ? '' : ' is-off') },
           cb,
-          h('span', { class: 'flex-grow-1 min-w-0 text-truncate' + (s.enabled === false ? ' text-body-secondary' : ''), text: (s.name || s.title || 'Без названия') }),
+          h('span', { class: 'flex-grow-1 min-w-0 text-truncate' + (shown ? '' : ' text-body-secondary'), text: (s.name || s.title || 'Без названия') }),
           on ? h('div', { class: 'btn-group btn-group-sm' },
-            btn('↑', function () { var j = p.slides.indexOf(id); if (j > 0) { p.slides.splice(j, 1); p.slides.splice(j - 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Раньше', disabled: ci === 0 }),
-            btn('↓', function () { var j = p.slides.indexOf(id); if (j < p.slides.length - 1) { p.slides.splice(j, 1); p.slides.splice(j + 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Позже', disabled: ci === chosen.length - 1 })) : null);
+            btn('↑', function () { ensureDisplayProgram(p); var j = p.slides.indexOf(id); if (j > 0) { p.slides.splice(j, 1); p.slides.splice(j - 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Раньше', disabled: ci === 0 }),
+            btn('↓', function () { ensureDisplayProgram(p); var j = p.slides.indexOf(id); if (j >= 0 && j < p.slides.length - 1) { p.slides.splice(j, 1); p.slides.splice(j + 1, 0, id); changed(true); } }, 'btn-outline-secondary', { title: 'Позже', disabled: ci === chosen.length - 1 })) : null);
       });
 
       var url = location.origin + location.pathname.replace(/admin\/?$/, '') + '?display=' + encodeURIComponent(p.id);
       return card(null, h('div', null,
         h('div', { class: 'row g-3 mb-3' },
-          field('Название', input(p, 'name')),
-          field('Ориентация', select(p, 'orientation', M.ORIENTATIONS, { rerender: true })),
-          field('Разрешение', select(p, 'resolution', M.DISPLAY_RESOLUTIONS, { number: true, rerender: true })),
+          field('Название', input(p, 'name', { onChange: fillPreviewDisplays })),
+          field('Ориентация', select(p, 'orientation', M.ORIENTATIONS, { rerender: true, onChange: function () { refreshPreviewForDisplay(p); } })),
+          field('Разрешение', select(p, 'resolution', M.DISPLAY_RESOLUTIONS, { number: true, rerender: true, onChange: function () { refreshPreviewForDisplay(p); } })),
           h('div', { class: 'col-12' },
             h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Адрес экрана' }),
             h('div', { class: 'input-group input-group-sm' },
               h('input', { class: 'form-control', readonly: true, value: url }),
               btn('Копировать', function () { navigator.clipboard && navigator.clipboard.writeText(url).then(function () { toast('Ссылка скопирована'); }); }, 'btn-outline-secondary')))),
-        h('div', { class: 'form-label small fw-semibold text-body-secondary', text: 'Программа: ' + chosen.length + ' из ' + data.slides.length + ' слайдов' }),
+        h('div', { class: 'form-label small fw-semibold text-body-secondary', text: 'Экраны дисплея: ' + chosen.length + ' из ' + data.slides.length }),
         h('div', { class: 'list-group list-group-flush border rounded' }, rows.length ? rows : h('div', { class: 'list-group-item text-body-secondary', text: 'Слайдов нет — добавьте во вкладке «Экраны».' })),
-        h('div', { class: 'd-flex gap-2 mt-3' },
-          btn('Предпросмотр', function () { ui.displayId = p.id; fillPreviewDisplays(); scalePreview(); sendPreview(); }, 'btn-outline-primary btn-sm'),
+        h('div', { class: 'd-flex flex-wrap gap-2 mt-3' },
+          btn('Настроить экраны', function () { setDisplay(p.id); ui.tab = 'slides'; window.scrollTo(0, 0); render(); }, 'btn-outline-primary btn-sm'),
+          btn('Предпросмотр', function () { setDisplay(p.id); }, 'btn-outline-secondary btn-sm'),
           btn('✕ Удалить', function () {
             if (!confirm('Удалить дисплей «' + (p.name || 'Дисплей') + '»? Слайды останутся в общем списке.')) return;
             data.displays.splice(pi, 1);
-            if (ui.displayId === p.id) { ui.displayId = ''; fillPreviewDisplays(); scalePreview(); }
+            if (ui.displayId === p.id) setDisplay((data.displays[0] && data.displays[0].id) || '');
+            else { fillPreviewDisplays(); scalePreview(); sendPreview(); }
             changed(true);
           }, 'btn-outline-danger btn-sm'))));
     });
 
     return h('div', null,
-      pageHead('Дисплеи', 'Физические экраны витрины. У каждого — своя программа слайдов и ориентация; адрес экрана открывается на устройстве.', [
-        btn('+ Дисплей', function () { data.displays.push(M.newDisplay()); changed(true); }, 'btn-primary')
+      pageHead('Дисплеи', 'Физические экраны витрины. У каждого — свои экраны, порядок показа и ориентация; адрес экрана открывается на устройстве.', [
+        btn('+ Дисплей', function () {
+          var p = M.newDisplay();
+          p.slides = data.slides.map(function (s) { return s.id; });
+          p.settings = M.displaySettings(data.settings, null);
+          p.cafe = M.displayCafe(data, null);
+          p.ticker = M.displayTicker(data, null);
+          data.displays.push(p);
+          setDisplay(p.id);
+          changed(true);
+        }, 'btn-primary')
       ]),
       data.displays.length ? cards : card('Дисплеев пока нет', h('p', { class: 'text-body-secondary mb-0' },
-        'Без дисплея экран показывает все слайды вертикально (как раньше). Создайте дисплей, чтобы задать ему свою программу и горизонтальную ориентацию.')));
+        'Без дисплея экран показывает все слайды вертикально (как раньше). Создайте дисплей, чтобы задать ему свой набор экранов и горизонтальную ориентацию.')));
   }
 
   /* ===== Блюда ===== */
@@ -1163,19 +1454,31 @@
 
   /* ===== Анимация и оформление ===== */
 
+  /* Действующие настройки выбранного дисплея: на них ссылаются «как в общих» в редакторе слайда. */
+  function activeSettings() {
+    return M.displaySettings(data.settings, currentDisplay());
+  }
+
   /* Выбор цвета надписи: «по умолчанию», цвет из палитры или свой. Значение — id палитры или #hex. */
-  function colorChooser(target, role, inheritLabel) {
+  /* Палитра текущего контекста: у выбранного дисплея может быть своя. */
+  function activePalette() {
+    var p = currentDisplay();
+    return p && p.settings && Array.isArray(p.settings.palette) && p.settings.palette.length ? p.settings.palette : data.settings.palette;
+  }
+
+  function colorChooser(target, role, inheritLabel, palette) {
+    var colors = palette || activePalette();
     var box = h('div', { class: 'd-flex flex-wrap align-items-center gap-1' });
     function draw() {
       box.innerHTML = '';
       var val = target[role];
       box.appendChild(btn(inheritLabel, function () { delete target[role]; changed(); draw(); }, 'btn-sm ' + (!val ? 'btn-dark' : 'btn-outline-secondary')));
-      data.settings.palette.forEach(function (p) {
+      colors.forEach(function (p) {
         box.appendChild(h('button', { type: 'button', class: 'swatch' + (val === p.id ? ' is-on' : ''), title: p.name, style: 'background:' + p.color,
           onclick: function () { target[role] = p.id; changed(); draw(); } }));
       });
       var custom = h('input', { type: 'color', class: 'form-control form-control-color form-control-sm swatch-custom' + (val && val[0] === '#' ? ' is-on' : ''), title: 'Свой цвет',
-        value: M.resolveColor(val, data.settings.palette) || '#ffffff' });
+        value: M.resolveColor(val, colors) || '#ffffff' });
       custom.addEventListener('input', function () { target[role] = custom.value; changed(); });
       custom.addEventListener('change', draw);
       box.appendChild(custom);
@@ -1184,11 +1487,11 @@
     return box;
   }
 
-  function colorsTable(target, inheritLabel) {
+  function colorsTable(target, inheritLabel, palette) {
     return h('div', { class: 'd-flex flex-column gap-2' }, Object.keys(M.TEXT_ROLES).map(function (role) {
       return h('div', { class: 'row g-2 align-items-center' },
         h('div', { class: 'col-md-4 small fw-semibold', text: M.TEXT_ROLES[role].label }),
-        h('div', { class: 'col-md-8' }, colorChooser(target, role, inheritLabel)));
+        h('div', { class: 'col-md-8' }, colorChooser(target, role, inheritLabel, palette)));
     }));
   }
 
@@ -1232,16 +1535,43 @@
       h('div', { class: 'form-text mt-2', text: 'Это общие значения; у каждого слайда можно задать свой размер. Все шрифты лежат в сборке и работают без интернета. Calibri берётся из системы, иначе — метрически совместимый Carlito.' })));
   }
 
+  /* Объекты, которые редактирует «Анимация и оформление»: настройки выбранного дисплея или общие. */
+  function designTarget() {
+    var p = currentDisplay();
+    if (!p) return { display: null, settings: data.settings, cafe: data.cafe, ticker: data.ticker };
+    if (!p.settings) p.settings = M.displaySettings(data.settings, p);
+    else {
+      var merged = M.displaySettings(data.settings, p);
+      Object.keys(merged).forEach(function (k) { p.settings[k] = merged[k]; });
+    }
+    if (!p.cafe) p.cafe = M.displayCafe(data, p);
+    else {
+      var cafe = M.displayCafe(data, p);
+      Object.keys(cafe).forEach(function (k) { if (p.cafe[k] === undefined) p.cafe[k] = cafe[k]; });
+    }
+    if (!Array.isArray(p.ticker)) p.ticker = M.displayTicker(data, p);
+    return { display: p, settings: p.settings, cafe: p.cafe, ticker: p.ticker };
+  }
+
   function renderDesign() {
-    var st = data.settings;
-    var tickerHolder = { v: (data.ticker || []).join('\n') };
+    var target = designTarget();
+    var st = target.settings;
+    var cafe = target.cafe;
+    var tickerHolder = { v: (target.ticker || []).join('\n') };
     var ticker = textarea(tickerHolder, 'v', { rows: 4 });
-    ticker.addEventListener('input', function () { data.ticker = tickerHolder.v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); });
+    ticker.addEventListener('input', function () {
+      var items = tickerHolder.v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+      if (target.display) target.display.ticker = items;
+      else data.ticker = items;
+    });
     var accent = h('input', { type: 'color', class: 'form-control form-control-color', value: st.accent });
     accent.addEventListener('input', function () { st.accent = accent.value; changed(); });
 
     return h('div', null,
-      pageHead('Анимация и оформление', 'Общие настройки для всех экранов. Слайд может переопределить появление информации и размеры текста.'),
+      displayPicker('design'),
+      pageHead('Анимация и оформление', target.display
+        ? 'Настройки дисплея «' + (target.display.name || 'Дисплей') + '». Всё ниже сохраняется и применяется только к нему.'
+        : 'Общие настройки для дисплеев без собственных. Слайд может переопределить появление информации и размеры текста.'),
       card('Переключение между слайдами', h('div', null, row(
         field('Эффект перехода', select(st.transition, 'effect', Object.keys(M.TRANSITIONS).reduce(function (o, k) { o[k] = M.TRANSITIONS[k].label; return o; }, {}))),
         field('Длительность перехода', range(st.transition, 'speed', 300, 3000, 100, function (v) { return v + ' мс'; })),
@@ -1251,7 +1581,7 @@
       card('Появление информации на слайде (по умолчанию)', animationEditor(st.animation, false)),
       fontsCard(st),
       paletteCard(st),
-      card('Цвета надписей', h('div', null, colorsTable(st.colors, 'тема'),
+      card('Цвета надписей', h('div', null, colorsTable(st.colors, 'тема', st.palette),
         h('div', { class: 'form-text mt-2', text: '«тема» — цвет по умолчанию из выбранной темы. У каждого слайда цвета можно переопределить в его настройках.' }))),
       card('Акцент на блюде и значок NEW', h('div', null,
         row(
@@ -1268,17 +1598,17 @@
         field('Название и логотип', h('div', { class: 'form-text', text: 'Задаются в блоке «Шапка экрана» ниже.' })))),
       card('Анимированный градиент на фоне', h('div', null,
         row(
-          field('Цвет 1 (левое верхнее пятно)', colorChooser(st.bg, 'color1', 'акцент')),
-          field('Цвет 2 (правое нижнее пятно)', colorChooser(st.bg, 'color2', 'тыквенный')),
+          field('Цвет 1 (левое верхнее пятно)', colorChooser(st.bg, 'color1', 'акцент', st.palette)),
+          field('Цвет 2 (правое нижнее пятно)', colorChooser(st.bg, 'color2', 'тыквенный', st.palette)),
           field('Скорость изменения', range(st.bg, 'speed', 0.25, 4, 0.25, function (v) { return '×' + Number(v).toFixed(2).replace(/0$/, ''); })),
           field('Яркость', range(st.bg, 'intensity', 0.3, 3, 0.1, function (v) { return Math.round(v * 100) + '%'; }))),
         h('div', { class: 'form-text mt-2', text: 'Включается в блоке «Оформление» (общее значение) или в настройках слайда. Цвета и скорость можно переопределить на слайде.' }))),
       card('Шапка экрана', h('div', null,
         h('div', { class: 'd-flex flex-wrap align-items-start gap-4 mb-3' },
-          h('div', null, h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Логотип' }), photoPicker(data.cafe, { key: 'logo', logo: true })),
+          h('div', null, h('div', { class: 'form-label small fw-semibold text-body-secondary mb-1', text: 'Логотип' }), photoPicker(cafe, { key: 'logo', logo: true })),
           h('div', { class: 'flex-grow-1' }, row(
-            field('Название', input(data.cafe, 'name', { placeholder: 'Название заведения' })),
-            field('Подпись под названием', input(data.cafe, 'tagline', { placeholder: 'кафе · кухня весь день' }))))),
+            field('Название', input(cafe, 'name', { placeholder: 'Название заведения' })),
+            field('Подпись под названием', input(cafe, 'tagline', { placeholder: 'кафе · кухня весь день' }))))),
         checkbox(st.header, 'enabled', 'Показывать шапку', { defaultOn: true, rerender: true }),
         st.header.enabled !== false ? h('div', { class: 'd-flex flex-wrap gap-4 mt-3 ps-1' },
           checkbox(st.header, 'logo', 'Логотип', { defaultOn: true }),
@@ -1304,6 +1634,7 @@
     var set = {};
     data.dishes.concat(data.events, data.slides).forEach(function (o) { if (o.photo) set[o.photo] = true; });
     if (data.cafe.logo) set[data.cafe.logo] = true;
+    (data.displays || []).forEach(function (p) { if (p.cafe && p.cafe.logo) set[p.cafe.logo] = true; });
     return Object.keys(set);
   }
 
@@ -1490,7 +1821,7 @@
     var serverCard = server.on
       ? card('Экраны на сервере', h('div', null,
           h('p', null, 'Данные хранятся на сервере (' + (server.storage === 'files' ? 'в файлах' : 'в базе данных MySQL') + '), экраны читают их из ', h('code', { text: 'api/data.php' }),
-            ' и обновляются сами каждые ' + data.settings.refreshInterval + ' с.'),
+            ' и проверяют обновления с интервалом, заданным у каждого дисплея.'),
           h('ul', { class: 'list-unstyled small mb-3' },
             h('li', null, 'Опубликованная ревизия: ', h('strong', { text: String(server.revision) })),
             h('li', null, 'Последняя публикация: ', h('strong', { text: server.updatedAt ? new Date(server.updatedAt.replace(' ', 'T')).toLocaleString('ru-RU') : '—' })),
@@ -1578,6 +1909,8 @@
   function showApp() {
     document.getElementById('login').hidden = true;
     document.getElementById('app').hidden = false;
+    var ids = (data.displays || []).map(function (d) { return d.id; });
+    if (ids.indexOf(ui.displayId) === -1) ui.displayId = ids[0] || '';
     renderNavRight();
     fillPreviewDisplays();
     render();

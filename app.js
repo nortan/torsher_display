@@ -36,7 +36,7 @@
     data: null, dataText: '', renderKey: '', tickerKey: '',
     swiper: null, slideCtx: null, activeEl: null, tickerTween: null, build: null,
     preview: { slideId: null, ignoreSchedule: false, displayId: null },
-    display: null, landscape: false, slideMeta: []
+    display: null, landscape: false, slideMeta: [], settingsCache: null, brandCache: null
   };
 
   /* ---------- Утилиты ---------- */
@@ -48,10 +48,14 @@
   }
 
   function settings() {
-    var s = (state.data && state.data.settings) || {};
-    var d = M.defaultSettings();
-    Object.keys(s).forEach(function (k) { d[k] = s[k]; });
-    return d;
+    if (!state.settingsCache) {
+      state.settingsCache = M.displaySettings((state.data && state.data.settings) || {}, state.display);
+    }
+    return state.settingsCache;
+  }
+  function brand() {
+    if (!state.brandCache) state.brandCache = M.displayCafe(state.data, state.display);
+    return state.brandCache;
   }
 
   function dishById(id) {
@@ -108,6 +112,8 @@
     var list = (state.data && state.data.displays) || [];
     for (var i = 0; i < list.length; i++) if (list[i].id === id) { disp = list[i]; break; }
     state.display = disp;
+    state.settingsCache = null;
+    state.brandCache = null;
     var size = M.displaySize(disp);
     var land = size.logicalWidth > size.logicalHeight;
     state.landscape = land;
@@ -767,7 +773,7 @@
   }
 
   function visibleSlides(now) {
-    var all = (state.data.slides || []).filter(function (s) { return s.enabled !== false; });
+    var all = (state.data.slides || []);
     if (PREVIEW && state.preview.slideId) {
       return (state.data.slides || []).filter(function (s) { return s.id === state.preview.slideId; });
     }
@@ -778,7 +784,12 @@
       all.forEach(function (s) { byId[s.id] = s; });
       all = program.map(function (id) { return byId[id]; }).filter(Boolean);
     }
+    // Видимость: у дисплея может быть своё вкл/выкл для каждого слайда, иначе — общий s.enabled.
+    var overrides = (state.display && state.display.slideEnabled) || {};
     return all.filter(function (s) {
+      if (Object.prototype.hasOwnProperty.call(overrides, s.id)) {
+        if (overrides[s.id] === false) return false;
+      } else if (s.enabled === false) return false;
       if (s.type === 'countdown' && !M.countdownEvent(state.data.events, s, now)) return false; // нет мероприятия — не показываем
       return (PREVIEW && state.preview.ignoreSchedule) || M.isScheduled(s, now);
     });
@@ -790,7 +801,7 @@
     var now = new Date();
     var visible = visibleSlides(now);
     if (!visible.length) {
-      var cafe = state.data.cafe || {};
+      var cafe = brand();
       visible = [{ id: 'fallback', type: 'info', title: cafe.name || 'Добро пожаловать', subtitle: cafe.tagline || '', lines: [] }];
     }
     var html = visible.map(function (s) { return renderSlide(s, now); }).join('');
@@ -805,7 +816,7 @@
   /* ---------- Бегущая строка ---------- */
 
   function buildTicker(force) {
-    var items = settings().tickerEnabled === false ? [] : ((state.data && state.data.ticker) || []);
+    var items = settings().tickerEnabled === false ? [] : M.displayTicker(state.data, state.display);
     var key = JSON.stringify(items) + '|' + settings().tickerSpeed;
     if (!force && key === state.tickerKey) return;
     state.tickerKey = key;
@@ -829,7 +840,7 @@
   /* ---------- Шапка, тема, часы ---------- */
 
   function applyBrand() {
-    var cafe = state.data.cafe || {};
+    var cafe = brand();
     var st = settings();
     els.name.textContent = cafe.name || '';
     els.tagline.textContent = cafe.tagline || '';
@@ -884,8 +895,8 @@
     state.dataText = text;
     var saved = false;
     if (save) { try { localStorage.setItem(CACHE_KEY, text); saved = localStorage.getItem(CACHE_KEY) === text; } catch (e) { /* нет хранилища */ } }
-    if (syncAutoRefresh(saved)) return;
     applyDisplay();
+    if (syncAutoRefresh(saved)) return;
     applyBrand();
     refreshSlides(true);
     buildTicker(true);

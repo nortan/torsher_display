@@ -50,7 +50,31 @@ details.sec[open] > summary::before { content: "▾ "; }
 .preview { position: sticky; top: 72px; width: 380px; max-width: 100%; }
 .preview__screen { position: relative; height: calc(100vh - 190px); min-height: 420px; overflow: hidden; background: #111; }
 .preview__screen iframe { position: absolute; top: 0; left: 0; width: 1080px; height: 1920px; border: 0; transform-origin: 0 0; }
-@media (max-width: 1199.98px) { .preview { position: static; width: 100%; } .preview__screen { height: 70vh; } }
+/* Горизонтальный экран вдвое шире — иначе в нём ничего не разглядеть. */
+.preview.preview--wide { width: min(760px, 50vw); }
+@media (max-width: 1199.98px) {
+  .preview, .preview.preview--wide { position: static; width: 100%; }
+  .preview__screen { height: 70vh; }
+}
+
+/* Диапазон времени слайда: два бегунка «С» и «По» на одной шкале. */
+.time-range { padding-top: .15rem; }
+.time-range__head { display: flex; justify-content: space-between; gap: 1rem; font-size: .85rem; color: var(--bs-secondary-color); }
+.time-range__head b { color: var(--bs-body-color); font-variant-numeric: tabular-nums; }
+.time-range__slider { position: relative; height: 34px; margin: 0 2px; }
+.time-range__inner { position: absolute; left: 9px; right: 9px; top: 50%; height: 6px; transform: translateY(-50%); }
+.time-range__track { position: absolute; inset: 0; background: #e4e1db; border-radius: 999px; }
+.time-range__fill { position: absolute; top: 0; bottom: 0; background: #5b6b12; border-radius: 999px; }
+.time-range__input { position: absolute; left: 0; top: 50%; width: 100%; height: 24px; margin: 0; transform: translateY(-50%); background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.time-range__input:focus { outline: none; }
+.time-range__input::-webkit-slider-runnable-track { height: 6px; background: transparent; border: 0; }
+.time-range__input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%; border: 3px solid #5b6b12; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); pointer-events: auto; cursor: grab; }
+.time-range__input::-moz-range-track { height: 6px; background: transparent; border: 0; }
+.time-range__input::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #5b6b12; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); pointer-events: auto; cursor: grab; }
+.time-range__input:active::-webkit-slider-thumb { cursor: grabbing; }
+.time-range__input:active::-moz-range-thumb { cursor: grabbing; }
+.time-range__ticks { display: flex; justify-content: space-between; margin: 0 2px; font-size: .72rem; color: var(--bs-secondary-color); font-variant-numeric: tabular-nums; }
+.time-range__status { margin-top: .15rem; font-size: .8rem; color: var(--bs-secondary-color); }
 
 .log { margin-top: .75rem; padding: .75rem; background: #1d1c1a; color: #d6d2ca; border-radius: .5rem; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 220px; overflow: auto; }
 .log:empty { display: none; }

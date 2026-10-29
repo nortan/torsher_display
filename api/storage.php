@@ -111,7 +111,7 @@ function norm_event(array $x): ?array
     ]);
 }
 
-/* Дисплей: id, имя, ориентация, разрешение и программа — упорядоченный список id слайдов. */
+/* Дисплей: id, имя, ориентация, разрешение, программа и свои настройки/шапка/строка. */
 const DISPLAY_ORIENTATIONS = ['vertical', 'horizontal'];
 const DISPLAY_RESOLUTIONS = [1920, 3840];
 function norm_display($x): ?array
@@ -123,12 +123,32 @@ function norm_display($x): ?array
     if ($resolution === '2k') $resolution = 1920;
     if ($resolution === '4k') $resolution = 3840;
     $resolution = is_numeric($resolution) ? (int)$resolution : 0;
+    $settings = $x['settings'] ?? null;
+    if (is_object($settings)) $settings = (array)$settings;
+    $cafe = $x['cafe'] ?? null;
+    if (is_object($cafe)) $cafe = (array)$cafe;
+    $slideEnabled = $x['slideEnabled'] ?? null;
+    if (is_object($slideEnabled)) $slideEnabled = (array)$slideEnabled;
+    $enabledOut = [];
+    if (is_array($slideEnabled)) {
+        foreach ($slideEnabled as $sid => $val) {
+            if (!is_scalar($sid)) continue;
+            $sid = str_field(['v' => $sid], 'v', 64);
+            if ($sid !== '') $enabledOut[$sid] = !empty($val);
+        }
+    }
     return [
         'id' => str_field($x, 'id', 64),
         'name' => str_field($x, 'name', 128),
         'orientation' => in_array($x['orientation'] ?? '', DISPLAY_ORIENTATIONS, true) ? $x['orientation'] : 'vertical',
         'resolution' => in_array($resolution, DISPLAY_RESOLUTIONS, true) ? $resolution : 1920,
+        // Свои оформление и шапка дисплея: null — наследовать общие данные.
+        'settings' => is_array($settings) ? (object)$settings : null,
+        'cafe' => is_array($cafe) ? (object)$cafe : null,
+        'ticker' => is_array($x['ticker'] ?? null) ? array_values(array_filter($x['ticker'], 'is_string')) : null,
         'slides' => array_values(array_filter(array_map(fn($id) => is_scalar($id) ? str_field(['v' => $id], 'v', 64) : '', $slides))),
+        // Своё вкл/выкл слайдов на дисплее: {id слайда: показывать}. Нет id — действует общий enabled.
+        'slideEnabled' => (object)$enabledOut,
     ];
 }
 

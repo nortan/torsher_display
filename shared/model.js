@@ -204,7 +204,7 @@
     return (prefix || 'id') + '-' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
   }
 
-  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function clone(o) { return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
 
   function defaultAnimation() {
     return {
@@ -257,6 +257,46 @@
     };
   }
 
+  /* Глубокое слияние настроек: массивы (например, палитра) заменяются целиком. */
+  function mergeSettings(base, extra) {
+    var out = clone(base || {});
+    Object.keys(extra || {}).forEach(function (k) {
+      var v = extra[k];
+      if (v && typeof v === 'object' && !Array.isArray(v) &&
+          out[k] && typeof out[k] === 'object' && !Array.isArray(out[k])) {
+        out[k] = mergeSettings(out[k], v);
+      } else {
+        out[k] = v == null ? v : clone(v);
+      }
+    });
+    return out;
+  }
+  /* Настройки дисплея: свои значения поверх общих; недостающие поля берутся из общих.
+     colors заменяется целиком: удалённый цвет должен вернуться к цвету темы, а не к общему. */
+  function displaySettings(base, display) {
+    var out = mergeSettings(defaultSettings(), base || {});
+    var own = (display && display.settings) || {};
+    Object.keys(own).forEach(function (k) {
+      var v = own[k];
+      if (k === 'colors' || v == null || typeof v !== 'object' || Array.isArray(v)) out[k] = v == null ? v : clone(v);
+      else out[k] = mergeSettings(out[k], v);
+    });
+    return out;
+  }
+  /* Название, подпись и логотип: свои у дисплея, остальное — из общих данных. */
+  function displayCafe(data, display) {
+    var out = clone((data && data.cafe) || {});
+    var own = display && display.cafe;
+    Object.keys(own && typeof own === 'object' && !Array.isArray(own) ? own : {}).forEach(function (k) {
+      out[k] = own[k] == null ? own[k] : clone(own[k]);
+    });
+    return out;
+  }
+  /* Строки бегущей строки: свой набор у дисплея или общий. */
+  function displayTicker(data, display) {
+    return (display && Array.isArray(display.ticker) ? display.ticker : ((data && data.ticker) || [])).slice();
+  }
+
   /* Заполняет слайд с блюдами подходящими блюдами: с фото — в фото-слоты, остальные — в текст. */
   function fillSlide(s, data) {
     var L = LAYOUTS[s.layout] || LAYOUTS['text-10'];
@@ -296,7 +336,7 @@
     };
   }
   function newDisplay() {
-    return { id: uid('disp'), name: 'Новый дисплей', orientation: 'vertical', resolution: 1920, slides: [] };
+    return { id: uid('disp'), name: 'Новый дисплей', orientation: 'vertical', resolution: 1920, slides: [], slideEnabled: {} };
   }
 
   function newEvent() {
@@ -530,7 +570,7 @@
     PHOTO_IN: PHOTO_IN, PHOTO_LOOP: PHOTO_LOOP, NAME_EFFECTS: NAME_EFFECTS, PRICE_IN: PRICE_IN, PRICE_LOOP: PRICE_LOOP,
     ACCENT_STYLES: ACCENT_STYLES, ACCENT_ANIMS: ACCENT_ANIMS, NEW_ANIMS: NEW_ANIMS, normalizeAnimation: normalizeAnimation,
     TRANSITIONS: TRANSITIONS, THEMES: THEMES, ANNOUNCE_STYLES: ANNOUNCE_STYLES, FONTS: FONTS, defaultFonts: defaultFonts, TEXT_ROLES: TEXT_ROLES, defaultPalette: defaultPalette, resolveColor: resolveColor, defaultHeader: defaultHeader, defaultPhotoPos: defaultPhotoPos, fillSlide: fillSlide, slideElements: slideElements, defaultElement: defaultElement, EVENT_STYLES: EVENT_STYLES,
-    uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings,
+    uid: uid, clone: clone, defaultAnimation: defaultAnimation, defaultSettings: defaultSettings, displaySettings: displaySettings, displayCafe: displayCafe, displayTicker: displayTicker,
     newDish: newDish, newEvent: newEvent, newSlide: newSlide, newDisplay: newDisplay, ORIENTATIONS: ORIENTATIONS, DISPLAY_RESOLUTIONS: DISPLAY_RESOLUTIONS, displaySize: displaySize, generateSlides: generateSlides,
     dateKey: dateKey, parseDate: parseDate, addDays: addDays, minutes: minutes,
     isScheduled: isScheduled, upcoming: upcoming, eventsForSlide: eventsForSlide,

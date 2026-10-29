@@ -49,12 +49,16 @@ php -S 127.0.0.1:8080 -t .            # с бэкендом (нужен api/conf
 ## Устройство кода (коротко)
 
 - `app.js`: `layoutCanvas` — масштаб физического холста и 4K-содержимого; `applyDisplay` — ориентация,
-  разрешение и программа дисплея; `render*` — HTML слайдов; `buildSlider` — Swiper;
+  разрешение, программа и видимость слайдов дисплея (`display.slideEnabled`); `render*` — HTML слайдов; `buildSlider` — Swiper;
   `animateSlide` — GSAP-последовательность (контекст на каждый показ); `applyElements` — показ,
   сдвиги и размеры элементов; `tickCountdowns` — счётчики; `loadData`/`checkBuild` — обновления.
 - `admin/admin.js`: хелперы `h()`, `input()`, `select()`, `checkbox()`, `range()` связывают поля
   с объектом данных. `changed()` сохраняет черновик и обновляет предпросмотр. Вкладки: `render*`.
+  В «Экранах» `currentDisplay()`/`slidesOfDisplay()` дают программу выбранного дисплея,
+  `setDisplay()` синхронизирует список, шапку предпросмотра и формат кадра.
 - `shared/model.js` подключается в браузере как `window.TorsherModel` и в Node через `require`.
+  `displaySettings()`, `displayCafe()` и `displayTicker()` сливают общие данные с `display.settings`,
+  `display.cafe`, `display.ticker`; эти же helpers используют плеер и админка.
 
 ## Производительность экрана
 
